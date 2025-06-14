@@ -1,0 +1,164 @@
+/* Container for the dialer */
+.phone-dialer {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+
+/* Title styling */
+.dialer-title {
+  font-size: 1.75rem;
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Input area for dialer */
+.dialer-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.phone-input {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Action button */
+.action-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.action-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Status and error messages */
+.status-message {
+  color: #155724;
+  background-color: #d4edda;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.error-message {
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Call Log styling */
+.call-log {
+  margin-top: 1.5rem;
+}
+
+.call-log-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.call-log-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.call-record {
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9ff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.call-record:hover {
+  background-color: #e9f4ff;
+}
+
+.record-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.record-number {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.record-time {
+  font-style: italic;
+  color: #555;
+}
+
+.record-status {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* Call back button inside each record */
+.call-back-btn {
+  align-self: flex-end;
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.call-back-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .phone-dialer {
+    padding: 1rem;
+  }
+  .dialer-title {
+    font-size: 1.5rem;
+  }
+  .record-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .call-back-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}

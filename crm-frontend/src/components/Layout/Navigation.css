@@ -1,0 +1,212 @@
+/* ------------------ Updated Navigation Container ------------------ */
+:root {
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 60px;
+  --sidebar-bg: transparent; /* Use transparent to blend into the page background */
+  --sidebar-border: transparent; /* Remove extra border */
+  --text-color: #ecf0f1;
+  --highlight-color: #00b3ff;
+  --hamburger-gap: 5px;
+}
+
+/* Base Reset for Navigation */
+.nav-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width-expanded);
+  height: 100vh; /* Transparent background for a blended look */
+  border-right: 1px solid var(--sidebar-border); /* No visible border */
+  transition: width 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 20px;
+}
+
+/* Collapsed state */
+.nav-container.collapsed {
+  width: var(--sidebar-width-collapsed);
+  align-items: center;
+}
+
+/* Hamburger Icon */
+.hamburger {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  margin-bottom: 20px;
+}
+
+.hamburger svg {
+  display: block;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+  margin-bottom: 20px;
+  transition: opacity 0.3s;
+}
+
+.nav-container.collapsed .profile-section {
+  justify-content: center;
+}
+
+.nav-container:not(.collapsed) .profile-section {
+  justify-content: flex-start;
+  padding-left: 20px;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-name {
+  color: var(--text-color);
+  margin-left: 10px;
+  font-size: 0.9rem;
+}
+
+.nav-container.collapsed .profile-name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Navigation List */
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each Navigation Item */
+.nav-item {
+  width: 100%;
+}
+
+/* Nav Links & Logout Button */
+.nav-link,
+.logout-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 15px;
+  color: var(--text-color);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  border-radius: 6px;
+}
+
+/* Hover & Active States with subtle neon gradient */
+.nav-link:hover,
+.logout-button:hover {
+  background: linear-gradient(90deg, rgba(67, 7, 195, 0.8), rgba(51, 184, 245, 0.8));
+  color: #fff;
+}
+
+/* Active state: animated glow */
+.nav-link.active {
+  background: linear-gradient(90deg, #706aff, #9c49ff, #ff4397, #ff7743);
+  background-size: 200% auto;
+  animation: glowAnimation 2s linear infinite;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(67, 7, 195, 0.6), 0 0 8px rgba(51, 184, 245, 0.6);
+  text-shadow: 0 0 4px #fff;
+}
+
+/* Keyframes for glow animation */
+@keyframes glowAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Icon and Text Styling */
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  transition: margin 0.3s;
+}
+
+.nav-container.collapsed .nav-link .nav-icon,
+.nav-container.collapsed .logout-button .nav-icon {
+  margin: 0 auto;
+}
+
+.nav-container:not(.collapsed) .nav-link .nav-icon,
+.nav-container:not(.collapsed) .logout-button .nav-icon {
+  margin: 0 10px 0 0;
+}
+
+.nav-text {
+  font-size: 1rem;
+  transition: opacity 0.3s;
+  opacity: 1;
+}
+
+.nav-container.collapsed .nav-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Logout Item at the Bottom */
+.logout {
+  margin-top: auto;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: left;
+  padding: 0 15px;
+}
+
+.nav-container.collapsed .logout {
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .nav-container {
+    width: var(--sidebar-width-collapsed);
+    align-items: center;
+  }
+  .nav-container:not(.open) .profile-name {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    position: absolute;
+    width: 0;
+    overflow: hidden;
+  }
+  .nav-container.open {
+    width: var(--sidebar-width-expanded);
+    align-items: flex-start;
+  }
+  .hamburger {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+  }
+}

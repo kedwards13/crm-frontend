@@ -1,0 +1,56 @@
+/* src/components/Schedule/Schedule.css */
+
+/* Main container card for scheduling dashboard */
+.schedule-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden; /* Hide any overflow so the container looks neat */
+  }
+  
+  /* The subnav (using your global FloatingSubNav styles) can be reused */
+  .schedule-content {
+    padding: 1rem 2rem;
+  }
+  
+  /* Calendar view styles */
+  .calendar-view {
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  /* Appointments view styles */
+  .appointments-view {
+    padding: 1rem;
+  }
+  
+  .appointments-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .appointment-item {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background 0.3s;
+  }
+  
+  .appointment-item:hover {
+    background: #eaeaea;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .schedule-container {
+      margin: 1rem;
+    }
+    .schedule-content {
+      padding: 1rem;
+    }
+  }

@@ -1,0 +1,145 @@
+/* src/components/Customers/CustomerImport.css */
+
+/* Main container styling: a dark, translucent card with subtle gradients */
+.ai-single-step {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: rgba(18, 18, 20, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 10px;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 2rem auto;
+    color: #e0e0e0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+/* Upload section layout with subtle neon highlights */
+.upload-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload-section input[type="file"] {
+    background: #2a2a2e;
+    padding: 0.75rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #ccc;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.upload-section input[type="file"]:hover {
+    border-color: #2894ff;
+}
+
+.upload-section button {
+    background: linear-gradient(90deg, #21ce99, #2894ff);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upload-section button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(40, 148, 255, 0.6);
+}
+
+/* Progress Bar styling */
+.upload-progress {
+    width: 100%;
+    height: 12px;
+    background: #2a2a2e;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #21ce99, #2894ff);
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+    border-radius: 6px;
+}
+
+.progress-text {
+    position: absolute;
+    right: 6px;
+    top: -24px;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Error message banner with neon red tone */
+.error-message {
+    background: #bd2130;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 6px;
+    color: #ffecec;
+    font-weight: 600;
+}
+
+/* Results section styling to feel high-tech and clean */
+.results-section {
+    margin-top: 2rem;
+    background: rgba(40, 40, 45, 0.9);
+    padding: 1.5rem;
+    border-radius: 8px;
+    animation: fadeIn 0.5s ease-in;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.results-section h3 {
+    color: #21ce99;
+    margin-bottom: 1rem;
+}
+
+/* Error list styling in results */
+.error-list {
+    background: rgba(50, 50, 55, 0.95);
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #f5f5f5;
+}
+
+.error-list h4 {
+    margin-bottom: 0.5rem;
+    color: #ff4c4c;
+}
+
+/* Text area for mapping adjustments styling */
+textarea {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #2a2a2e;
+    color: #ccc;
+    padding: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #2894ff;
+    outline: none;
+}
+
+/* Simple fadeIn animation for results section */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

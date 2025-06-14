@@ -1,0 +1,293 @@
+/*************************************************************
+  1) Root Variables & Dark Theme Base
+*************************************************************/
+:root {
+  --color-bg: #1c1c1e;               /* Main dark background */
+  --color-bg-sidebar: #1c1c1e;       /* Sidebar background */
+  --color-bg-subnav: #1c1c1e;        /* Sub-nav background */
+  --color-bg-card: #1c1c1e;          /* Card/widget background */
+  --color-border: #1c1c1e;           /* Outline/border color */
+  --color-text: #f5f5f7;             /* Light text color */
+  --color-accent: #0a84ff;           /* Accent (buttons, links) */
+  --shadow-elevation: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --sidebar-width: 200px; /* Reduced */
+  --container-max-width: 1440px;
+
+  /* Pipeline Gradients – keep or tweak as needed */
+  --gradient-new: linear-gradient(90deg, #00f2fe 0%, #54ff00 100%);
+  --gradient-qualified: linear-gradient(90deg, #54ff00 0%, #ffa500 100%);
+  --gradient-proposed: linear-gradient(90deg, #ffa500 0%, #ff3b30 100%);
+  --gradient-closed: linear-gradient(90deg, #ff3b30 0%, #c149ff 100%);
+}
+
+#root > div {
+  min-height: 100vh; /* makes the background extend fully */
+  display: flex;
+  flex-direction: column;
+}
+
+/*************************************************************
+  2) Body & Global Base
+*************************************************************/
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-bg); /* Dark main background */
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/*************************************************************
+  3) Card Styling (Widgets, Boxes)
+*************************************************************/
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-elevation);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  color: var(--color-text);
+}
+
+/* Slight lift on hover */
+.card:hover {
+  background-color: #2d2b33; /* slightly different from --color-bg-card */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/*************************************************************
+  4) Pipeline Gradients (Neon Glow)
+*************************************************************/
+/* Example usage: <div class="pipeline-count count-new">12</div> */
+.pipeline-count {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  transition: text-shadow 0.3s ease;
+}
+
+/* 1) New: Blue → Green */
+.count-new {
+  background: var(--gradient-new);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 8px rgba(0,242,254, 0.6), 0 0 16px rgba(84,255,0, 0.5);
+}
+.count-new:hover {
+  text-shadow: 0 0 12px rgba(0,242,254, 0.8), 0 0 24px rgba(84,255,0, 0.6);
+}
+
+/* 2) Qualified: Green → Orange */
+.count-qualified {
+  background: var(--gradient-qualified);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 8px rgba(84,255,0, 0.6), 0 0 16px rgba(255,165,0, 0.5);
+}
+.count-qualified:hover {
+  text-shadow: 0 0 12px rgba(84,255,0, 0.8), 0 0 24px rgba(255,165,0, 0.6);
+}
+
+/* 3) Proposed: Orange → Red */
+.count-proposed {
+  background: var(--gradient-proposed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 8px rgba(255,165,0, 0.6), 0 0 16px rgba(255,59,48, 0.5);
+}
+.count-proposed:hover {
+  text-shadow: 0 0 12px rgba(255,165,0, 0.8), 0 0 24px rgba(255,59,48, 0.6);
+}
+
+/* 4) Closed: Red → Purple */
+.count-closed {
+  background: var(--gradient-closed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 8px rgba(255,59,48, 0.6), 0 0 16px rgba(193,73,255, 0.5);
+}
+.count-closed:hover {
+  text-shadow: 0 0 12px rgba(255,59,48, 0.8), 0 0 24px rgba(193,73,255, 0.6);
+}
+
+/*************************************************************
+  5) AI Assistant Orb
+*************************************************************/
+/* Example usage: <div class="assistant-orb"></div> */
+.assistant-orb {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #706aff 0%,
+    #9c49ff 30%,
+    #ff4397 60%,
+    #ff7743 100%
+  );
+  animation: orbGlow 3s infinite alternate ease-in-out;
+  box-shadow: 0 0 20px rgba(255,119,67,0.4);
+}
+
+@keyframes orbGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255,119,67,0.4);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255,119,67,0.6);
+  }
+}
+
+/*************************************************************
+  6) Example Buttons
+*************************************************************/
+button {
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: rgba(10,132,255,0.8);
+}
+
+/*************************************************************
+  7) React Big Calendar (Dark Mode Integration)
+*************************************************************/
+/* If you have a .calendar-container wrapping your RBC: */
+.calendar-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-elevation);
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.rbc-calendar,
+.rbc-month-view,
+.rbc-day-bg,
+.rbc-header,
+.rbc-date-cell,
+.rbc-timeslot-group {
+  background: transparent !important;
+  border-color: var(--color-border) !important;
+}
+
+.rbc-day-bg:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.rbc-today {
+  background-color: rgba(255,255,255,0.08) !important;
+}
+
+/* RBC Toolbar */
+.rbc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-family: inherit;
+  color: var(--color-text);
+}
+.rbc-toolbar .rbc-btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.rbc-toolbar button {
+  background: #3d3d3d;
+  color: var(--color-text);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border: none;
+  font-size: 0.9rem;
+}
+.rbc-toolbar button:hover:not(:disabled) {
+  background: #9c49ff;
+}
+.rbc-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rbc-toolbar-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* RBC Events */
+.rbc-event {
+  background-color: #9c49ff;
+  color: #fff;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: background-color 0.3s;
+  box-shadow: 0 0 4px rgba(156,73,255,0.4);
+}
+.rbc-event:hover {
+  background-color: #c149ff;
+  box-shadow: 0 0 8px rgba(193,73,255,0.6);
+}
+
+/* RBC Agenda View */
+.rbc-agenda-view table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  color: var(--color-text);
+}
+.rbc-agenda-view thead > tr > th {
+  background-color: rgba(255,255,255,0.08);
+  font-weight: 600;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.rbc-agenda-view tbody > tr {
+  border-bottom: 1px solid var(--color-border);
+}
+.rbc-agenda-view tbody > tr:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* RBC Week/Day Time Column */
+.rbc-time-column .rbc-timeslot-group {
+  border-color: var(--color-border);
+}
+.rbc-time-slot {
+  border-top: 1px solid var(--color-border);
+}
+
+/*************************************************************
+  8) Responsive Adjustments
+*************************************************************/
+@media (max-width: 768px) {
+  .rbc-toolbar-label {
+    font-size: 1.1rem;
+  }
+  .rbc-toolbar button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+}

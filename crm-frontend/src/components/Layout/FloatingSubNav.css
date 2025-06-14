@@ -1,0 +1,84 @@
+.sub-nav {
+  position: fixed;
+  top: var(--topbar-height);
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--subnav-height);
+  background: rgba(28, 28, 30, 0.6);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(61, 61, 61, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  transition: left 0.3s, background 0.3s, color 0.3s;
+  z-index: 1000;
+}
+
+.subnav-tabs {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.floating-subnav-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+/* ✅ Ensure HOVER works */
+.floating-subnav-btn:hover {
+  background: rgba(10,132,255, 0.15);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+
+/* ✅ SUPER FORCED Active Tab Style */
+.floating-subnav-btn.active {
+  background: linear-gradient(90deg, #706aff, #9c49ff, #ff4397, #ff7743);
+  background-size: 200% auto;
+  animation: activeGlow 3s linear infinite;
+  color: white !important;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+  text-shadow: 0 0 4px #fff;
+}
+
+@keyframes activeGlow {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: 100% center;
+  }
+}
+
+.subnav-search {
+  margin-left: auto;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .sub-nav {
+    left: 0;
+    right: 0;
+    padding: 0.4rem 0.8rem;
+    gap: 0.5rem;
+  }
+  .floating-subnav-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}

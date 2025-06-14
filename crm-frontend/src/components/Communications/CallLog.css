@@ -1,0 +1,128 @@
+/* src/components/Communication/CallLog.css */
+
+/* Container for the entire call log card */
+.call-log-card {
+  /* Use a dark gradient background for a sleek look */
+  background: linear-gradient(135deg, #1c1c1e, #252525);
+  border: 1px solid #333;
+  border-radius: 50px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Title for the call log */
+.call-log-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #f5f5f7;
+}
+
+/* List styling */
+.call-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each individual call record */
+.call-record {
+  background: linear-gradient(135deg, #1c1c1e, #2a2a2e);
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+/* Hover state for call records */
+.call-record:hover {
+  background: linear-gradient(135deg, #2a2a2e, #333);
+}
+
+/* Layout for details inside each record */
+.record-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+/* Styling for the phone number in the record */
+.record-number {
+  font-weight: 600;
+  color: #28a745;
+}
+
+/* Styling for the time in the record */
+.record-time {
+  font-style: italic;
+  color: #ffffff;
+}
+
+/* Styling for the status text */
+.record-status {
+  margin-bottom: 0.75rem;
+  color: #f5f5f7;
+  font-size: 1rem;
+}
+
+/* Container for action buttons within each record */
+.record-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Common styles for all action buttons */
+.call-back-btn,
+.mark-handled-btn,
+.remove-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  color: #f5f5f7;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+/* Specific styles for Call Back button */
+.call-back-btn {
+  background: #28b747;
+}
+.call-back-btn:hover {
+  background: #1e9334;
+}
+
+/* Specific styles for Mark as Handled button */
+.mark-handled-btn {
+  background: #777777;
+}
+.mark-handled-btn:hover {
+  background: #0097d8;
+}
+
+/* Specific styles for Remove button */
+.remove-btn {
+  background: #f40a22;
+}
+.remove-btn:hover {
+  background: #c82333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .call-record {
+    padding: 0.75rem;
+  }
+  .record-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .call-back-btn,
+  .mark-handled-btn,
+  .remove-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}

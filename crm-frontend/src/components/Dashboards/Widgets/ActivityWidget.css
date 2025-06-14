@@ -1,0 +1,38 @@
+/* src/components/Widgets/ActivityWidget.css */
+
+.activity-widget {
+    /* Rely on .widget.card from your main CSS for background, border, etc. */
+    text-align: left;
+    padding: 15px; /* If you want extra padding inside the card */
+    box-sizing: border-box;
+  }
+  
+  .activity-widget h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: left; /* Keep it left-aligned */
+  }
+  
+  /* The feed list */
+  .activity-feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Each item: a row with text on the left, time on the right */
+  .activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .activity-text {
+    font-weight: 500; /* Slightly bold for emphasis */
+  }
+  
+  .activity-time {
+    opacity: 0.8;
+    font-size: 0.9rem;
+  }

@@ -1,0 +1,127 @@
+/* src/components/Finance/FinancePage.css */
+
+.finance-page {
+  padding: 2rem;
+  background-color: none;
+  color: var(--color-text);
+  margin-left: 10rem;
+}
+
+.finance-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  background: linear-gradient(90deg, #00f2fe, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+}
+
+.finance-content {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.left-column,
+.right-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* Chart container */
+.chart-container {
+  margin: 20px 0;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: var(--shadow-elevation);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.chart-container:hover {
+  background: #444446;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* AI Insights Section */
+.ai-insights {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--shadow-elevation);
+  transition: background 0.3s, box-shadow 0.3s;
+  text-align: center;
+}
+.ai-insights:hover {
+  background: #2a2a3a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.insights-title {
+  font-size: 1.8rem;
+  color: var(--color-accent);
+  margin-bottom: 15px;
+}
+
+.orb-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.ai-orb {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #706aff, #9c49ff, #ff4397, #ff7743);
+  animation: orbGlow 3s infinite alternate ease-in-out;
+  box-shadow: 0 0 20px rgba(255, 119, 67, 0.4);
+}
+
+@keyframes orbGlow {
+  from {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 119, 67, 0.4);
+  }
+  to {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 119, 67, 0.6);
+  }
+}
+
+.insights-text {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.ai-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ai-insight-btn {
+  padding: 10px 20px;
+  background-color: var(--color-accent);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.ai-insight-btn:hover {
+  background-color: #2894ff;
+  box-shadow: 0 0 10px rgba(40, 148, 255, 0.7);
+}
+
+.ai-insight-btn.secondary {
+  background-color: #ff8c00;
+}
+.ai-insight-btn.secondary:hover {
+  background-color: #e07a00;
+}

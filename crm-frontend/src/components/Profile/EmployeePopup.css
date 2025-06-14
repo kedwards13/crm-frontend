@@ -1,0 +1,247 @@
+/* EmployeePopup.css */
+
+:root {
+  --primary-color: #007bff;
+  --accent-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --bg-color: #ffffff;
+  --overlay-color: rgba(0,0,0,0.6);
+  --font-family: 'Roboto', sans-serif;
+  --border-radius: 8px;
+  --spacing: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--font-family);
+}
+
+/* The overlay forcibly covers the screen and centers the popup */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Make sure overlay covers the entire screen: */
+  width: 100%;
+  height: 100%;
+
+  /* Dim the background */
+  background: rgba(0,0,0,0.5);
+
+  /* Center content horizontally & vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Ensure it's above all other elements */
+  z-index: 9999;
+}
+
+/* Popup Container */
+.popup.employee-popup {
+  background: var(--bg-color);
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 600px;
+  padding: calc(var(--spacing) * 1.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Entrance animation */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Header */
+.popup-header {
+  text-align: center;
+  margin-bottom: var(--spacing);
+}
+.popup-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #333;
+}
+.popup-header p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+.status-line {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Nav Tabs */
+.popup-navbar {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: var(--spacing);
+  border-bottom: 1px solid #eaeaea;
+}
+.popup-navbar button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+}
+.popup-navbar button.active,
+.popup-navbar button:hover {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Content */
+.popup-content {
+  margin-bottom: var(--spacing);
+}
+.popup-content section {
+  padding: 0.5rem 0;
+}
+.popup-content h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+/* Form Groups */
+.popup-form-group {
+  margin-bottom: var(--spacing);
+  display: flex;
+  flex-direction: column;
+}
+.popup-form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #444;
+}
+.popup-form-group input,
+.popup-form-group select {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.popup-form-group input:focus,
+.popup-form-group select:focus {
+  border-color: var(--primary-color);
+}
+
+/* Avatar Group */
+.pic-group {
+  align-items: center;
+  text-align: center;
+}
+.avatar-container {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 0.5rem;
+  border: 2px dashed #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+.profile-pic-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.no-pic {
+  font-style: italic;
+  color: #999;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+}
+.avatar-file-input {
+  margin-top: 0.5rem;
+}
+
+/* Actions */
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.popup-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.save-btn {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+.update-btn {
+  background-color: var(--warning-color);
+  color: #333;
+}
+.cancel-btn {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+/* Sub-popup for status updates */
+.status-popup {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -10%);
+  background: var(--bg-color);
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10000;
+}
+.status-popup h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+.status-btn {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.status-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}

@@ -1,0 +1,229 @@
+/* ------------------ Global Variables & Reset ------------------ */
+:root {
+  /* Dimensions */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 60px;
+  --topbar-height: 80px;
+  --subnav-height: 60px;
+  --container-max-width: 1800px;
+  --padding-x: 32px;
+
+  /* Dark Mode (Default) */
+  --color-bg: #1c1c1e;
+  --color-bg-sidebar: #2c2c2e;
+  --color-bg-subnav: #2c2c2e;
+  --color-bg-content: #1c1c1e;
+  --color-bg-card: #333336;
+  --color-text: #f5f5f7;
+  --color-accent: #0a84ff;
+  --color-border: #3d3d3c;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  /* Transition times */
+  --transition-speed: 0.3s;
+}
+
+body.light-mode {
+  --color-bg: #f9f9f9;
+  --color-bg-sidebar: #ffffff;
+  --color-bg-subnav: #ffffff;
+  --color-bg-content: #f9f9f9;
+  --color-bg-card: #ffffff;
+  --color-text: #1c1c1e;
+  --color-accent: #007aff;
+  --color-border: #ddd;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Base Reset */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-text);
+  transition: background var(--transition-speed), color var(--transition-speed);
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+#app {
+  width: 100%;
+  min-height: 100%;
+  position: relative;
+}
+
+/* ------------------ Sidebar ------------------ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  color: var(--color-text);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--box-shadow);
+  overflow-y: auto;
+  z-index: 1000;
+  flex-shrink: 0;
+  transition: width var(--transition-speed) ease;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* Sidebar Navigation List */
+.sidebar .nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .nav-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar .nav-item:hover {
+  background-color: var(--color-bg-card);
+}
+
+.sidebar .nav-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.top-bar {
+  padding-bottom: 1 rem;
+}
+
+/* ------------------ Sub-Nav (Top Bar) ------------------ */
+.sub-nav {
+  position: fixed;
+  top: var(--topbar-height);
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--subnav-height);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  transition: left var(--transition-speed), background var(--transition-speed), color var(--transition-speed);
+  z-index: 999;
+}
+
+.sidebar.collapsed ~ .sub-nav {
+  left: var(--sidebar-width-collapsed);
+}
+
+.sub-nav button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-speed), border-bottom-color var(--transition-speed);
+}
+
+.sub-nav button:hover,
+.sub-nav button.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ------------------ TopBar (Optional) ------------------ */
+/* If using a TopBar, define its fixed style in its own CSS (e.g., TopBar.css) */
+
+/* ------------------ Layout Container ------------------ */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--topbar-height);
+  min-height: 150vh;
+  max-width: var(--container-max-width);
+  transition: all var(--transition-speed) ease;
+ /* Match the main dark theme */
+}
+
+.layout-container.collapsed .sidebar {
+  width: var(--sidebar-width-collapsed);
+}
+
+.layout-container.collapsed .sub-nav {
+  left: var(--sidebar-width-collapsed);
+}
+
+.layout-container.collapsed .layout-main {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* ------------------ Main Content Area ------------------ */
+.layout-main {
+  display: flex;
+  flex: 1;
+  padding-top: var(--topbar-height);
+  transition: margin-left var(--transition-speed);
+}
+
+.layout-content {
+  flex: 1;
+  padding: clamp(2rem, 4vw + 1rem, 5rem); 
+  transition: background var(--transition-speed), color var(--transition-speed);
+  color: var(--color-text);
+  margin: 0 auto;
+  max-width: 1600px;
+  padding: 2rem 3rem;
+}
+
+/* Global Search Styles (if applicable) */
+.global-search-wrapper {
+  padding: 0 20px;
+  margin: 20px 10px;
+  text-align: center;
+}
+
+.global-search-inline {
+  margin-left: auto;
+  max-width: 400px;
+  flex-shrink: 0;
+}
+
+.global-search-fixed {
+  position: absolute;
+  top: calc(var(--subnav-height) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  z-index: 1130;
+}
+
+/* ------------------ Responsive Adjustments ------------------ */
+@media (max-width: 480px) {
+  .sidebar {
+    display: none;
+  }
+  .sub-nav {
+    left: 0;
+    right: 0;
+  }
+  .layout-main {
+    margin-left: 0;
+  }
+}

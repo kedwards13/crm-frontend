@@ -1,0 +1,73 @@
+.marketplace-view {
+    padding: 2rem;
+    color: white;
+  }
+  
+  .marketplace-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--color-accent, #53f9ff);
+  }
+  
+  .property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .property-card {
+    background: #1c1c1e;
+    border: 1px solid #2e2e2e;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 10px #00000055;
+  }
+  
+  .property-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .property-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  
+  .property-card .price {
+    color: #14ff00;
+    font-weight: 600;
+  }
+  
+  .property-card .address {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-top: 0.5rem;
+  }
+  
+  .property-card .meta {
+    font-size: 0.75rem;
+    color: #888;
+    margin: 0.5rem 0;
+  }
+  
+  .market-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .market-actions button {
+    flex: 1;
+    background: #53f9ff;
+    color: black;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .market-actions button:hover {
+    background: #35d2d2;
+  }

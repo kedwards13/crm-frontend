@@ -1,0 +1,40 @@
+/* src/components/Welcome.css */
+.welcome-container {
+    text-align: center;
+    margin-top: 10vh;
+    color: #2c3e50;
+}
+
+.welcome-container h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.welcome-container p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.welcome-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.welcome-button {
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(145deg, #00b3ff, #00b3ff);
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.welcome-button:hover {
+    background: linear-gradient(145deg, #0056b3, #004494);
+    transform: translateY(-2px);
+}

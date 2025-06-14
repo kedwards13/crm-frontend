@@ -1,0 +1,82 @@
+/* Outer card for financial widget */
+.financial-widget {
+  width: 100%;
+  max-width: 550px;
+  max-height: 450px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Ensure chart widgets are centered and clean */
+.financial-slide {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+}
+
+.slide-content {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* slick carousel layout fix */
+.slick-slider {
+  height: 100%;
+}
+.slick-list {
+  height: 100%;
+  overflow: hidden;
+}
+.slick-track {
+  display: flex !important;
+  height: 100%;
+}
+.slick-slide {
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+}
+.slick-slide > div {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* slick dots */
+.slick-dots li button:before {
+  font-size: 10px;
+  color: #666;
+}
+.slick-dots li.slick-active button:before {
+  color: var(--color-accent);
+}
+
+/* Recharts internal styling override */
+.recharts-wrapper,
+.recharts-surface {
+  background: transparent !important;
+}
+
+.recharts-rectangle {
+  fill: transparent !important;
+}

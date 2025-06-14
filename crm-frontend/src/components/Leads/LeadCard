@@ -1,0 +1,17 @@
+import React from 'react';
+import './LeadCard.css';
+
+function LeadCard({ lead, onClick, children }) {
+  return (
+    <div className="lead-card" onClick={onClick}>
+      <h3>{lead.name || 'N/A'}</h3>
+      {lead.phone_number && <p><b>Phone:</b> {lead.phone_number}</p>}
+      <p><b>Address:</b> {lead.address}</p>
+      <p><b>Type:</b> {lead.property_type}</p>
+      {lead.asking_price && <p><b>Price:</b> ${lead.asking_price.toLocaleString()}</p>}
+      {children} {/* If you need extra buttons in certain contexts */}
+    </div>
+  );
+}
+
+export default LeadCard;

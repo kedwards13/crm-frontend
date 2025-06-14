@@ -1,0 +1,77 @@
+/* src/components/Leads/LeadGen.css */
+.leadgen-container {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .leadgen-config {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .leadgen-config label {
+    display: flex;
+    flex-direction: column;
+    font-size: 1rem;
+  }
+  
+  .leadgen-config input,
+  .leadgen-config select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .leadgen-config button {
+    width: fit-content;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .leadgen-config button:hover {
+    background-color: #0056b3;
+  }
+  
+  .leadgen-message {
+    font-size: 1rem;
+    color: green;
+    margin-bottom: 1rem;
+  }
+  
+  .leadgen-results {
+    margin-top: 1rem;
+  }
+  
+  .leadgen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  
+  .leadgen-card {
+    background-color: #535353;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .leadgen-card h4 {
+    margin: 0 0 0.5rem;
+    color: #007bff;
+  }
+  
+  .leadgen-card p {
+    margin: 0.3rem 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }

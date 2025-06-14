@@ -1,0 +1,48 @@
+.import-properties {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .import-properties h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .file-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .file-upload input {
+    padding: 0.5rem;
+  }
+  
+  .file-upload button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .file-upload button:hover {
+    background-color: #0056b3;
+  }
+  
+  .upload-status {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .upload-status.success {
+    color: green;
+  }
+  
+  .upload-status.error {
+    color: red;
+  }

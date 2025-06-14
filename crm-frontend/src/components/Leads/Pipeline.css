@@ -1,0 +1,123 @@
+.pipeline-view {
+    margin-top: 55rem;
+    padding: 2rem;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-left: 9rem;
+  }
+  
+  /* Header */
+  .pipeline-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-accent, #53f9ff);
+  }
+  
+  /* AI Panel */
+  .pipeline-ai-top {
+    width: 100%;
+  }
+  
+  /* === Vertical Stacked Pipeline === */
+  .pipeline-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  
+  /* Each Stage */
+  .pipeline-stage {
+    background: #1c1c1e;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #2e2e2e;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Stage Title */
+  .pipeline-stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .pipeline-stage-header .count {
+    background: #3a3a3d;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    border-radius: 6px;
+    color: #eee;
+  }
+  
+  /* Horizontal scroll for cards */
+  .pipeline-lead-row {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  
+  .pipeline-lead-row::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .pipeline-lead-row::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
+  }
+  
+  /* Card Style */
+  .lead-card {
+    flex: 0 0 250px;
+    background: #2a2a2e;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #00000055;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .lead-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 15px #00000088;
+  }
+  
+  .lead-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .lead-price {
+    color: #14ff00;
+  }
+  
+  .lead-meta {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+  }
+  
+  .lead-tags span {
+    background: #444;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    margin-right: 4px;
+    border-radius: 4px;
+    color: #ccc;
+  }
+  
+  /* Empty State */
+  .pipeline-empty {
+    color: #888;
+    font-size: 0.85rem;
+    text-align: center;
+  }

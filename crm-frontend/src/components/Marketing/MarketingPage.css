@@ -1,0 +1,105 @@
+/* src/components/Marketing/MarketingPage.css */
+
+.marketing-page {
+    padding: 20px;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    margin-left: 10rem;
+    margin-top: 18rem; /* or var(--color-bg-content) if you want the card color */
+  }
+  
+  .marketing-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    background: linear-gradient(90deg, #706aff, #9c49ff, #ff4397, #ff7743);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 12px rgba(255, 119, 67, 0.6);
+  }
+  
+  .section-subtitle {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    color: var(--color-text);
+    text-shadow: 0 0 6px rgba(162, 208, 255, 0.6);
+  }
+  
+  .marketing-section {
+    margin-bottom: 40px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: var(--shadow-elevation);
+    transition: background 0.3s;
+  }
+  
+  .marketing-section:hover {
+    background: #2a2a3a;
+  }
+  
+  .chart-wrapper {
+    margin-top: 10px;
+  }
+  
+  .ai-insights {
+    position: relative;
+    padding-bottom: 20px;
+  }
+  
+  .ai-insights p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 20px 0;
+  }
+  
+  /* Glowing AI Orb */
+  .orb-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  
+  .ai-orb {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      #706aff 0%,
+      #9c49ff 30%,
+      #ff4397 60%,
+      #ff7743 100%
+    );
+    animation: orbGlow 3s infinite alternate ease-in-out;
+    box-shadow: 0 0 20px rgba(255, 119, 67, 0.4);
+  }
+  
+  @keyframes orbGlow {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(255, 119, 67, 0.4);
+    }
+    100% {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255, 119, 67, 0.6);
+    }
+  }
+  
+  .ai-action-btn {
+    display: inline-block;
+    background-color: var(--color-accent);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  
+  .ai-action-btn:hover {
+    background-color: #2894ff;
+    box-shadow: 0 0 8px rgba(10,132,255,0.7);
+  }

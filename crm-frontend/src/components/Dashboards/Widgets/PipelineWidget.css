@@ -1,0 +1,81 @@
+/* src/components/Dashboards/Widgets/PipelineWidget.css */
+
+.pipeline-widget {
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--color-bg-card, #2a2a3a);
+    border: 1px solid var(--color-border, #3d3d3d);
+    box-shadow: var(--shadow-elevation, 0 2px 8px rgba(0, 0, 0, 0.3));
+    text-align: center;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .pipeline-title {
+    font-size: 1.2rem;
+    margin: 0;
+    margin-bottom: 0.5rem;
+    color: var(--color-text, #f5f5f7);
+  }
+  
+  .pipeline-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Base styling for the count number */
+  .pipeline-count {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    transition: text-shadow 0.3s ease;
+  }
+  
+  /* 1) New: Blue → Green */
+  .count-new {
+    background: linear-gradient(90deg, #00f2fe 0%, #54ff00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(0,242,254, 0.6), 0 0 16px rgba(84,255,0, 0.5);
+  }
+  .count-new:hover {
+    text-shadow: 0 0 12px rgba(0,242,254, 0.8), 0 0 24px rgba(84,255,0, 0.6);
+  }
+  
+  /* 2) Qualified: Green → Orange */
+  .count-qualified {
+    background: linear-gradient(90deg, #54ff00 0%, #ffa500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(84,255,0, 0.6), 0 0 16px rgba(255,165,0, 0.5);
+  }
+  .count-qualified:hover {
+    text-shadow: 0 0 12px rgba(84,255,0, 0.8), 0 0 24px rgba(255,165,0, 0.6);
+  }
+  
+  /* 3) Proposed: Orange → Red */
+  .count-proposed {
+    background: linear-gradient(90deg, #ffa500 0%, #ff3b30 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(255,165,0, 0.6), 0 0 16px rgba(255,59,48, 0.5);
+  }
+  .count-proposed:hover {
+    text-shadow: 0 0 12px rgba(255,165,0, 0.8), 0 0 24px rgba(255,59,48, 0.6);
+  }
+  
+  /* 4) Closed: Red → Purple */
+  .count-closed {
+    background: linear-gradient(90deg, #ff3b30 0%, #c149ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 8px rgba(255,59,48, 0.6), 0 0 16px rgba(193,73,255, 0.5);
+  }
+  .count-closed:hover {
+    text-shadow: 0 0 12px rgba(255,59,48, 0.8), 0 0 24px rgba(193,73,255, 0.6);
+  }
+  
+  .pipeline-label {
+    font-size: 1rem;
+    color: var(--color-text, #ccc);
+  }
