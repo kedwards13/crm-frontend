@@ -1,0 +1,29 @@
+// Import shared global styles
+@use '../../../styles/variables' as *;
+@use '../../../styles/buttons' as *;
+
+// Component-specific styles
+.info-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.info-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.info-left,
+.info-right {
+  flex: 1;
+  min-width: 300px;
+}
+
+.section-header {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }

@@ -21,14 +21,14 @@
     /* Apple-like light text */
     --color-text: #f5f5f7;
     /* Accent color – neon-ish blue */
-    --color-accent: #2894ff;
+    --color-accent: #28a2ff;
     /* Subtle border color */
     --color-border: #3a3c3d;
     /* Shadow for lifted elements */
     --shadow-elevation: 0 2px 8px rgba(0, 0, 0, 0.7);
     
     /* (Optional) Neon glow for certain accents */
-    --neon-glow: 0 0 8px rgba(10,132,255,0.7);
+    --neon-glow: 0 0 8px rgba(10, 157, 255, 0.7);
   }
   
   /* ------------------ Light Mode Overrides (if needed) ------------------ */
@@ -38,7 +38,7 @@
     --color-bg-subnav: #ffffff;
     --color-bg-card: #ffffff;
     --color-text: #1c1c1e;
-    --color-accent: #007aff;
+    --color-accent: #00a6ff;
     --color-border: #ddd;
     --shadow-elevation: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
@@ -274,7 +274,7 @@
     transition: background-color 0.3s;
   }
   button:hover {
-    background-color: rgba(10,132,255,0.8);
+    background-color: rgba(10, 165, 255, 0.854);
   }
   
   /*************************************************************

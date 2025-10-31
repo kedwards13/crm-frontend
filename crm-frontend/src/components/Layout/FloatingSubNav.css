@@ -1,84 +1,143 @@
-.sub-nav {
+/* Fixed, full-width bar under the TopBar. Align inner content with the sidebar. */
+.floating-subnav{
   position: fixed;
-  top: var(--topbar-height);
-  left: var(--sidebar-width);
+  top: var(--topbar-height, 64px);
+  left: 0;
   right: 0;
-  height: var(--subnav-height);
-  background: rgba(28, 28, 30, 0.6);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(61, 61, 61, 0.3);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  padding: 0 1rem;
-  gap: 1rem;
-  overflow-x: auto;
-  white-space: nowrap;
-  transition: left 0.3s, background 0.3s, color 0.3s;
-  z-index: 1000;
+  height: var(--subnav-height, 48px);
+  z-index: 1090; /* TopBar should be above this (e.g., 1100) */
+
+  background: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.subnav-tabs {
-  display: flex;
-  gap: 1rem;
+/* Inner content lines up with the canvas by padding-left = current sidebar width */
+.floating-subnav-inner{
+  height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  padding-left: var(--sidebar-current-width, var(--sidebar-width, 240px));
+  padding-right: 12px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* left slot | tabs | right slot */
   align-items: center;
+  gap: 10px;
+
+  transition: padding-left .25s ease;
+  color: var(--color-text);
 }
 
-.floating-subnav-btn {
-  background: none;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.95rem;
-  font-weight: 500;
+/* Slots simply place-through their children */
+.fsn-left, .fsn-right{ display: contents; }
+
+/* ---------- Tabs area ---------- */
+.fsn-tabs-wrap{
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* arrow | scroller | arrow */
+  align-items: center;
+  gap: 6px;
+}
+
+.fsn-arrow{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-bg-card) 85%, transparent);
   color: var(--color-text);
   cursor: pointer;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  transition: filter .15s ease, opacity .15s ease;
+  font-size: 18px;
+  line-height: 1;
+}
+.fsn-arrow:hover{ filter: brightness(1.05); }
+.fsn-arrow.hidden{ opacity: 0; pointer-events: none; }
+
+/* Scroll container with theme-aware edge fades */
+.fsn-scroller{
+  position: relative;
+  overflow: auto hidden;
+  scrollbar-width: none; /* Firefox */
+}
+.fsn-scroller::-webkit-scrollbar{ display: none; } /* WebKit */
+
+.fsn-scroller::before,
+.fsn-scroller::after{
+  content:"";
+  position: sticky;
+  top: 0;
+  width: 16px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity .15s ease;
 }
 
-/* ✅ Ensure HOVER works */
-.floating-subnav-btn:hover {
-  background: rgba(10,132,255, 0.15);
-  color: var(--color-accent);
-  border: 2px solid var(--color-accent);
+/* Edge fades adapt to theme background automatically */
+.fsn-scroller::before{
+  left: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-bg) 40%, transparent),
+    transparent
+  );
 }
-
-/* ✅ SUPER FORCED Active Tab Style */
-.floating-subnav-btn.active {
-  background: linear-gradient(90deg, #706aff, #9c49ff, #ff4397, #ff7743);
-  background-size: 200% auto;
-  animation: activeGlow 3s linear infinite;
-  color: white !important;
-  border: 2px solid white;
-  box-shadow: 0 0 10px rgba(255,255,255,0.5);
-  text-shadow: 0 0 4px #fff;
+.fsn-scroller::after{
+  right: 0;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--color-bg) 40%, transparent),
+    transparent
+  );
 }
+.fsn-scroller.at-start::before{ opacity: 0; }
+.fsn-scroller.at-end::after{ opacity: 0; }
 
-@keyframes activeGlow {
-  from {
-    background-position: 0% center;
-  }
-  to {
-    background-position: 100% center;
-  }
-}
-
-.subnav-search {
-  margin-left: auto;
-  max-width: 400px;
-  display: flex;
+/* Tabs row */
+.fsn-tabs{
+  display: inline-flex;
+  gap: .6rem;
   align-items: center;
+  padding: 0 6px;
+  white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .sub-nav {
-    left: 0;
-    right: 0;
-    padding: 0.4rem 0.8rem;
-    gap: 0.5rem;
-  }
-  .floating-subnav-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
+/* Pill tab */
+.fsn-tab{
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: .42rem .9rem;
+  font-size: .94rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.fsn-tab:hover{
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+.fsn-tab.active{
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(90deg, #ff6a6a,#ff7b45);
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px){
+  .floating-subnav-inner{
+    padding-left: var(--sidebar-width-collapsed, 60px);
+    grid-template-columns: 1fr; /* tabs row only */
   }
 }

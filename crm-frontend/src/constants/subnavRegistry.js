@@ -5,7 +5,8 @@ export const industrySubnavConfig = {
       { key: 'list', label: 'Customers', path: '/customers/list' },
       { key: 'import', label: 'Import', path: '/customers/import' },
       { key: 'care', label: 'Customer Care', path: '/customers/care' },
-      { key: 'ai', label: 'AI Insights', path: '/customers/ai' }
+      { key: 'revival',  label: 'Revival Scans',  path: '/customers/revival' },
+      { key: 'ai', label: 'AI Insights', path: '/customers/ai' },
     ],
     '/leads': [
       { key: 'new', label: 'New Leads', path: '/leads/new' },
@@ -18,6 +19,13 @@ export const industrySubnavConfig = {
       { key: 'calendar', label: 'Calendar View', path: '/schedule/calendar' },
       { key: 'routing', label: 'Route Planner', path: '/schedule/routing' },
       { key: 'unscheduled', label: 'Unscheduled Jobs', path: '/schedule/unscheduled' }
+    ],
+    '/revival': [
+      { key: 'overview', label: 'Overview', path: '/revival/overview' },
+      { key: 'campaigns', label: 'Campaigns', path: '/revival/campaigns' },
+      { key: 'planner', label: 'Planner', path: '/revival/planner' },
+      { key: 'history', label: 'History', path: '/revival/history' },
+      { key: 'ai', label: 'AI Insights', path: '/revival/ai' }
     ],
     '/settings': [
       { key: 'team', label: 'Team', path: '/settings/team' },

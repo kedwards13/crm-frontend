@@ -1,0 +1,114 @@
+/* ===================================================================
+   Operations Subnav (reusable) — solid pills, no gradients
+   Usage: <nav class="ops-subnav ops-subnav--fleet"> … </nav>
+          <NavLink className={({isActive})=>`ops-tab ${isActive?'is-active':''}`} />
+   =================================================================== */
+
+/* Inherit from your global tokens (surface/text/border/primary/etc.) */
+:root{
+    --ops-radius-pill: 999px;
+    --ops-gap: 10px;
+    --ops-pad-y: .46rem;
+    --ops-pad-x: .98rem;
+    --ops-font-size: 14.5px;
+    --ops-font-weight: 600;
+  
+    /* sensible defaults if not defined globally */
+    --surface: var(--color-bg-card, #111823);
+    --surface-2: color-mix(in srgb, var(--surface) 80%, #000 20%);
+    --text: var(--color-text, #e5ecf3);
+    --text-muted: color-mix(in srgb, var(--text) 70%, #9aa5b1 30%);
+    --border: var(--color-border, #263241);
+  
+    /* fallback accent (overridden per section below) */
+    --ops-accent: var(--primary, #2563eb);
+    --ops-ink: var(--primary-ink, #ffffff);
+  
+    --ops-focus: 0 0 0 3px color-mix(in srgb, var(--ops-accent) 28%, transparent);
+  }
+  
+  /* ---- Wrapper: flex + bottom divider, horizontal scroll on overflow ---- */
+  .ops-subnav{
+    display: flex;
+    gap: var(--ops-gap);
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+    overflow: auto hidden;
+    scrollbar-width: none;
+  }
+  .ops-subnav::-webkit-scrollbar{ display:none; }
+  
+  /* ---- Tabs ---- */
+  .ops-tab{
+    appearance: none;
+    background: color-mix(in srgb, var(--surface) 74%, transparent);
+    color: var(--text-muted);
+    border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+    border-radius: var(--ops-radius-pill);
+    padding: var(--ops-pad-y) var(--ops-pad-x);
+    font-size: var(--ops-font-size);
+    font-weight: var(--ops-font-weight);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, transform .04s ease;
+  }
+  
+  .ops-tab:hover{
+    background: color-mix(in srgb, var(--ops-accent) 10%, transparent);
+    color: color-mix(in srgb, var(--text) 95%, #fff 5%);
+    border-color: color-mix(in srgb, var(--ops-accent) 40%, var(--text));
+  }
+  
+  .ops-tab:active{ transform: translateY(1px); }
+  
+  .ops-tab:focus-visible{
+    outline: none;
+    box-shadow: var(--ops-focus);
+  }
+  
+  /* Active = solid fill + crisp border, no gradient/glow */
+  .ops-tab.is-active,
+  .ops-tab[aria-current="page"],
+  .ops-tab[aria-selected="true"]{
+    background: var(--ops-accent);
+    color: var(--ops-ink);
+    border-color: var(--ops-accent);
+  }
+  
+  /* Disabled (optional) */
+  .ops-tab[aria-disabled="true"],
+  .ops-tab.is-disabled{
+    opacity: .55;
+    pointer-events: none;
+  }
+  
+  /* ---- Section accents (override --ops-accent per section) ---- */
+  .ops-subnav--fleet      { --ops-accent: #2563eb; } /* blue */
+  .ops-subnav--inventory  { --ops-accent: #0ea5e9; } /* sky */
+  .ops-subnav--techs      { --ops-accent: #10b981; } /* emerald */
+  .ops-subnav--training   { --ops-accent: #a855f7; } /* violet */
+  .ops-subnav--compliance { --ops-accent: #f59e0b; } /* amber */
+  
+  /* ---- Light mode fine-tunes (if you toggle data-theme="light") ---- */
+  :root[data-theme="light"] .ops-subnav{
+    border-bottom-color: color-mix(in srgb, #000 10%, transparent);
+  }
+  :root[data-theme="light"] .ops-tab{
+    background: color-mix(in srgb, #fff 85%, var(--surface) 15%);
+    color: color-mix(in srgb, #334155 74%, #000 26%);
+    border-color: color-mix(in srgb, #000 10%, transparent);
+  }
+  :root[data-theme="light"] .ops-tab:hover{
+    background: color-mix(in srgb, var(--ops-accent) 9%, #fff 91%);
+    color: #0b0f14;
+  }
+  
+  /* ---- Compact on small screens ---- */
+  @media (max-width: 640px){
+    .ops-subnav{ gap: 8px; padding: 10px 0; }
+    .ops-tab{ font-size: 13.5px; padding: .4rem .78rem; }
+  }

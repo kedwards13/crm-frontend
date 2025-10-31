@@ -1,20 +1,14 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+// src/components/Layout/Navigation.js
+import React, { useEffect, useMemo, useState, useContext } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../App';
 import {
-  FiHome,
-  FiFileText,
-  FiUsers,
-  FiCalendar,
-  FiPhone,
-  FiTrendingUp,
-  FiBarChart2,
-  FiTag,
-  FiLogOut,
-  FiMenu,
-  FiSettings,
+  FiHome, FiFileText, FiUsers, FiCalendar, FiPhone,
+  FiTrendingUp, FiBarChart2, FiTag, FiLogOut, FiMenu, FiSettings
 } from 'react-icons/fi';
-import { navRegistry } from '../../constants/navRegistry';
+
+import { getNavForIndustry, getIndustryKey } from '../../constants/uiRegistry';
+import { getUserRole } from '../../helpers/tenantHelpers';
 import './Navigation.css';
 
 const ICON_MAP = {
@@ -29,75 +23,137 @@ const ICON_MAP = {
   FiSettings: <FiSettings />,
 };
 
-const Navigation = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [navItems, setNavItems] = useState([]);
-  const { logout } = useContext(AuthContext);
+export default function Navigation({
+  collapsed = false,
+  onToggle = () => {},
+  peekOnHover = true,
+  autoCollapseMobile = true,
+}) {
+  const { logout, user, tenant } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 720px)').matches);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    let tenantIndustry = 'general';
-    try {
-      const tenantStr = localStorage.getItem('activeTenant');
-      if (tenantStr && tenantStr !== 'undefined') {
-        const tenantObj = JSON.parse(tenantStr);
-        tenantIndustry = tenantObj?.industry?.toLowerCase() || 'general';
-      }
-    } catch (err) {
-      console.warn('⚠️ Could not parse tenant industry:', err);
-    }
-
-    const items = navRegistry[tenantIndustry] || navRegistry['general'];
-    setNavItems(items);
+    const mm = window.matchMedia('(max-width: 720px)');
+    const handle = () => setIsMobile(mm.matches);
+    mm.addEventListener('change', handle);
+    return () => mm.removeEventListener('change', handle);
   }, []);
 
-  const toggleMenu = () => {
-    setIsOpen((prev) => !prev);
+  // Get actual industryKey and userRole from context
+  const industryKey = useMemo(() => getIndustryKey('general'), [tenant]);
+  const userRole = getUserRole(user?.role || 'Member');
+
+  const [navItems, setNavItems] = useState([]);
+
+  useEffect(() => {
+    const items = getNavForIndustry(industryKey, userRole);
+    setNavItems(items);
+  }, [industryKey, userRole, location]);
+
+  useEffect(() => {
+    const update = () => setNavItems(getNavForIndustry(industryKey, userRole));
+    const onStorage = (e) => {
+      if (e.key === 'activeTenant' || e.key === 'ui_overrides') update();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [industryKey, userRole]);
+
+  const handleHamburger = () => {
+    if (isMobile && autoCollapseMobile) {
+      setDrawerOpen((v) => !v);
+    } else {
+      onToggle();
+    }
   };
 
   const handleLogout = () => {
-    logout();
+    logout?.();
+    if (isMobile && autoCollapseMobile) setDrawerOpen(false);
     navigate('/login');
   };
 
+  const handleLinkClick = () => {
+    if (isMobile && autoCollapseMobile) setDrawerOpen(false);
+  };
+
+  const sidebarClasses = [
+    'sidebar',
+    collapsed ? 'is-collapsed' : '',
+    peekOnHover ? 'peek-on-hover' : '',
+    isMobile && autoCollapseMobile ? 'is-mobile' : '',
+    isMobile && autoCollapseMobile && drawerOpen ? 'open' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <nav className={`nav-container ${isOpen ? 'open' : 'collapsed'}`}>
-      {/* Hamburger Toggle */}
-      <div className="hamburger" onClick={toggleMenu}>
-        <FiMenu size={24} color="currentColor" />
-      </div>
+    <>
+      {isMobile && autoCollapseMobile && (
+        <button
+          className={`sidebar-scrim ${drawerOpen ? 'visible' : ''}`}
+          aria-hidden={!drawerOpen}
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
 
-      {/* Profile Header */}
-      <div className="profile-section">
-        <img src="/assets/profile.jpg" alt="Profile" className="profile-icon" />
-        {isOpen && <span className="profile-name">Your Profile</span>}
-      </div>
-
-      {/* Main Navigation */}
-      <ul className="nav-list">
-        {navItems.map(({ path, label, icon }) => (
-          <li key={path} className="nav-item">
-            <NavLink
-              to={path}
-              end
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            >
-              <span className="nav-icon">{ICON_MAP[icon] || <FiHome />}</span>
-              {isOpen && <span className="nav-text">{label}</span>}
-            </NavLink>
-          </li>
-        ))}
-
-        {/* Logout Button */}
-        <li className="nav-item logout">
-          <button onClick={handleLogout} className="logout-button">
-            <span className="nav-icon"><FiLogOut /></span>
-            {isOpen && <span className="nav-text">Logout</span>}
+      <nav className={sidebarClasses} aria-label="Primary">
+        <div className="sidebar-inner">
+          <button
+            className="sidebar-hamburger"
+            type="button"
+            onClick={handleHamburger}
+            aria-label={isMobile ? (drawerOpen ? 'Close menu' : 'Open menu') : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+            title={isMobile ? (drawerOpen ? 'Close' : 'Menu') : (collapsed ? 'Expand' : 'Collapse')}
+          >
+            <FiMenu size={22} />
           </button>
-        </li>
-      </ul>
-    </nav>
-  );
-};
 
-export default Navigation;
+          <div className="sidebar-profile" aria-label="Account">
+            <img
+              src={user?.avatar || '/assets/profile.jpg'}
+              alt=""
+              className="sidebar-profile-avatar"
+            />
+            <span className="sidebar-profile-name">{user?.name || 'Your Profile'}</span>
+          </div>
+
+          <ul className="sidebar-nav" role="list">
+            {navItems.map(({ path, label, icon }) => {
+              const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
+              return (
+                <li key={path} className="sidebar-item">
+                  <NavLink
+                    to={path}
+                    className={`sidebar-link ${isActive ? 'active' : ''}`}
+                    title={label}
+                    onClick={handleLinkClick}
+                  >
+                    <span className="sidebar-icon">{ICON_MAP[icon] || <FiHome />}</span>
+                    <span className="sidebar-text">{label}</span>
+                  </NavLink>
+                </li>
+              );
+            })}
+
+            <li className="sidebar-spacer" aria-hidden="true" />
+
+            <li className="sidebar-item">
+              <button
+                className="sidebar-link sidebar-logout"
+                onClick={handleLogout}
+                title="Logout"
+                type="button"
+              >
+                <span className="sidebar-icon"><FiLogOut /></span>
+                <span className="sidebar-text">Logout</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </>
+  );
+}

@@ -1,6 +1,6 @@
-// src/components/Communication/Emails.js
+// crm-frontend/src/components/Communications/Email/EmailPage.jsx
 import React, { useState } from 'react';
-import './Emails.css';
+import './EmailPage.css';
 
 const Emails = () => {
   const [subject, setSubject] = useState('');

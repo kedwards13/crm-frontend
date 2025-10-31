@@ -1,0 +1,57 @@
+:root {
+    /* layout */
+    --sidebar-width: 240px;
+    --sidebar-width-collapsed: 60px;
+    --topbar-height: 64px;
+    --subnav-height: 56px;
+    --content-max: 1280px;
+  
+    /* spacing */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px;  --s-4: 16px;
+    --s-5: 20px; --s-6: 24px; --s-7: 28px;  --s-8: 32px;
+  
+    /* radius */
+    --r-1: 8px; --r-2: 12px; --r-3: 16px;
+  
+    /* shadow */
+    --sh-1: 0 1px 2px rgba(0,0,0,.12);
+    --sh-2: 0 6px 20px rgba(0,0,0,.18);
+  
+    /* font */
+    --font-sans: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    --fs-1: 12px; --fs-2: 14px; --fs-3: 16px; --fs-4: 18px;
+  
+    /* default (dark) */
+    --bg: #0f0f10;
+    --bg-card: #151517;
+    --bg-elev: #1b1c1f;
+    --text-1: #eaeaea;
+    --text-2: #b7b8bb;
+    --border: #2b2c30;
+    --accent: #6aa0ff;
+  }
+  
+  /* Light */
+  :root[data-theme="light"] {
+    --bg: #f8f8fb;
+    --bg-card: #ffffff;
+    --bg-elev: #ffffff;
+    --text-1: #0c0c0d;
+    --text-2: #5c5d62;
+    --border: #e6e7ea;
+    --accent: #2e7cf6;
+  }
+  
+  /* Industry accents (optional) */
+  :root[data-industry="pest_control"] { --accent: #22c55e; }
+  :root[data-industry="fitness"]      { --accent: #ef4444; }
+  :root[data-industry="real_estate"]  { --accent: #8b5cf6; }
+  :root[data-industry="auto"]         { --accent: #f59e0b; }
+  
+  /* base */
+  html, body {
+    margin: 0; padding: 0;
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-1);
+  }

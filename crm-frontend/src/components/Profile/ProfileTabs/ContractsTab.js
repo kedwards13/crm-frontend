@@ -7,7 +7,7 @@ import {
   fetchDocuments,
   fetchSignatures,
   generatePdf
-}  from /src/api/contractsApi';
+}  from '../../../api/contractsApi';
 
 const ContractsTab = ({ lead }) => {
   const [docs, setDocs] = useState([]);

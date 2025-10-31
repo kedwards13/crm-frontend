@@ -13,7 +13,7 @@ const CustomersDashboard = ({ token }) => {
     const fetchMetrics = async () => {
       try {
         // Example endpoint: /api/customers/metrics
-        const response = await axios.get('http://localhost:808/api/customers/metrics', {
+        const response = await axios.get('http://os.abon.ai/api/customers/metrics', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         setMetrics(response.data);

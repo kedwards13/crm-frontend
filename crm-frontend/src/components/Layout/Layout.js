@@ -1,85 +1,121 @@
 // src/components/Layout/Layout.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navigation from './Navigation';
-import TopBar from './TopBar'; // We'll move subnav into here
-import { getSubNavForPage } from '../../constants/subnavRegistry';
+import TopBar from './TopBar';
+import { getSubNavForPage } from '../../constants/uiRegistry';
+import { getIndustry, getUserRole } from '../../helpers/tenantHelpers';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [tabs, setTabs] = useState([]);
+  const navigate  = useNavigate();
+
+  const [tabs, setTabs]           = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [theme, setTheme]         = useState('system'); // 'dark' | 'light' | 'system'
+
+  // ------- Theme (light/dark/system) -------
+  useEffect(() => {
+    setTheme(localStorage.getItem('theme') || 'system');
+  }, []);
 
   useEffect(() => {
-    // 1. Derive basePath (/customers, /leads, etc.) from the URL
-    const basePath = `/${location.pathname.split('/')[1] || ''}`;
+    const mm = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const apply = () => {
+      const prefersDark = !!mm?.matches;
+      const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+      document.body.classList.toggle('light-mode', !isDark);
+    };
+    apply();
+    if (theme === 'system' && mm?.addEventListener) {
+      mm.addEventListener('change', apply);
+      return () => mm.removeEventListener('change', apply);
+    }
+  }, [theme]);
+
+  // ------- Tabs wiring (industry + route) -------
+  useEffect(() => {
+    // normalize "/leads/new" -> basePath "/leads"
+    const seg = location.pathname.split('/').filter(Boolean)[0] || '';
+    const basePath = `/${seg}`;
     const fullPath = location.pathname;
 
-    // 2. Get tenant industry from localStorage (fall back to 'general')
-    let tenantIndustry = 'general';
-    try {
-      const tenantStr = localStorage.getItem('activeTenant');
-      if (tenantStr && tenantStr !== 'undefined') {
-        const tenantObj = JSON.parse(tenantStr);
-        tenantIndustry = tenantObj?.industry?.toLowerCase() || 'general';
+    const recompute = () => {
+      // single source of truth for industry + role
+      const industryKey = getIndustry('general');   // e.g. 'pest_control'
+      const userRole    = getUserRole('Member');    // e.g. 'Admin' | 'Manager' | 'Member'
+
+      // read subnav for this page from uiRegistry
+      const availableTabs = getSubNavForPage(basePath, industryKey, userRole) || [];
+      setTabs(availableTabs);
+
+      // find the best matching active tab
+      const matchedTab = availableTabs.find(
+        (t) => fullPath === t.path || fullPath.startsWith(`${t.path}/`)
+      );
+
+      if (!matchedTab && availableTabs.length > 0 && fullPath === basePath) {
+        // nudge to first tab only when sitting exactly at basePath
+        navigate(availableTabs[0].path, { replace: true });
+        setActiveTab(availableTabs[0].key);
+      } else {
+        setActiveTab(matchedTab?.key ?? null);
       }
-    } catch (err) {
-      console.warn('⚠️ Failed to parse tenant industry:', err);
-    }
+    };
 
-    // 3. Look up relevant tabs for this basePath + industry
-    const availableTabs = getSubNavForPage(basePath, tenantIndustry);
-    setTabs(availableTabs);
+    recompute();
 
-    // 4. Determine which tab is "active" based on the current path
-    const matchedTab = availableTabs.find(
-      (tab) => fullPath === tab.path || fullPath.startsWith(tab.path)
-    );
-
-    // If there's no matched tab but we do have tabs, and user is exactly at basePath,
-    // redirect them to the first tab's path
-    if (!matchedTab && availableTabs.length > 0 && fullPath === basePath) {
-      navigate(availableTabs[0].path, { replace: true });
-      setActiveTab(availableTabs[0].key);
-    } else {
-      setActiveTab(matchedTab?.key || null);
-    }
+    // react to changes from another tab/login that update tenant/overrides
+    const onStorage = (e) => {
+      if (e.key === 'activeTenant' || e.key === 'ui_overrides') {
+        recompute();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, [location, navigate]);
 
-  // Handler when user clicks a subnav tab
   const handleTabChange = (tabKey) => {
-    const selectedTab = tabs.find((tab) => tab.key === tabKey);
-    if (selectedTab) {
+    const selected = tabs.find((t) => t.key === tabKey);
+    if (selected && location.pathname !== selected.path) {
       setActiveTab(tabKey);
-      navigate(selectedTab.path);
+      navigate(selected.path);
     }
   };
 
-  const toggleSidebar = () => {
-    setCollapsed((prev) => !prev);
-  };
+  const toggleSidebar = () => setCollapsed((v) => !v);
+
+  // Expose shell state if children need it later
+  const shellContext = useMemo(
+    () => ({ collapsed, theme, setTheme }),
+    [collapsed, theme]
+  );
 
   return (
-    <div className={`layout-container ${collapsed ? 'collapsed' : ''}`}>
-      {/* Left navigation (sidebar) */}
-      <Navigation onToggle={toggleSidebar} collapsed={collapsed} />
+    <div className={`layout-shell ${collapsed ? 'collapsed' : ''}`}>
+      {/* Sidebar (fixed) */}
+      <Navigation collapsed={collapsed} onToggle={toggleSidebar} />
 
-      {/* Top bar that now also receives tab props */}
+      {/* Top bar (fixed) */}
       <TopBar
-        onSearchSelect={(item) => navigate(item.path)} 
-        inboxCount={3}
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        inboxCount={3}
+        onSearchSelect={(item) => item?.path && navigate(item.path)}
+        theme={theme}
+        onThemeChange={(next) => {
+          localStorage.setItem('theme', next);
+          setTheme(next);
+        }}
       />
 
-      {/* Main content area */}
-      <div className="layout-main">
-        <div className="layout-content">{children}</div>
-      </div>
+      {/* Scrollable content area (the only scroller) */}
+      <main className="content-area" data-shell={JSON.stringify(shellContext)}>
+        {children}
+      </main>
     </div>
   );
 };

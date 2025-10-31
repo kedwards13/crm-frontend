@@ -1,28 +1,30 @@
 /* src/components/Customers/CustomerImport.css */
 
-/* Main container styling: a dark, translucent card with subtle gradients */
-.ai-single-step {
+/* ───── Container & Card ───── */
+.import-container, .ai-chat-container {
+    position: relative;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .card {
     background: rgba(18, 18, 20, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: 10px;
     padding: 2rem;
-    max-width: 700px;
     margin: 2rem auto;
     color: #e0e0e0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-}
-
-/* Upload section layout with subtle neon highlights */
-.upload-section {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    max-width: 900px;
+  }
+  
+  /* ───── Upload Section ───── */
+  .upload-section {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
-}
-
-.upload-section input[type="file"] {
+  }
+  .upload-section input[type="file"] {
     background: #2a2a2e;
     padding: 0.75rem;
     border: 1px solid #444;
@@ -30,13 +32,11 @@
     color: #ccc;
     font-size: 0.95rem;
     transition: border-color 0.3s ease;
-}
-
-.upload-section input[type="file"]:hover {
+  }
+  .upload-section input[type="file"]:hover {
     border-color: #2894ff;
-}
-
-.upload-section button {
+  }
+  .upload-section button {
     background: linear-gradient(90deg, #21ce99, #2894ff);
     border: none;
     border-radius: 8px;
@@ -46,100 +46,243 @@
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.upload-section button:hover {
+  }
+  .upload-section button:hover {
     transform: scale(1.03);
-    box-shadow: 0 6px 18px rgba(40, 148, 255, 0.6);
-}
-
-/* Progress Bar styling */
-.upload-progress {
+    box-shadow: 0 6px 18px rgba(40,148,255,0.6);
+  }
+  
+  /* ───── Progress Bar ───── */
+  .upload-progress {
     width: 100%;
     height: 12px;
     background: #2a2a2e;
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 1.5rem;
-}
-
-.upload-progress-bar {
+  }
+  .upload-progress-bar {
     height: 100%;
     background: linear-gradient(90deg, #21ce99, #2894ff);
     width: 0%;
     transition: width 0.3s ease;
     position: relative;
     border-radius: 6px;
-}
-
-.progress-text {
+  }
+  .progress-text {
     position: absolute;
     right: 6px;
     top: -24px;
     font-size: 12px;
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-/* Error message banner with neon red tone */
-.error-message {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  
+  /* ───── Error & Success ───── */
+  .error-message, .error-banner {
     background: #bd2130;
     padding: 1rem;
     margin-bottom: 1.5rem;
     border-radius: 6px;
     color: #ffecec;
     font-weight: 600;
-}
-
-/* Results section styling to feel high-tech and clean */
-.results-section {
+    text-align: center;
+  }
+  .card h2.success::after {
+    content: " ✔";
+    color: #21ce99;
+    margin-left: 0.5rem;
+  }
+  
+  /* ───── Preview & Results ───── */
+  .results-section, .preview-section {
     margin-top: 2rem;
-    background: rgba(40, 40, 45, 0.9);
+    background: rgba(40,40,45,0.9);
     padding: 1.5rem;
     border-radius: 8px;
     animation: fadeIn 0.5s ease-in;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.results-section h3 {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  }
+  .results-section h3 {
     color: #21ce99;
     margin-bottom: 1rem;
-}
-
-/* Error list styling in results */
-.error-list {
-    background: rgba(50, 50, 55, 0.95);
+  }
+  .error-list {
+    background: rgba(50,50,55,0.95);
     margin-top: 1rem;
     padding: 1rem;
     border-radius: 8px;
     color: #f5f5f5;
-}
-
-.error-list h4 {
+  }
+  .error-list h4 {
     margin-bottom: 0.5rem;
     color: #ff4c4c;
-}
-
-/* Text area for mapping adjustments styling */
-textarea {
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid #444;
-    background: #2a2a2e;
-    color: #ccc;
-    padding: 0.75rem;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.3s ease;
-}
-
-textarea:focus {
-    border-color: #2894ff;
-    outline: none;
-}
-
-/* Simple fadeIn animation for results section */
-@keyframes fadeIn {
+  }
+  
+  /* ───── Fade-in ───── */
+  @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* ───── Table Styling ───── */
+  .card .overflow-auto {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .card .overflow-auto table {
+    table-layout: fixed;
+    width: 100%;
+    white-space: nowrap;
+    border-collapse: collapse;
+  }
+  .card table th,
+  .card table td {
+    font-size: 0.825rem;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  /* Highlight priority columns by position */
+  .card table th:nth-child(1),
+  .card table td:nth-child(1),
+  .card table th:nth-child(7),
+  .card table td:nth-child(7),
+  .card table th:nth-child(8),
+  .card table td:nth-child(8),
+  .card table th:nth-child(9),
+  .card table td:nth-child(9),
+  .card table th:nth-child(10),
+  .card table td:nth-child(10),
+  .card table th:nth-child(11),
+  .card table td:nth-child(11) {
+    background: rgba(33,206,153,0.1);
+  }
+  
+  /* Fixed widths for most-critical fields */
+  .card table th:nth-child(9),
+  .card table td:nth-child(9) { width: 140px; }  /* phone */
+  .card table th:nth-child(10),
+  .card table td:nth-child(10) { width: 180px; } /* address */
+  .card table th:nth-child(7),
+  .card table td:nth-child(7),
+  .card table th:nth-child(8),
+  .card table td:nth-child(8) { width: 100px; }  /* first/last */
+  
+  /* Collapse less-critical columns */
+  .card table th:nth-child(n+12),
+  .card table td:nth-child(n+12) {
+    opacity: 0.75;
+    font-size: 0.75rem;
+  }
+  
+  /* Zebras + hover */
+  .card table tbody tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+  .card table tbody tr:hover           { background: rgba(255,255,255,0.08); }
+  
+  /* ───── Shake on Error ───── */
+  .import-container.shake {
+    animation: shake 0.5s;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-6px); }
+    75%     { transform: translateX(6px); }
+  }
+  
+  /* ───── Spinner Overlay ───── */
+  .spinner-overlay {
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .spinner {
+    width:48px;
+    height:48px;
+    border:6px solid #eee;
+    border-top-color:#21ce99;
+    border-radius:50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* ───── Buttons ───── */
+  .btn-primary {
+    background: linear-gradient(90deg,#21ce99,#2894ff);
+    color:#fff;
+    padding:0.65rem 1.2rem;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:disabled {
+    opacity:0.6;
+    cursor:not-allowed;
+  }
+  .btn-primary:not(:disabled):hover {
+    transform:scale(1.03);
+    box-shadow:0 4px 12px rgba(40,148,255,0.6);
+  }
+  
+  /* ───── In-Process Chat Pane ───── */
+  .ai-chat-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 300px;
+    max-height: 400px;
+    background: rgba(18,18,20,0.95);
+    border: 1px solid #444;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    overflow: hidden;
+    z-index: 20;
+  }
+  .ai-chat-header {
+    background: linear-gradient(90deg,#21ce99,#2894ff);
+    padding: 0.75rem;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+  }
+  .ai-chat-log {
+    flex: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.05);
+  }
+  .ai-chat-msg {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .ai-chat-msg.user { color: #ffd60a; }
+  .ai-chat-msg.ai   { color: #0a84ff; }
+  .ai-chat-input {
+    display: flex;
+    border-top: 1px solid #444;
+  }
+  .ai-chat-input input {
+    flex: 1;
+    padding: 0.5rem;
+    background: rgba(18,18,20,0.9);
+    border: none;
+    color: #f5f5f7;
+  }
+  .ai-chat-input button {
+    padding: 0.5rem 1rem;
+    background: #0a84ff;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .ai-chat-input button:hover {
+    background: #0070cc;
+  }

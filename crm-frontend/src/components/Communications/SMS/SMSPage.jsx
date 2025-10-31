@@ -1,7 +1,7 @@
-// src/components/Communication/Messages.js
+// crm-frontend/src/components/Communications/SMS/SMSPage.jsx
 import React, { useState, useEffect } from 'react';
 import MessageLog from './MessageLog';
-import './Messages.css';
+import './SMSPage.css';
 
 const Messages = () => {
   const [message, setMessage] = useState('');

@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import axios from 'axios';
 import './TeamManagement.css';
 import EmployeePopup from '../Profile/EmployeePopup';
+import { AuthContext } from '../../App';
 
 const UserCard = ({ member, onClick }) => {
   const defaultAvatar = '/default-avatar.png';
@@ -39,9 +40,9 @@ const TeamManagement = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const { logout } = useContext(AuthContext);
 
-  // Use the environment variable for the API URL or fallback to localhost:808
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:808';
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem('token');
 
   const fetchTeamMembers = useCallback(async () => {
@@ -78,7 +79,6 @@ const TeamManagement = () => {
     setError(null);
     setSuccess(null);
 
-    // Map form fields to backend expected keys (using snake_case)
     const payload = {
       first_name: newMember.firstName,
       last_name: newMember.lastName,
@@ -94,7 +94,7 @@ const TeamManagement = () => {
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setSuccess(response.data.message);
+      setSuccess(response.data.message || 'User added successfully.');
       setNewMember({
         firstName: '',
         lastName: '',
@@ -131,64 +131,26 @@ const TeamManagement = () => {
 
   return (
     <div className="team-management">
-      <h2>Team Management</h2>
+      <div className="team-header">
+        <h2>Team Management</h2>
+        <button className="logout-btn" onClick={logout}>🚪 Log Out</button>
+      </div>
 
       {success && <p className="success-message">{success}</p>}
       {error && <p className="error-message">{error}</p>}
 
       <form onSubmit={handleAddMember} className="team-form">
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name"
-          value={newMember.firstName}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={newMember.lastName}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={newMember.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="phoneNumber"
-          placeholder="Phone Number"
-          value={newMember.phoneNumber}
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={newMember.password}
-          onChange={handleChange}
-          required
-        />
-        <select
-          name="role"
-          value={newMember.role}
-          onChange={handleChange}
-          required
-        >
+        <input type="text" name="firstName" placeholder="First Name" value={newMember.firstName} onChange={handleChange} required />
+        <input type="text" name="lastName" placeholder="Last Name" value={newMember.lastName} onChange={handleChange} required />
+        <input type="email" name="email" placeholder="Email" value={newMember.email} onChange={handleChange} required />
+        <input type="text" name="phoneNumber" placeholder="Phone Number" value={newMember.phoneNumber} onChange={handleChange} />
+        <input type="password" name="password" placeholder="Password" value={newMember.password} onChange={handleChange} required />
+        <select name="role" value={newMember.role} onChange={handleChange} required>
           <option value="Member">Member</option>
           <option value="Manager">Manager</option>
           <option value="Admin">Admin</option>
         </select>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Member'}
-        </button>
+        <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Member'}</button>
       </form>
 
       <h3>Current Team</h3>

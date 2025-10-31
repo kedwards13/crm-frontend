@@ -1,0 +1,31 @@
+.operations-shell {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--gap-lg);
+  }
+  
+  .operations-subnav {
+    display: flex;
+    gap: var(--gap);
+    padding: var(--gap) 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--gap-lg);
+  }
+  
+  .operations-subnav a {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  
+  .operations-subnav a.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+  }
+  
+  .operations-content {
+    flex: 1;
+  }

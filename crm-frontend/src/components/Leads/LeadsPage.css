@@ -1,81 +1,109 @@
+/* Core page layout */
 .leads-page {
-  padding: calc(var(--subnav-height) + 1.5rem) 2rem 2rem;
-  margin-top:53rem;
-  margin-left: 10rem;
-  background: none;
-  min-height: 100vh;
-  overflow-x: hidden;
-  box-sizing: border-box;
+  padding: 0 1rem 2rem;
+  background-color: var(--color-bg, #ffffff);
+  color: var(--color-text, #111111);
 }
 
+/* Two-pane desktop layout */
 .leads-layout {
-  display: flex;
-  gap: 2rem;
-  max-width: 1440px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.25rem;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .lead-section-title {
-  font-size: 1.5rem;
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  text-align: center;
-  margin-bottom: 1.25rem;
-  color: var(--color-text-primary);
 }
 
-/* === LEFT SIDE: Full Lead List === */
+/* Columns */
 .leads-list-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  min-width: 0;
 }
-
-.lead-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  width: 100%;
-}
-
-/* === RIGHT SIDE: AI Panel + Pipeline === */
 .leads-right-panel {
-  flex: 1.3;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-}
-
-/* Assistant Panel */
-.ai-assistant-box {
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-card);
-  border-radius: 12px;
-  padding: 1.25rem;
-  box-shadow: var(--shadow-elevation);
-}
-
-/* Pipeline Grid: 2x3 layout */
-.pipeline-2col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 1fr));
   gap: 1rem;
 }
 
-@media (max-width: 1024px) {
-  .leads-page {
-    margin-left: var(--sidebar-width-collapsed);
-    padding: 1.5rem;
-  }
+/* AI Assistant Box */
+.ai-assistant-box {
+  border: 1px solid var(--color-border, #ccc);
+  background: var(--color-bg-card, #f9f9f9);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease, border 0.3s ease;
+}
 
+/* Support dark mode override via class or :root */
+body.dark .leads-page {
+  background-color: var(--color-bg, #0f0f0f);
+  color: var(--color-text, #f1f1f1);
+}
+body.dark .ai-assistant-box {
+  background: var(--color-bg-card, #151515);
+  border-color: var(--color-border, #2a2a2a);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* Grid Layout for Lead Cards */
+.lead-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+.lead-grid.grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+.lead-grid.list {
+  grid-template-columns: 1fr;
+}
+
+/* Card selection and checkbox */
+.selectable {
+  position: relative;
+  padding-left: 36px;
+}
+.selectable .checkbox {
+  position: absolute;
+  left: 8px;
+  top: 12px;
+}
+.selectable.selected {
+  outline: 2px solid var(--color-accent, #0a84ff);
+  border-radius: 12px;
+}
+
+/* State indicators */
+.loading,
+.error,
+.empty {
+  margin: 0.5rem 0;
+  opacity: 0.9;
+}
+.error {
+  color: var(--color-danger, #d33);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
   .leads-layout {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
-
-  .leads-right-panel {
-    flex-direction: column;
+  .lead-grid.grid {
+    grid-template-columns: 1fr;
   }
-
-  .pipeline-2col {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+@media (max-width: 600px) {
+  .ai-assistant-box {
+    padding: 0.75rem;
+  }
+  .leads-page {
+    padding: 0.5rem 0.75rem 2rem;
   }
 }

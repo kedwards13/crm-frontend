@@ -1,0 +1,229 @@
+.inbox-page {
+    padding: 24px;
+  }
+  
+  .inbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  
+  .inbox-item {
+    background: #1e1f24;
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .inbox-item:hover {
+    background: #2a2b31;
+  }
+  
+  .inbox-item.read {
+    opacity: 0.7;
+  }
+  
+  .meta {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .subject {
+    font-weight: 600;
+    font-size: 16px;
+    color: #f5f5f5;
+  }
+  
+  .body {
+    font-size: 14px;
+    color: #ccc;
+  }
+
+  .two-column {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+  }
+  
+  .inbox-list {
+    width: 40%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .inbox-preview {
+    flex: 1;
+    background: #1c1e22;
+    border-radius: 12px;
+    padding: 16px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .thread-history {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #121417;
+    border-radius: 8px;
+  }
+  
+  .msg-bubble.outbound {
+    background: #2a2e3c;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    align-self: flex-end;
+  }
+  
+  .msg-bubble.inbound {
+    background: #313336;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    align-self: flex-start;
+  }
+
+  .inbox-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .inbox-toolbar input[type="search"] {
+    flex: 1;
+    padding: 10px 14px;
+    background: #121417;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-right: 12px;
+  }
+  
+  .toolbar-actions button {
+    background: #2a2b31;
+    border: none;
+    color: #eee;
+    margin-left: 6px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .toolbar-actions button:hover {
+    background: #3b3c43;
+  }
+  
+  .msg-actions button {
+    background: transparent;
+    border: none;
+    color: #888;
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .msg-actions button:hover {
+    color: #fff;
+  }
+
+  .search-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  
+  .email-composer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    backdrop-filter: blur(4px);
+  }
+  
+  .email-composer {
+    background: #1c1e22;
+    width: 600px;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  }
+  
+  .composer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .composer-field label {
+    font-size: 14px;
+    color: #aaa;
+  }
+  
+  .composer-field input,
+  .composer-field textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #121417;
+    color: #fff;
+    padding: 8px;
+  }
+  
+  .customer-dropdown {
+    position: absolute;
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    width: 100%;
+  }
+  
+  .dropdown-item {
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .dropdown-item:hover {
+    background: #333;
+  }
+  
+  .send-btn {
+    background: #0a84ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  
+  .send-btn:hover {
+    background: #0066cc;
+  }

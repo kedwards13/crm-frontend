@@ -1,123 +1,140 @@
-.pipeline-view {
-    margin-top: 55rem;
-    padding: 2rem;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-left: 9rem;
-  }
-  
-  /* Header */
-  .pipeline-header h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--color-accent, #53f9ff);
-  }
-  
-  /* AI Panel */
-  .pipeline-ai-top {
-    width: 100%;
-  }
-  
-  /* === Vertical Stacked Pipeline === */
-  .pipeline-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-  
-  /* Each Stage */
-  .pipeline-stage {
-    background: #1c1c1e;
-    padding: 1rem;
-    border-radius: 10px;
-    border: 1px solid #2e2e2e;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Stage Title */
-  .pipeline-stage-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1rem;
-    font-weight: 600;
-    border-bottom: 1px solid #444;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .pipeline-stage-header .count {
-    background: #3a3a3d;
-    padding: 2px 8px;
-    font-size: 0.7rem;
-    border-radius: 6px;
-    color: #eee;
-  }
-  
-  /* Horizontal scroll for cards */
-  .pipeline-lead-row {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-  }
-  
-  .pipeline-lead-row::-webkit-scrollbar {
-    height: 8px;
-  }
-  
-  .pipeline-lead-row::-webkit-scrollbar-thumb {
-    background-color: #444;
-    border-radius: 4px;
-  }
-  
-  /* Card Style */
-  .lead-card {
-    flex: 0 0 250px;
-    background: #2a2a2e;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 0 10px #00000055;
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .lead-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 15px #00000088;
-  }
-  
-  .lead-header {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  
-  .lead-price {
-    color: #14ff00;
-  }
-  
-  .lead-meta {
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-bottom: 0.25rem;
-  }
-  
-  .lead-tags span {
-    background: #444;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    margin-right: 4px;
-    border-radius: 4px;
-    color: #ccc;
-  }
-  
-  /* Empty State */
-  .pipeline-empty {
-    color: #888;
-    font-size: 0.85rem;
-    text-align: center;
-  }
+/* Page container aligns with the shell (TopBar + optional SubNav handled by .content-area) */
+.pipeline-page { min-height: 100vh; }
+
+/* Header */
+.pipeline .pipeline-header{
+  display: grid;
+  align-items: start;
+  gap: .75rem;
+  margin: 1rem 0 0.5rem;
+}
+.pipeline .pipeline-header h1{
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Assistant */
+.pipeline-ai-top { width: 100%; }
+
+/* Vertical stack of stages */
+.pipeline-vertical{
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Stage section */
+.pl-stage{
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: .75rem;
+}
+
+/* Sticky header inside card for long rows */
+.pl-stage-header{
+  position: sticky;
+  top: 0; /* sticks within stage box */
+  z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .25rem .35rem .5rem;
+  background: color-mix(in srgb, var(--color-bg-card) 92%, transparent);
+  border-bottom: 1px solid var(--color-border);
+  border-top-left-radius: 10px; border-top-right-radius: 10px;
+}
+.pl-stage-header h3{
+  margin: 0; font-size: 1rem; font-weight: 600;
+}
+.pl-stage-header .count{
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  color: var(--color-text);
+  padding: 2px 8px; border-radius: 999px; font-size: .75rem; font-weight: 600;
+}
+
+/* Horizontal row with edge fades + snap */
+.pl-row{
+  position: relative;
+  display: flex; gap: .75rem;
+  overflow-x: auto;
+  padding: .75rem .25rem .5rem;
+  scroll-snap-type: x proximity;
+}
+.pl-row::-webkit-scrollbar{ height: 8px; }
+.pl-row::-webkit-scrollbar-thumb{
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  border-radius: 6px;
+}
+
+/* Card */
+.pl-card{
+  flex: 0 0 280px;
+  background: color-mix(in srgb, var(--color-bg-card) 90%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  padding: .65rem .7rem;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  scroll-snap-align: start;
+}
+.pl-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.24);
+  border-color: var(--color-accent);
+}
+.pl-card.selected{ outline: 2px solid var(--color-accent); }
+
+/* Card header */
+.pl-card-top{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center; gap: .5rem;
+}
+.pl-check{ display:inline-flex; align-items:center; }
+.pl-name{ font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-value{ font-weight: 700; }
+
+/* Meta + chips */
+.pl-card-meta{ margin-top: .25rem; font-size: .85rem; opacity: .9; }
+.pl-chips{ margin-top: .35rem; display: flex; gap: .35rem; flex-wrap: wrap; }
+
+/* Compact chip + note */
+.pl-chip{
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .75rem;
+}
+.pl-note{
+  max-width: 220px;
+  font-size: .78rem;
+  opacity: .9;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Message preview */
+.pl-msg{
+  margin-top: .35rem;
+  font-size: .82rem;
+  opacity: .9;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Empty / errors */
+.pl-empty{ margin: .75rem 0 .25rem; opacity: .8; }
+.pl-loading{ margin: .75rem 0; opacity: .9; }
+.pl-error{ margin: .75rem 0; color: #d33; }
+
+/* Show more */
+.pl-more{ padding: .25rem; }
+.pl-more .filters-button{ height: 34px; }
+
+/* Responsive */
+@media (max-width: 900px){
+  .pl-card{ flex-basis: 240px; }
+}

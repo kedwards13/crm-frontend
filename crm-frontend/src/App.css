@@ -291,3 +291,139 @@ button:hover {
     padding: 0.4rem 0.6rem;
   }
 }
+
+/*************************************************************
+  9) Typography System
+*************************************************************/
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/*************************************************************
+  10) Links & Accents
+*************************************************************/
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #58a6ff;
+  text-decoration: underline;
+}
+
+/*************************************************************
+  11) Input Enhancements
+*************************************************************/
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background: var(--input-bg, #1e1e1e);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border 0.3s, background 0.3s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 4px var(--color-accent);
+}
+
+/*************************************************************
+  12) Tables & Lists
+*************************************************************/
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+th, td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+  background: rgba(255,255,255,0.05);
+}
+
+/*************************************************************
+  13) Utility Classes
+*************************************************************/
+.u-center {
+  text-align: center;
+}
+
+.u-muted {
+  color: rgba(245,245,247, 0.6);
+  font-size: 0.9rem;
+}
+
+.u-glow {
+  color: var(--color-accent);
+  text-shadow: 0 0 4px var(--color-accent), 0 0 12px var(--color-accent);
+}
+
+.u-glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+
+/*************************************************************
+  14) Animations (Pulse, Fade In)
+*************************************************************/
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/*************************************************************
+  15) Light Theme Override (Optional Future Toggle)
+*************************************************************/
+html[data-theme="light"] {
+  --color-bg: #f9f9fb;
+  --color-bg-sidebar: #ffffff;
+  --color-bg-subnav: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-border: #e0e0e0;
+  --color-text: #111;
+  --color-accent: #007aff;
+  --shadow-elevation: 0 2px 6px rgba(0,0,0,0.1);
+}
