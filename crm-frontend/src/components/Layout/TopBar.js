@@ -1,132 +1,151 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import GlobalSearch from '../GlobalSearch';
-import { FiInbox, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import './TopBar.css';
+// src/components/Layout/TopBar.js
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-/**
- * Fixed top bar that:
- * - visually spans across the app while content aligns after the sidebar
- * - shows a horizontally scrollable pill subnav with edge fades + arrows
- * - keeps search and inbox on the right
- */
+import {
+  FiInbox,
+  FiChevronLeft,
+  FiChevronRight,
+  FiSun,
+  FiMoon,
+  FiPlus,
+  FiSearch,
+} from "react-icons/fi";
+
+import "./TopBar.css";
+
 export default function TopBar({
   onSearchSelect,
   inboxCount = 0,
   tabs = [],
   activeTab,
   onTabChange,
+  theme = "system",
+  onThemeChange,
 }) {
+  const navigate = useNavigate();
   const scrollerRef = useRef(null);
-  const leftBtnRef  = useRef(null);
+  const leftBtnRef = useRef(null);
   const rightBtnRef = useRef(null);
 
-  // show/hide scroll arrows based on overflow/scroll position
+  const [showNewMenu, setShowNewMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  /* --------------------------------------------------------------------------
+     🌟 Overflow Handling for Scrolling Pills
+  -------------------------------------------------------------------------- */
   const refreshOverflow = () => {
     const el = scrollerRef.current;
     if (!el) return;
-    const canScrollLeft  = el.scrollLeft > 2;
-    const canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+    const canLeft = el.scrollLeft > 2;
+    const canRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
 
-    leftBtnRef.current?.classList.toggle('hidden', !canScrollLeft);
-    rightBtnRef.current?.classList.toggle('hidden', !canScrollRight);
-
-    // edge fades
-    el.classList.toggle('at-start', !canScrollLeft);
-    el.classList.toggle('at-end',   !canScrollRight);
+    leftBtnRef.current?.classList.toggle("hidden", !canLeft);
+    rightBtnRef.current?.classList.toggle("hidden", !canRight);
   };
 
   useEffect(() => {
     refreshOverflow();
     const el = scrollerRef.current;
     if (!el) return;
-    const onResize = () => refreshOverflow();
+
     const onScroll = () => refreshOverflow();
-    window.addEventListener('resize', onResize);
-    el.addEventListener('scroll', onScroll, { passive: true });
+    const onResize = () => refreshOverflow();
+
+    window.addEventListener("resize", onResize);
+    el.addEventListener("scroll", onScroll);
+
     return () => {
-      window.removeEventListener('resize', onResize);
-      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener("resize", onResize);
+      el.removeEventListener("scroll", onScroll);
     };
   }, [tabs, activeTab]);
 
-  const handleArrow = (dir) => {
+  const scrollTabs = (dir) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const delta = Math.max(160, Math.round(el.clientWidth * 0.6));
-    el.scrollBy({ left: dir === 'left' ? -delta : delta, behavior: 'smooth' });
+    el.scrollBy({
+      left: dir === "left" ? -220 : 220,
+      behavior: "smooth",
+    });
   };
 
-  // Keyboard: left/right to change tab, Home/End to jump
-  const onTabsKeyDown = (e) => {
-    if (!tabs?.length) return;
-    const idx = tabs.findIndex(t => t.key === activeTab);
-    if (e.key === 'ArrowRight') {
+  const handleThemeToggle = () =>
+    onThemeChange(theme === "dark" ? "light" : "dark");
+
+  const hasTabs = useMemo(() => tabs?.length > 0, [tabs]);
+
+  /* --------------------------------------------------------------------------
+     🔍 SIMPLE INLINE SEARCH (no GlobalSearch component)
+  -------------------------------------------------------------------------- */
+  const triggerSearch = () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    // You can later replace this with real global search routing
+    onSearchSelect?.({ query: q });
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
       e.preventDefault();
-      const next = tabs[(idx + 1) % tabs.length];
-      onTabChange?.(next.key);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
-      onTabChange?.(prev.key);
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      onTabChange?.(tabs[0].key);
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      onTabChange?.(tabs[tabs.length - 1].key);
+      triggerSearch();
     }
   };
 
-  // Smooth wheel horizontal scroll on trackpads/mice
-  const onWheel = (e) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    // if vertical scroll dominates, let the page scroll
-    if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
+  /* --------------------------------------------------------------------------
+     🌟 NEW MENU ACTION HANDLING
+  -------------------------------------------------------------------------- */
+  const handleNewAction = (path) => {
+    if (path === "/customers/new") {
+      navigate("/customers/list", { state: { create: "customer" } });
+    } else if (path === "/leads/new") {
+      navigate("/leads/new", { state: { create: "lead" } });
+    } else {
+      navigate(path);
     }
+    setShowNewMenu(false);
   };
 
-  const hasTabs = useMemo(() => (tabs && tabs.length > 0), [tabs]);
-
+  /* --------------------------------------------------------------------------
+     🌟 FINAL RENDER
+  -------------------------------------------------------------------------- */
   return (
-    <header className="top-bar" role="banner">
+    <header className="top-bar">
       <div className="top-bar-inner">
-        {/* LEFT: Subnav */}
-        <div className={`top-bar-subnav-wrap ${hasTabs ? '' : 'no-tabs'}`}>
+        {/* ------------------------------------------------------------------
+            LEFT SECTION — FLOATING SUBNAV / TABS
+        ------------------------------------------------------------------ */}
+        <div className={`top-bar-subnav-wrap ${!hasTabs ? "no-tabs" : ""}`}>
           {hasTabs && (
             <>
               <button
                 ref={leftBtnRef}
-                type="button"
                 className="tabs-arrow left hidden"
-                aria-label="Scroll tabs left"
-                onClick={() => handleArrow('left')}
+                onClick={() => scrollTabs("left")}
               >
                 <FiChevronLeft size={18} />
               </button>
 
               <nav
-                className="top-bar-subnav-scroller at-start"
+                className="top-bar-subnav-scroller"
                 ref={scrollerRef}
-                aria-label="Page sections"
-                onWheel={onWheel}
-                onKeyDown={onTabsKeyDown}
-                tabIndex={0}
+                onWheel={(e) => {
+                  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    scrollerRef.current.scrollLeft += e.deltaY;
+                    e.preventDefault();
+                  }
+                }}
               >
-                <div className="top-bar-subnav" role="tablist" aria-orientation="horizontal">
-                  {tabs.map((tab) => (
+                <div className="top-bar-subnav">
+                  {tabs.map((t) => (
                     <button
-                      key={tab.key}
-                      type="button"
-                      role="tab"
-                      aria-selected={activeTab === tab.key}
-                      className={`top-bar-subnav-button ${activeTab === tab.key ? 'active' : ''}`}
-                      onClick={() => onTabChange?.(tab.key)}
-                      title={tab.label}
+                      key={t.key}
+                      className={`top-bar-subnav-button ${
+                        activeTab === t.key ? "active" : ""
+                      }`}
+                      onClick={() => onTabChange(t.key)}
                     >
-                      {tab.label}
+                      {t.label}
                     </button>
                   ))}
                 </div>
@@ -134,10 +153,8 @@ export default function TopBar({
 
               <button
                 ref={rightBtnRef}
-                type="button"
                 className="tabs-arrow right hidden"
-                aria-label="Scroll tabs right"
-                onClick={() => handleArrow('right')}
+                onClick={() => scrollTabs("right")}
               >
                 <FiChevronRight size={18} />
               </button>
@@ -145,15 +162,79 @@ export default function TopBar({
           )}
         </div>
 
-        {/* RIGHT: Search then inbox */}
+        {/* ------------------------------------------------------------------
+            RIGHT SECTION — SEARCH + INBOX + THEME + NEW
+        ------------------------------------------------------------------ */}
         <div className="top-bar-right">
+          {/* 🔍 Clean inline search (no nested component) */}
           <div className="top-bar-search">
-            <GlobalSearch onSelect={onSearchSelect} />
+            <FiSearch
+              size={16}
+              className="top-bar-search-icon"
+              onClick={triggerSearch}
+            />
+            <input
+              type="text"
+              placeholder="Search for customers, deals, tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+            />
           </div>
-          <button className="top-bar-inbox" type="button" aria-label="Inbox">
-            <FiInbox size={20} />
-            {inboxCount > 0 && <span className="inbox-count">{inboxCount}</span>}
+
+          {/* Inbox */}
+          <div className="inbox-wrapper">
+            <button
+              className="top-bar-btn"
+              onClick={() => navigate("/inbox")}
+              aria-label="Inbox"
+            >
+              <FiInbox size={20} />
+            </button>
+            {inboxCount > 0 && (
+              <span className="inbox-count">{inboxCount}</span>
+            )}
+          </div>
+
+          {/* Theme Toggle */}
+          <button
+            className="top-bar-btn"
+            onClick={handleThemeToggle}
+            aria-label="Theme Toggle"
+          >
+            {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
           </button>
+
+          {/* + NEW BUTTON */}
+          <div className="top-bar-new-container">
+            <button
+              className="top-bar-new-btn"
+              onClick={() => setShowNewMenu((v) => !v)}
+            >
+              <FiPlus size={18} />
+              <span>New</span>
+            </button>
+
+            {showNewMenu && (
+              <div className="top-bar-new-menu">
+                <button onClick={() => handleNewAction("/customers/new")}>
+                  Add Customer
+                </button>
+                <button onClick={() => handleNewAction("/leads/new")}>
+                  Add Lead
+                </button>
+                <button onClick={() => handleNewAction("/revival/scan")}>
+                  Scan Quote
+                </button>
+                <button onClick={() => handleNewAction("/tasks/new")}>
+                  New Task
+                </button>
+                <button onClick={() => handleNewAction("/schedule/new")}>
+                  Add Appointment
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

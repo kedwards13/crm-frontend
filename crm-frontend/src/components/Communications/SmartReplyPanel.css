@@ -1,0 +1,84 @@
+.smart-panel {
+    border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+  }
+  
+  .smart-panel__header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .smart-title { display: flex; gap: 8px; align-items: center; font-weight: 600; }
+  .icon-btn {
+    border: 1px solid rgba(0,0,0,0.08);
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px; cursor: pointer;
+  }
+  
+  .smart-thread {
+    max-height: 160px;
+    overflow-y: auto;
+    background: #f8fafc;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  .smart-msg { margin-bottom: 6px; font-size: 0.9rem; }
+  .smart-msg.in .smart-msg__body {
+    background: #eef6ff; color: #0b5ed7; border: 1px solid #cde2ff;
+  }
+  .smart-msg.out .smart-msg__body {
+    background: #f5f5f5; color: #333; border: 1px solid #e7e7e7;
+  }
+  .smart-msg__body {
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  
+  .sentiment {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.08);
+    margin-bottom: 8px;
+  }
+  .sentiment--positive { background: #eaffec; color: #1d7a2f; border-color: #c7f1d2; }
+  .sentiment--neutral  { background: #f5f7fb; color: #445; border-color: #e3e7ef; }
+  .sentiment--negative { background: #ffefef; color: #a12b2b; border-color: #f6c9c9; }
+  
+  .smart-editor textarea {
+    width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    min-height: 110px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    outline: none; resize: vertical;
+  }
+  .smart-editor textarea:focus {
+    border-color: #007aff; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+  
+  .smart-footer {
+    margin-top: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .smart-footer .left { display: flex; align-items: center; gap: 8px; }
+  .smart-footer .right { display: flex; align-items: center; gap: 8px; }
+  
+  button.primary, button.secondary, button.ghost {
+    border-radius: 10px; padding: 8px 12px; cursor: pointer; border: 1px solid transparent;
+  }
+  button.primary   { background: #007aff; color: #fff; }
+  button.primary:disabled { background: #a6c8ff; cursor: not-allowed; }
+  button.secondary { background: #eef3ff; color: #0b5ed7; border-color: #cfe0ff; }
+  button.ghost     { background: #fff; color: #333; border: 1px solid rgba(0,0,0,0.08); }
+  
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+  
+  .hint { color: #666; font-size: 0.85rem; }

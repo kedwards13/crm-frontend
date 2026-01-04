@@ -1,429 +1,239 @@
-/*************************************************************
-  1) Root Variables & Dark Theme Base
-*************************************************************/
+/* ============================================================
+   ABON OS — ENTERPRISE THEME (FINAL CLEAN VERSION)
+   Palantir × Stripe Hybrid • Premium • Neutral • Unbreakable
+   -----------------------------------------------------------
+   IMPORTANT: 
+   - app.css handles GLOBAL theme + components only.
+   - layout.css handles shell (sidebar/topbar/subnav/content area).
+   - popup.css handles modals.
+============================================================ */
+
+/* ------------------------------------------------------------
+   ROOT THEME TOKENS — DARK MODE DEFAULT
+------------------------------------------------------------ */
 :root {
-  --color-bg: #1c1c1e;               /* Main dark background */
-  --color-bg-sidebar: #1c1c1e;       /* Sidebar background */
-  --color-bg-subnav: #1c1c1e;        /* Sub-nav background */
-  --color-bg-card: #1c1c1e;          /* Card/widget background */
-  --color-border: #1c1c1e;           /* Outline/border color */
-  --color-text: #f5f5f7;             /* Light text color */
-  --color-accent: #0a84ff;           /* Accent (buttons, links) */
-  --shadow-elevation: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --sidebar-width: 200px; /* Reduced */
-  --container-max-width: 1440px;
+  /* BACKGROUNDS */
+  --bg-0: #0e0f11;   /* app shell */
+  --bg-1: #141618;   /* cards / panels */
+  --bg-2: #1b1d20;   /* hover / deep surfaces */
+  --bg-3: #26292d;   /* borders / outlines */
 
-  /* Pipeline Gradients – keep or tweak as needed */
-  --gradient-new: linear-gradient(90deg, #00f2fe 0%, #54ff00 100%);
-  --gradient-qualified: linear-gradient(90deg, #54ff00 0%, #ffa500 100%);
-  --gradient-proposed: linear-gradient(90deg, #ffa500 0%, #ff3b30 100%);
-  --gradient-closed: linear-gradient(90deg, #ff3b30 0%, #c149ff 100%);
+  /* TEXT */
+  --text-0: #f7f9fb;
+  --text-1: #c3c7cc;
+  --text-2: #8e949c;
+
+  /* ACCENT */
+  --accent-0: #4ea3ff;
+  --accent-1: #77c0ff;
+  --accent-2: #b0ddff;
+
+  /* BUTTONS */
+  --btn-bg: #222427;
+  --btn-bg-hover: #2b2e32;
+
+  /* BORDERS */
+  --border-0: #2d2f33;
+  --border-1: #3a3d41;
+
+  /* RADII & SHADOWS */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-0: 0 4px 22px rgba(0,0,0,0.35);
+
+  /* INPUTS */
+  --input-bg: #101214;
+  --input-border: #2c2e33;
+  --input-focus: 0 0 10px rgba(78,163,255,0.45);
+
+  --transition: 0.22s ease;
 }
 
-#root > div {
-  min-height: 100vh; /* makes the background extend fully */
-  display: flex;
-  flex-direction: column;
+/* ------------------------------------------------------------
+   LIGHT MODE OVERRIDE
+------------------------------------------------------------ */
+body.light-mode {
+  --bg-0: #ffffff;
+  --bg-1: #f7f8fa;
+  --bg-2: #ffffff;
+  --bg-3: #e5e8ec;
+
+  --text-0: #1c1d1f;
+  --text-1: #44484d;
+  --text-2: #6b6f75;
+
+  --accent-0: #007aff;
+  --accent-1: #339cff;
+  --accent-2: #79befc;
+
+  --btn-bg: #f3f4f7;
+  --btn-bg-hover: #e6e8eb;
+
+  --border-0: #d9dbe0;
+  --border-1: #c9ccd1;
+
+  --input-bg: #f3f4f7;
+  --input-border: #c9ccd1;
+  --input-focus: 0 0 10px rgba(0,122,255,0.25);
 }
 
-/*************************************************************
-  2) Body & Global Base
-*************************************************************/
+/* ------------------------------------------------------------
+   GLOBAL RESET — SAFE FOR TAILWIND + POPUPS
+------------------------------------------------------------ */
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  box-sizing: border-box;
-  background-color: var(--color-bg); /* Dark main background */
-  color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  transition: background 0.3s, color 0.3s;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, Roboto, Arial, sans-serif;
+  background: var(--bg-0);
+  color: var(--text-0);
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
 }
 
-*, *::before, *::after {
-  box-sizing: inherit;
+body.modal-open {
+  overflow: hidden !important; /* full popup freeze */
 }
 
-/*************************************************************
-  3) Card Styling (Widgets, Boxes)
-*************************************************************/
-.card {
-  background-color: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-elevation);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
-  color: var(--color-text);
+/* ------------------------------------------------------------
+   CARDS / PANELS (global reusable UI blocks)
+------------------------------------------------------------ */
+.card,
+.panel,
+.gt-panel {
+  background: var(--bg-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-0);
+  transition: background var(--transition), box-shadow var(--transition);
 }
 
-/* Slight lift on hover */
 .card:hover {
-  background-color: #2d2b33; /* slightly different from --color-bg-card */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  background: var(--bg-2);
 }
 
-/*************************************************************
-  4) Pipeline Gradients (Neon Glow)
-*************************************************************/
-/* Example usage: <div class="pipeline-count count-new">12</div> */
-.pipeline-count {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-  transition: text-shadow 0.3s ease;
-}
-
-/* 1) New: Blue → Green */
-.count-new {
-  background: var(--gradient-new);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(0,242,254, 0.6), 0 0 16px rgba(84,255,0, 0.5);
-}
-.count-new:hover {
-  text-shadow: 0 0 12px rgba(0,242,254, 0.8), 0 0 24px rgba(84,255,0, 0.6);
-}
-
-/* 2) Qualified: Green → Orange */
-.count-qualified {
-  background: var(--gradient-qualified);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(84,255,0, 0.6), 0 0 16px rgba(255,165,0, 0.5);
-}
-.count-qualified:hover {
-  text-shadow: 0 0 12px rgba(84,255,0, 0.8), 0 0 24px rgba(255,165,0, 0.6);
-}
-
-/* 3) Proposed: Orange → Red */
-.count-proposed {
-  background: var(--gradient-proposed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(255,165,0, 0.6), 0 0 16px rgba(255,59,48, 0.5);
-}
-.count-proposed:hover {
-  text-shadow: 0 0 12px rgba(255,165,0, 0.8), 0 0 24px rgba(255,59,48, 0.6);
-}
-
-/* 4) Closed: Red → Purple */
-.count-closed {
-  background: var(--gradient-closed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(255,59,48, 0.6), 0 0 16px rgba(193,73,255, 0.5);
-}
-.count-closed:hover {
-  text-shadow: 0 0 12px rgba(255,59,48, 0.8), 0 0 24px rgba(193,73,255, 0.6);
-}
-
-/*************************************************************
-  5) AI Assistant Orb
-*************************************************************/
-/* Example usage: <div class="assistant-orb"></div> */
-.assistant-orb {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 30% 30%,
-    #706aff 0%,
-    #9c49ff 30%,
-    #ff4397 60%,
-    #ff7743 100%
-  );
-  animation: orbGlow 3s infinite alternate ease-in-out;
-  box-shadow: 0 0 20px rgba(255,119,67,0.4);
-}
-
-@keyframes orbGlow {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 20px rgba(255,119,67,0.4);
-  }
-  100% {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px rgba(255,119,67,0.6);
-  }
-}
-
-/*************************************************************
-  6) Example Buttons
-*************************************************************/
-button {
-  background-color: var(--color-accent);
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-  padding: 0.75rem 1.25rem;
+/* ------------------------------------------------------------
+   BUTTONS (GLOBAL)
+------------------------------------------------------------ */
+button,
+.btn {
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  border: 1px solid var(--border-0);
+  background: var(--btn-bg);
+  padding: 9px 15px;
+  border-radius: var(--radius-sm);
+  color: var(--text-0);
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--transition);
 }
+
 button:hover {
-  background-color: rgba(10,132,255,0.8);
+  background: var(--btn-bg-hover);
 }
 
-/*************************************************************
-  7) React Big Calendar (Dark Mode Integration)
-*************************************************************/
-/* If you have a .calendar-container wrapping your RBC: */
-.calendar-container {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-elevation);
-  background: var(--color-bg-card);
-  color: var(--color-text);
-  box-sizing: border-box;
+button:active {
+  transform: translateY(1px);
 }
 
-.rbc-calendar,
-.rbc-month-view,
-.rbc-day-bg,
-.rbc-header,
-.rbc-date-cell,
-.rbc-timeslot-group {
-  background: transparent !important;
-  border-color: var(--color-border) !important;
+/* Accent */
+.btn-primary,
+.action-btn.primary {
+  background: var(--accent-0) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(78,163,255,0.35);
 }
 
-.rbc-day-bg:hover {
-  background-color: rgba(255,255,255,0.05);
+.btn-primary:hover,
+.action-btn.primary:hover {
+  background: var(--accent-1) !important;
 }
 
-.rbc-today {
-  background-color: rgba(255,255,255,0.08) !important;
-}
-
-/* RBC Toolbar */
-.rbc-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  font-family: inherit;
-  color: var(--color-text);
-}
-.rbc-toolbar .rbc-btn-group {
-  display: flex;
-  gap: 0.5rem;
-}
-.rbc-toolbar button {
-  background: #3d3d3d;
-  color: var(--color-text);
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  border: none;
-  font-size: 0.9rem;
-}
-.rbc-toolbar button:hover:not(:disabled) {
-  background: #9c49ff;
-}
-.rbc-toolbar button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.rbc-toolbar-label {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-/* RBC Events */
-.rbc-event {
-  background-color: #9c49ff;
-  color: #fff;
-  border: none;
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  transition: background-color 0.3s;
-  box-shadow: 0 0 4px rgba(156,73,255,0.4);
-}
-.rbc-event:hover {
-  background-color: #c149ff;
-  box-shadow: 0 0 8px rgba(193,73,255,0.6);
-}
-
-/* RBC Agenda View */
-.rbc-agenda-view table {
-  width: 100%;
-  border-collapse: collapse;
+/* Ghost button */
+.btn-ghost {
   background: transparent;
-  color: var(--color-text);
-}
-.rbc-agenda-view thead > tr > th {
-  background-color: rgba(255,255,255,0.08);
-  font-weight: 600;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.rbc-agenda-view tbody > tr {
-  border-bottom: 1px solid var(--color-border);
-}
-.rbc-agenda-view tbody > tr:hover {
-  background-color: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-1);
+  color: var(--text-1);
 }
 
-/* RBC Week/Day Time Column */
-.rbc-time-column .rbc-timeslot-group {
-  border-color: var(--color-border);
-}
-.rbc-time-slot {
-  border-top: 1px solid var(--color-border);
+.btn-ghost:hover {
+  border-color: var(--accent-0);
+  color: var(--accent-0);
 }
 
-/*************************************************************
-  8) Responsive Adjustments
-*************************************************************/
-@media (max-width: 768px) {
-  .rbc-toolbar-label {
-    font-size: 1.1rem;
-  }
-  .rbc-toolbar button {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.6rem;
-  }
-}
-
-/*************************************************************
-  9) Typography System
-*************************************************************/
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  font-weight: 600;
-  color: var(--color-text);
-  line-height: 1.25;
-}
-
-p {
-  margin-bottom: 1rem;
-  color: var(--color-text);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/*************************************************************
-  10) Links & Accents
-*************************************************************/
-a {
-  color: var(--color-accent);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: #58a6ff;
-  text-decoration: underline;
-}
-
-/*************************************************************
-  11) Input Enhancements
-*************************************************************/
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
+/* ------------------------------------------------------------
+   INPUTS
+------------------------------------------------------------ */
+input,
 textarea,
 select {
-  background: var(--input-bg, #1e1e1e);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 0.95rem;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border 0.3s, background 0.3s;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-0);
+  transition: var(--transition);
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: var(--color-accent);
+  border-color: var(--accent-0);
+  box-shadow: var(--input-focus);
   outline: none;
-  box-shadow: 0 0 4px var(--color-accent);
 }
 
-/*************************************************************
-  12) Tables & Lists
-*************************************************************/
+/* ------------------------------------------------------------
+   TABLES — Customers / Leads / Campaigns
+------------------------------------------------------------ */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--color-bg-card);
-  color: var(--color-text);
-}
-
-th, td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
+  background: var(--bg-1);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 th {
+  background: var(--bg-2);
+  color: var(--text-1);
+  padding: 12px;
+  border-bottom: 1px solid var(--border-1);
+  font-size: 12px;
   font-weight: 600;
-  background: rgba(255,255,255,0.05);
+  text-transform: uppercase;
 }
 
-/*************************************************************
-  13) Utility Classes
-*************************************************************/
-.u-center {
-  text-align: center;
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-0);
+  color: var(--text-0);
 }
 
-.u-muted {
-  color: rgba(245,245,247, 0.6);
-  font-size: 0.9rem;
+tr:hover td {
+  background: var(--bg-2);
 }
 
-.u-glow {
-  color: var(--color-accent);
-  text-shadow: 0 0 4px var(--color-accent), 0 0 12px var(--color-accent);
+/* ------------------------------------------------------------
+   CHAT BUBBLES — AI tab
+------------------------------------------------------------ */
+.gt-ai-bubble {
+  max-width: 74%;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-sm);
+  color: var(--text-0);
+  line-height: 1.45;
 }
 
-.u-glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-}
-
-/*************************************************************
-  14) Animations (Pulse, Fade In)
-*************************************************************/
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+/* ------------------------------------------------------------
+   RESPONSIVE
+------------------------------------------------------------ */
+@media (max-width: 768px) {
+  table {
+    font-size: 13px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-/*************************************************************
-  15) Light Theme Override (Optional Future Toggle)
-*************************************************************/
-html[data-theme="light"] {
-  --color-bg: #f9f9fb;
-  --color-bg-sidebar: #ffffff;
-  --color-bg-subnav: #ffffff;
-  --color-bg-card: #ffffff;
-  --color-border: #e0e0e0;
-  --color-text: #111;
-  --color-accent: #007aff;
-  --shadow-elevation: 0 2px 6px rgba(0,0,0,0.1);
 }

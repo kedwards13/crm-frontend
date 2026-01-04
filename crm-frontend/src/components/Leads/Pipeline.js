@@ -4,15 +4,9 @@ import CustomerPopup from '../Profile/CustomerPopup';
 import FiltersBar from '../Layout/FiltersBar';
 import { getIndustry } from '../../utils/tenantHelpers';
 import { getPipelineConfig } from '../../constants/pipelineRegistry';
+import { listCrmLeads } from '../../api/leadsApi';
+import { normalizeLead } from '../../utils/normalizeLead';
 import './Pipeline.css';
-
-const API_BASE = process.env.REACT_APP_API_BASE;
-
-function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
-  const c = new AbortController();
-  const id = setTimeout(() => c.abort(), timeoutMs);
-  return fetch(url, { ...options, signal: c.signal }).finally(() => clearTimeout(id));
-}
 
 function useDebounced(v, delay = 250) {
   const [val, setVal] = useState(v);
@@ -24,6 +18,22 @@ function useDebounced(v, delay = 250) {
 }
 
 const PAGE_SIZE = 30;
+
+const bucketByStage = (leads, stageConfig) => {
+  const buckets = {};
+  stageConfig.forEach((s) => {
+    buckets[s.key] = [];
+  });
+  buckets._unassigned = [];
+
+  leads.forEach((lead) => {
+    const stage = lead.safeStatus || 'new';
+    if (buckets[stage]) buckets[stage].push(lead);
+    else buckets._unassigned.push(lead);
+  });
+
+  return buckets;
+};
 
 export default function PipelineView() {
   const industry = (getIndustry?.() || 'general').toLowerCase();
@@ -61,15 +71,11 @@ export default function PipelineView() {
     (async () => {
       setLoading(true); setError('');
       try {
-        const token = localStorage.getItem('token');
-        const res   = await fetchWithTimeout(`${API_BASE}/leads/crm-leads/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }, 15000);
-        const txt = await res.text();
-        if (!res.ok) throw new Error(`crm-leads ${res.status} ${txt.slice(0,200)}`);
-        const json = txt ? JSON.parse(txt) : [];
-        const rows = Array.isArray(json) ? json : (json.results || []);
-        setAllLeads(rows);
+        const res = await listCrmLeads();
+        const rows = Array.isArray(res.data)
+          ? res.data
+          : res.data?.results || [];
+        setAllLeads(rows.map(normalizeLead));
       } catch (e) {
         setError(String(e?.message || e));
       } finally {
@@ -92,21 +98,22 @@ export default function PipelineView() {
   const buckets = useMemo(() => {
     // narrow by stage
     let rows = allLeads;
-    if (stageFilter !== 'all') rows = rows.filter(l => (l.status || '') === stageFilter);
+    if (stageFilter !== 'all' && stageFilter !== '_unassigned') {
+      rows = rows.filter((l) => (l.safeStatus || 'new') === stageFilter);
+    }
 
     // search
     const needle = dq.trim().toLowerCase();
     if (needle) {
       rows = rows.filter(l => {
         const fields = [
-          'name', 'email', 'phone_number', 'message', 'source', 'address', 'city', 'state',
-          // include industry specific fields if present
-          ...config.displayedFields
-        ];
-        return fields.some(f => {
-          const v = (l[f] ?? '').toString().toLowerCase();
-          return v.includes(needle);
-        });
+          l.displayName,
+          l.displayEmail,
+          l.displayPhone,
+          l.serviceLabel || l.service,
+          l.message,
+        ].map((x) => (x || '').toString().toLowerCase());
+        return fields.some((v) => v.includes(needle));
       });
     }
 
@@ -120,18 +127,28 @@ export default function PipelineView() {
     });
 
     // bucket by configured stages (keep empty buckets)
-    const map = Object.fromEntries(stageList.map(s => [s.key, []]));
-    rows.forEach(l => {
-      const k = l.status || 'new';
-      if (map[k]) map[k].push(l);
-    });
-    return map;
-  }, [allLeads, dq, stageFilter, sortBy, stageList, config.displayedFields]);
+    return bucketByStage(rows, stageList);
+  }, [allLeads, dq, stageFilter, sortBy, stageList]);
+
+  const stageOptions = useMemo(() => {
+    const base = stageList.map((s) => ({ key: s.key, label: s.label }));
+    if (buckets._unassigned.length) {
+      base.push({ key: "_unassigned", label: "Unassigned / Needs Review" });
+    }
+    return base;
+  }, [buckets._unassigned.length, stageList]);
 
   // selection (visible only)
   const visibleIds = useMemo(() => {
     const ids = [];
-    (stageFilter === 'all' ? stageList.map(s => s.key) : [stageFilter]).forEach(k => {
+    const activeStages =
+      stageFilter === 'all'
+        ? [
+            ...stageList.map((s) => s.key),
+            ...(buckets._unassigned.length ? ['_unassigned'] : []),
+          ]
+        : [stageFilter];
+    activeStages.forEach((k) => {
       const page = pageByStage[k] || 1;
       const slice = (buckets[k] || []).slice(0, page * PAGE_SIZE);
       slice.forEach(l => ids.push(l.id));
@@ -164,6 +181,17 @@ export default function PipelineView() {
   );
 
   const renderField = (lead, field) => {
+    if (field === 'email') {
+      const email = lead.displayEmail || lead.email;
+      if (!email) return null;
+      return renderChip(String(email));
+    }
+    if (field === 'phone_number') {
+      const phone = lead.displayPhone || lead.phone_number;
+      if (!phone) return null;
+      return renderChip(String(phone));
+    }
+
     const val = lead?.[field];
     if (val == null || val === '') return null;
 
@@ -187,9 +215,9 @@ export default function PipelineView() {
       case 'estimated_price':
         return renderChip(`Value: $${Number(val).toLocaleString()}`);
       case 'email':
-        return renderChip(String(val));
+        return renderChip(lead.displayEmail || String(val));
       case 'phone_number':
-        return renderChip(String(val));
+        return renderChip(lead.displayPhone || String(val));
       case 'source':
         return renderChip(`Source: ${String(val)}`);
       case 'notes':
@@ -224,7 +252,7 @@ export default function PipelineView() {
             />
             <select className="filters-select" value={stageFilter} onChange={(e)=>setStageFilter(e.target.value)}>
               <option value="all">All stages</option>
-              {stageList.map(s => <option value={s.key} key={s.key}>{s.label}</option>)}
+              {stageOptions.map(s => <option value={s.key} key={s.key}>{s.label}</option>)}
             </select>
           </>
         }
@@ -256,7 +284,18 @@ export default function PipelineView() {
 
         {!loading && !error && (
           <div className="pipeline-vertical">
-            {(stageFilter === 'all' ? stageList : stageList.filter(s => s.key === stageFilter)).map(stage => {
+            {(
+              stageFilter === 'all'
+                ? [
+                    ...stageList,
+                    ...(buckets._unassigned.length
+                      ? [{ key: '_unassigned', label: 'Unassigned / Needs Review' }]
+                      : []),
+                  ]
+                : stageFilter === '_unassigned'
+                ? [{ key: '_unassigned', label: 'Unassigned / Needs Review' }]
+                : stageList.filter(s => s.key === stageFilter)
+            ).map(stage => {
               const data = buckets[stage.key] || [];
               const page = pageByStage[stage.key] || 1;
               const slice = data.slice(0, page * PAGE_SIZE);
@@ -287,13 +326,19 @@ export default function PipelineView() {
                                 checked={selected.has(lead.id)}
                                 onClick={(e)=>e.stopPropagation()}
                                 onChange={(e)=>{ e.stopPropagation(); toggleOne(lead.id); }}
-                                aria-label={`Select ${lead.name || 'lead'}`}
+                                aria-label={`Select ${lead.displayName || lead.name || 'lead'}`}
                               />
                             </label>
-                            <strong className="pl-name">{lead.name || 'Unnamed'}</strong>
+                            <strong className="pl-name">{lead.displayName || lead.name || 'Unnamed'}</strong>
                             {config.valueField && (
                               <span className="pl-value">${valueOf(lead).toLocaleString()}</span>
                             )}
+                          </div>
+
+                          <div className="pl-chip-row">
+                            <span className="pl-chip">
+                              {lead.serviceLabel || lead.service || lead.industry_role || 'General Inquiry'}
+                            </span>
                           </div>
 
                           <div className="pl-card-meta">

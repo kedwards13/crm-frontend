@@ -1,133 +1,107 @@
 // src/components/Communications/AIInsightsPanel.js
-import React, { useEffect, useState } from 'react';
-import { AiOutlineCheck, AiOutlineClose } from 'react-icons/ai';
-import api from '../../apiClient';
-import './AIInsightsPanel.css';
+import React, { useEffect, useState } from "react";
+import api from "../../apiClient";
+import "./AIInsightsPanel.css";
 
-const AIInsightsPanel = ({ leadId, customerId }) => {
-  const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
-  const [summary, setSummary] = useState('');
-  const [suggestedReply, setSuggestedReply] = useState('');
+export default function AIInsightsPanel({
+  leadId,
+  customerId,
+  partyId,
+  customerName,
+  suggestedReply,
+  sentiment,
+  loading,
+}) {
+  const [localSuggested, setLocalSuggested] = useState(suggestedReply || "");
+  const [localSummary, setLocalSummary] = useState(sentiment || "");
   const [chatMessages, setChatMessages] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
 
-  // Load thread and AI insight
+  /* -----------------------------------------------
+     AUTO SYNC WITH INBOX AI VALUES 
+  ------------------------------------------------ */
   useEffect(() => {
-    const loadThread = async () => {
-      try {
-        const threadRes = await api.get('/comms/thread/', {
-          params: { lead_id: leadId, customer_id: customerId },
-        });
-        setMessages(threadRes.data.messages);
+    setLocalSuggested(suggestedReply || "");
+    setLocalSummary(sentiment || "");
+  }, [suggestedReply, sentiment]);
 
-        const aiRes = await api.get('/comms/smart-reply/', {
-          params: { lead_id: leadId, customer_id: customerId },
-        });
+  /* -----------------------------------------------
+     CHAT SEND
+  ------------------------------------------------ */
+  const handleSend = () => {
+    if (!newMessage.trim()) return;
 
-        setSuggestedReply(aiRes.data.reply);
-        setSummary(aiRes.data.sentiment);
-
-        setTasks([
-          { id: 1, text: 'Follow up with suggested reply', approved: false },
-        ]);
-      } catch (err) {
-        console.error('AI Insights error', err);
-      } finally {
-        setLoading(false);
-      }
+    const msg = {
+      id: Date.now(),
+      text: newMessage,
+      from: "user",
     };
 
-    if (leadId || customerId) loadThread();
-  }, [leadId, customerId]);
+    setChatMessages((prev) => [...prev, msg]);
+    setNewMessage("");
 
-  const handleApproveTask = (taskId) => {
-    setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, approved: true } : t)));
-  };
-
-  const handleDenyTask = (taskId) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
-  };
-
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    const msg = { id: Date.now(), text: newMessage, from: 'user' };
-    setChatMessages(prev => [...prev, msg]);
-    setNewMessage('');
-
+    // fake ai return
     setTimeout(() => {
-      setChatMessages(prev => [
+      setChatMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: "AI: Got it. I'll handle that.", from: 'ai' },
+        {
+          id: Date.now(),
+          text: "AI: Understood.",
+          from: "ai",
+        },
       ]);
-    }, 1000);
+    }, 900);
   };
 
   return (
-    <div className="ai-panel-container">
-      {loading ? (
-        <p className="ai-loading">Analyzing conversation...</p>
-      ) : (
+    <div className="ai-panel">
+
+      {/* ---------------- LOADING ---------------- */}
+      {loading && (
+        <div className="ai-loading minimal-fade">
+          <p>Analyzing conversation…</p>
+        </div>
+      )}
+
+      {!loading && (
         <>
-          <div className="ai-section">
+          {/* ---------------- SUMMARY ---------------- */}
+          <section className="ai-card minimal-fade">
             <h3>AI Summary</h3>
-            <p className="ai-summary-text">{summary || 'No summary available.'}</p>
-          </div>
+            <p>
+              {localSummary && localSummary !== "neutral"
+                ? localSummary
+                : "No summary available."}
+            </p>
+          </section>
 
-          <div className="ai-section">
+          {/* ---------------- SUGGESTED REPLY ---------------- */}
+          <section className="ai-card minimal-fade">
             <h3>Suggested Reply</h3>
-            <div className="ai-suggested-reply">{suggestedReply || 'N/A'}</div>
-          </div>
+            <p className="ai-suggest">{localSuggested || "N/A"}</p>
+          </section>
 
-          <div className="chat-messages scrollable">
-            {chatMessages.map(msg => (
-              <div key={msg.id} className={`chat-bubble ${msg.from}`}>
-                <p>{msg.text}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="chat-input">
-            <input
-              type="text"
-              placeholder="Ask AI or continue..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button onClick={handleSendMessage}>Send</button>
-          </div>
-
-          {tasks.length > 0 && (
-            <div className="ai-section">
-              <h3>Suggested Tasks</h3>
-              <ul className="tasks-list">
-                {tasks.map((task) => (
-                  <li key={task.id} className="task-item">
-                    <span className="task-text">{task.text}</span>
-                    {task.approved ? (
-                      <span className="task-approved">
-                        <AiOutlineCheck size={18} />
-                      </span>
-                    ) : (
-                      <div className="task-actions">
-                        <button onClick={() => handleApproveTask(task.id)}>
-                          <AiOutlineCheck size={18} />
-                        </button>
-                        <button onClick={() => handleDenyTask(task.id)}>
-                          <AiOutlineClose size={18} />
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+          {/* ---------------- CHAT LOG ---------------- */}
+          <section className="ai-chat minimal-fade">
+            <div className="chat-scroll">
+              {chatMessages.map((m) => (
+                <div key={m.id} className={`bubble ${m.from}`}>
+                  {m.text}
+                </div>
+              ))}
             </div>
-          )}
+
+            <div className="chat-input-row">
+              <input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Ask AI or continue…"
+              />
+              <button onClick={handleSend}>Send</button>
+            </div>
+          </section>
         </>
       )}
     </div>
   );
-};
-
-export default AIInsightsPanel;
+}

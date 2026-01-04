@@ -99,7 +99,11 @@
     transition: background 0.3s, box-shadow 0.3s;
   }
   
-  .ai-action-btn:hover {
+.ai-action-btn:hover {
     background-color: #2894ff;
     box-shadow: 0 0 8px rgba(10,132,255,0.7);
+  }
+
+  .muted {
+    color: var(--text-2, #9aa0a6);
   }

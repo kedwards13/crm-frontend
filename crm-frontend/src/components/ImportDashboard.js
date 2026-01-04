@@ -80,7 +80,7 @@ function ImportDashboard() {
               <div key={index} className="card" onClick={() => handleCardClick(lead)}>
                 <h4>{lead.address}</h4>
                 <p>{lead.name || 'N/A'}</p>
-                <p>{lead.phone_number || 'N/A'}</p>
+                <p>{lead.primary_phone || lead.phone_number || 'N/A'}</p>
                 <p>{lead.marketing_list || 'N/A'}</p>
               </div>
             ))}
@@ -113,7 +113,7 @@ function ImportDashboard() {
             <h4>Owner Name:</h4>
             <p>{selectedLead.name || 'N/A'}</p>
             <h4>Phone Numbers:</h4>
-            <p>{selectedLead.phone_number || 'N/A'}</p>
+            <p>{selectedLead.primary_phone || selectedLead.phone_number || 'N/A'}</p>
             <h4>Lead Source:</h4>
             <p>{selectedLead.marketing_list || 'N/A'}</p>
             {/* Add more fields as required */}

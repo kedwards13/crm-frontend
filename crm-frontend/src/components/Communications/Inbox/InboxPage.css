@@ -1,229 +1,387 @@
+/* ============================================================
+   INBOX PAGE — LAYOUT
+============================================================ */
 .inbox-page {
-    padding: 24px;
-  }
-  
-  .inbox-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
-  }
-  
-  .inbox-item {
-    background: #1e1f24;
-    padding: 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .inbox-item:hover {
-    background: #2a2b31;
-  }
-  
-  .inbox-item.read {
-    opacity: 0.7;
-  }
-  
-  .meta {
-    color: #aaa;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-  
-  .subject {
-    font-weight: 600;
-    font-size: 16px;
-    color: #f5f5f5;
-  }
-  
-  .body {
-    font-size: 14px;
-    color: #ccc;
-  }
+  padding: 24px;
+  color: #e5e7eb;
+}
 
-  .two-column {
-    display: flex;
-    gap: 24px;
-    padding: 24px;
-  }
-  
-  .inbox-list {
-    width: 40%;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  .inbox-preview {
-    flex: 1;
-    background: #1c1e22;
-    border-radius: 12px;
-    padding: 16px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .thread-history {
-    max-height: 240px;
-    overflow-y: auto;
-    padding: 12px;
-    background: #121417;
-    border-radius: 8px;
-  }
-  
-  .msg-bubble.outbound {
-    background: #2a2e3c;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    align-self: flex-end;
-  }
-  
-  .msg-bubble.inbound {
-    background: #313336;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    align-self: flex-start;
-  }
+.two-column {
+  display: flex;
+  gap: 24px;
+  padding: 12px 0;
+  min-height: calc(100vh - var(--topbar-height, 64px) - var(--subnav-height, 48px) - 40px);
+  overflow: visible;
+  align-items: stretch;
+}
 
-  .inbox-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .inbox-toolbar input[type="search"] {
-    flex: 1;
-    padding: 10px 14px;
-    background: #121417;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 8px;
-    margin-right: 12px;
-  }
-  
-  .toolbar-actions button {
-    background: #2a2b31;
-    border: none;
-    color: #eee;
-    margin-left: 6px;
-    border-radius: 8px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .toolbar-actions button:hover {
-    background: #3b3c43;
-  }
-  
-  .msg-actions button {
-    background: transparent;
-    border: none;
-    color: #888;
-    margin-left: 6px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .msg-actions button:hover {
-    color: #fff;
-  }
+/* ============================================================
+   LEFT PANEL — MESSAGE LIST
+============================================================ */
+.inbox-list {
+  width: 38%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-  .search-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-  }
-  
-  .email-composer-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    backdrop-filter: blur(4px);
-  }
-  
-  .email-composer {
-    background: #1c1e22;
-    width: 600px;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-  }
-  
-  .composer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .composer-field label {
-    font-size: 14px;
-    color: #aaa;
-  }
-  
-  .composer-field input,
-  .composer-field textarea {
-    width: 100%;
-    border-radius: 8px;
-    border: 1px solid #333;
-    background: #121417;
-    color: #fff;
-    padding: 8px;
-  }
-  
-  .customer-dropdown {
-    position: absolute;
-    background: #222;
-    border: 1px solid #333;
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    width: 100%;
-  }
-  
-  .dropdown-item {
-    padding: 8px 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .dropdown-item:hover {
-    background: #333;
-  }
-  
-  .send-btn {
-    background: #0a84ff;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-  
-  .send-btn:hover {
-    background: #0066cc;
-  }
+.inbox-list h2 {
+  margin: 6px 0 4px 0;
+}
+
+.inbox-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  background: #121417;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #2e3138;
+  width: 100%;
+  gap: 8px;
+}
+
+.search-group input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  width: 100%;
+  font-size: 14px;
+}
+
+.toolbar-actions button {
+  background: #242529;
+  border: 1px solid #34363d;
+  color: #ddd;
+  margin-left: 6px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.toolbar-actions button:hover {
+  background: #34363d;
+}
+
+/* ============================================================
+   MESSAGE CARDS
+============================================================ */
+.inbox-item {
+  background: #1d1f23;
+  border: 1px solid #2c2e34;
+  padding: 15px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border 0.15s;
+}
+
+.inbox-item:hover {
+  background: #26282d;
+  border-color: #3a3d45;
+}
+
+.inbox-item.read {
+  opacity: 0.62;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.from {
+  font-weight: 600;
+  color: #f3f4f6;
+  font-size: 15px;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ------------ Direction + Type Badge ---------------- */
+.direction-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #2b2d33;
+  border: 1px solid #3a3c43;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #d1d5db;
+  margin-left: 6px;
+}
+
+.subject {
+  font-size: 15px;
+  margin: 4px 0;
+  font-weight: 600;
+  color: #fafafa;
+}
+
+.body-preview {
+  font-size: 13px;
+  color: #c9cdd4;
+  max-height: 40px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   RIGHT PANEL — PREVIEW + AI + THREAD
+============================================================ */
+.inbox-preview {
+  flex: 1;
+  background: #1c1e22;
+  border-radius: 12px;
+  padding: 22px;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  min-height: 0;
+  box-shadow: 0 0 20px rgba(0,0,0,0.25);
+}
+
+/* Remove giant spacing above AI panel */
+.inbox-preview > *:first-child {
+  margin-top: -4px;
+}
+
+.inbox-preview h3 {
+  color: #f3f4f6;
+  font-size: 18px;
+  margin-bottom: -2px;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   ANALYZE + PROFILE BUTTONS (side by side)
+============================================================ */
+.analyze-btn,
+.view-profile-btn {
+  background: #0a84ff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.analyze-btn:hover,
+.view-profile-btn:hover {
+  background: #0666cc;
+}
+
+.view-profile-btn {
+  background: #0a6bff;
+}
+
+/* ============================================================
+   THREAD HISTORY
+============================================================ */
+.thread-history {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 16px;
+  background: #121417;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #1f2125;
+}
+
+/* Clean modern scrollbar */
+.thread-history::-webkit-scrollbar {
+  width: 8px;
+}
+.thread-history::-webkit-scrollbar-thumb {
+  background: #2d2f33;
+  border-radius: 6px;
+}
+
+/* ============================================================
+   MESSAGE BUBBLES
+============================================================ */
+.msg-bubble {
+  max-width: 78%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  position: relative;
+  line-height: 1.45;
+  word-wrap: break-word;
+}
+
+/* ===== OUTBOUND ===== */
+.msg-bubble.outbound {
+  align-self: flex-end;
+  background: #2763d6;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.msg-bubble.outbound::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  border-left: 8px solid #2763d6;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+}
+
+/* ===== INBOUND ===== */
+.msg-bubble.inbound {
+  align-self: flex-start;
+  background: #2f3136;
+  color: #fff;
+  border-bottom-left-radius: 4px;
+}
+
+.msg-bubble.inbound::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  border-right: 8px solid #2f3136;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.bubble-body {
+  font-size: 14px;
+  line-height: 1.48;
+}
+
+/* ============================================================
+   MMS MEDIA
+============================================================ */
+.mms-media img {
+  max-width: 260px;
+  border-radius: 10px;
+  margin-top: 6px;
+  border: 1px solid #3a3c43;
+}
+
+/* ============================================================
+   EMAIL COMPOSER
+============================================================ */
+.email-composer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.email-composer {
+  background: #1c1e22;
+  width: 620px;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+.composer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.composer-field label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.composer-field input,
+.composer-field textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #121417;
+  color: #fff;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.customer-dropdown {
+  position: absolute;
+  background: #1f2125;
+  border: 1px solid #333;
+  border-radius: 8px;
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 4px;
+  z-index: 20;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #2a2c31;
+}
+
+.send-btn {
+  background: #0a84ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.send-btn:hover {
+  background: #0666cc;
+}

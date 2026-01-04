@@ -14,7 +14,9 @@ export function normalizeIndustry(raw) {
     // Aliases
     if ([
       'pest', 'pestcontrol', 'pest-control', 'pest control', 'pc',
-      'sunpest', 'sun pest', 'sun pest control'
+      'sunpest', 'sun pest', 'sun pest control',
+      'home service', 'home services', 'home-service', 'home-services', 'homeservices',
+      'hvac', 'plumbing', 'electrical', 'roofing', 'landscaping'
     ].includes(s)) return 'pest_control';
   
     if (['re', 'realestate', 'real-estate', 'real estate', 'rei', 'investor'].includes(s)) {
@@ -23,7 +25,11 @@ export function normalizeIndustry(raw) {
   
     if (['wholesaling', 'wholesale', 'wholesaler', 'wre'].includes(s)) return 'wholesaler';
   
-    if (['fitness', 'gym', 'healthclub', 'health club'].includes(s)) return 'fitness';
+    if ([
+      'fitness', 'gym', 'healthclub', 'health club',
+      'studio', 'yoga', 'pilates', 'spin', 'boxing',
+      'medspa', 'med spa', 'spa', 'salon'
+    ].includes(s)) return 'fitness';
   
     if (['auto', 'automotive', 'car', 'dealership'].includes(s)) return 'auto';
   

@@ -1,115 +1,193 @@
-/* ────────────────
-   AI Chat Assistant Panel
-────────────────── */
-.ai-chat-wrapper {
-    background: #1b1b1e;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 0 14px rgba(0, 200, 255, 0.07);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    max-height: 520px;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .ai-header {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-  
-  .ai-orb-glow {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #0af, #004d91);
-    box-shadow: 0 0 12px #0af, 0 0 20px #00ccff77;
-    margin: 0 auto 0.5rem;
-  }
-  
-  .ai-header h3 {
-    color: #fff;
-    font-size: 1.2rem;
-    margin: 0;
-  }
-  
-  .ai-sub {
-    color: #999;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-  }
-  
-  /* Messages */
-  .ai-chat-window {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    scrollbar-width: thin;
-  }
-  
-  .ai-message {
-    display: flex;
-    margin-bottom: 0.5rem;
-  }
-  
-  .ai-message.user {
-    justify-content: flex-end;
-  }
-  
-  .ai-message.ai {
-    justify-content: flex-start;
-  }
-  
-  .ai-message .bubble {
-    max-width: 80%;
-    padding: 0.75rem 1.2rem;
-    border-radius: 16px;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    word-break: break-word;
-  }
-  
-  .ai-message.user .bubble {
-    background: #4cd964;
-    color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  
-  .ai-message.ai .bubble {
-    background: #0a84ff;
-    color: #fff;
-    border-bottom-left-radius: 4px;
-  }
-  
-  /* Input */
-  .ai-chat-input {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .ai-chat-input input {
-    flex: 1;
-    padding: 0.65rem 1rem;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: #2c2c31;
-    color: #f5f5f5;
-    font-size: 0.95rem;
-  }
-  
-  .ai-chat-input button {
-    background: #0a84ff;
-    color: white;
-    padding: 0.65rem 1.1rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .ai-chat-input button:hover {
-    background: #0070e0;
-  }
+/* ============================================================
+   AI PANEL — ENTERPRISE / GOTHAM UI
+   Matches the popup system + light/dark mode variables
+============================================================= */
+
+/* Inherit popup global theme structure */
+:root {
+  --ai-bg: var(--panel-bg);
+  --ai-text: var(--text-primary);
+  --ai-text-sub: var(--text-secondary);
+  --ai-card: var(--input-bg);
+  --ai-card-border: var(--input-border);
+  --ai-hover: var(--button-hover-bg);
+  --ai-accent: var(--tab-active);
+  --ai-bubble-bg: var(--input-bg);
+  --ai-bubble-border: var(--input-border);
+}
+
+/* Main container */
+.gt-ai {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 18px;
+  color: var(--ai-text);
+}
+
+/* ---------------------------------------------
+   HEADER
+---------------------------------------------- */
+.gt-ai-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gt-ai-orb {
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background: var(--ai-accent);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.45);
+}
+
+.gt-ai-header-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ai-text);
+}
+
+.gt-ai-sub {
+  font-size: 13px;
+  color: var(--ai-text-sub);
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------
+   ACTION BUTTON ROW
+---------------------------------------------- */
+.gt-ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gt-ai-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+
+  font-size: 13px;
+  border-radius: 6px;
+
+  background: var(--ai-card);
+  border: 1px solid var(--ai-card-border);
+  color: var(--ai-text);
+
+  transition: border 0.16s ease, background 0.16s ease;
+}
+
+.gt-ai-action-btn:hover {
+  border-color: var(--ai-accent);
+  background: var(--ai-hover);
+}
+
+.gt-ai-action-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+}
+
+/* ---------------------------------------------
+   CHAT WINDOW
+---------------------------------------------- */
+.gt-ai-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gt-ai-msg {
+  display: flex;
+}
+
+.gt-ai-msg.user {
+  justify-content: flex-end;
+}
+
+.gt-ai-msg.ai {
+  justify-content: flex-start;
+}
+
+/* Chat bubble */
+.gt-ai-bubble {
+  max-width: 78%;
+  padding: 10px 14px;
+
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.42;
+
+  background: var(--ai-bubble-bg);
+  border: 1px solid var(--ai-bubble-border);
+  color: var(--ai-text);
+}
+
+/* ---------------------------------------------
+   INPUT AREA
+---------------------------------------------- */
+.gt-ai-input-row {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.gt-ai-input {
+  flex: 1;
+
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--ai-text);
+
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+
+  transition: border 0.2s ease;
+}
+
+.gt-ai-input:focus {
+  border-color: var(--ai-accent);
+  outline: none;
+}
+
+.gt-ai-send {
+  padding: 10px 16px;
+  background: var(--ai-accent);
+  color: #fff;
+
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: background 0.15s ease;
+}
+
+.gt-ai-send:hover {
+  background: #1e40af; /* darker blue */
+}
+
+/* ---------------------------------------------
+   LIGHT MODE OVERRIDE
+---------------------------------------------- */
+body[data-theme="light"] .gt-ai {
+  --ai-bubble-bg: #ffffff;
+  --ai-card: #f3f4f6;
+  --ai-hover: #e5e7eb;
+  --ai-bubble-border: #d1d5db;
+}
+
+/* ---------------------------------------------
+   DARK MODE OVERRIDE
+---------------------------------------------- */
+body[data-theme="dark"] .gt-ai {
+  --ai-bubble-bg: #1b1d21;
+  --ai-card: #1f1f25;
+  --ai-hover: #2a2d33;
+  --ai-bubble-border: #32363c;
+}

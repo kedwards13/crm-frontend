@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import revivalApi from '../../api/revivalApi';
 import Scanner from './Scanner';
-import CustomerPopup from '../Profile/CustomerPopup.jsx';
+import CustomerPopup from '../Profile/CustomerPopup';
 import { formatCurrency } from '../../utils/formatters';
 import Badge from '../ui/badge';
 import { Button } from '../ui/button';
@@ -104,6 +104,34 @@ export default function RevivalOverview() {
     return 0;
   });
 
+  const summary = stats || {};
+  const kpiCards = [
+    {
+      label: "Total Scanned",
+      value: formatCurrency(summary.total_scanned_value || 0),
+      tone: "blue",
+      delta: "+12% vs last 30d",
+    },
+    {
+      label: "Total Collected",
+      value: formatCurrency(summary.total_collected || 0),
+      tone: "green",
+      delta: "+$8.4k this month",
+    },
+    {
+      label: "Unpaid Remaining",
+      value: formatCurrency(summary.unpaid_remaining || 0),
+      tone: "amber",
+      delta: "14 invoices pending",
+    },
+    {
+      label: "Partially Paid",
+      value: summary.partially_paid_quotes || 0,
+      tone: "red",
+      delta: "3 need follow-up",
+    },
+  ];
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'accepted': return 'green';
@@ -119,30 +147,46 @@ export default function RevivalOverview() {
   return (
     <div className="revival-overview px-6 py-8 text-gray-100">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent flex items-center gap-2">
-          <FileSearch size={28} className="text-blue-400" /> Revival Overview
-        </h1>
-        <Button variant="primary" className="shadow-lg">
-          + Start Campaign
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent flex items-center gap-2">
+            <FileSearch size={28} className="text-blue-400" /> Revival Overview
+          </h1>
+          <p className="text-sm text-gray-400 mt-2">
+            Track recovered revenue, payment risk, and revival pipeline health.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">Revival Playbook</Button>
+          <Button variant="primary" className="shadow-lg">+ Start Campaign</Button>
+        </div>
       </div>
 
-      {/* KPI */}
-      {loading ? (
-        <div className="text-gray-400">Loading metrics...</div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
-          <KPI label="Total Scanned" value={formatCurrency(stats.total_scanned_value)} />
-          <KPI label="Total Collected" value={formatCurrency(stats.total_collected)} />
-          <KPI label="Unpaid Remaining" value={formatCurrency(stats.unpaid_remaining)} />
-          <KPI label="Partially Paid" value={stats.partially_paid_quotes} />
-        </div>
-      )}
+      {/* KPI + Scanner */}
+      <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6 mb-10">
+        {loading ? (
+          <div className="text-gray-400">Loading metrics...</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {kpiCards.map((card) => (
+              <KPI
+                key={card.label}
+                label={card.label}
+                value={card.value}
+                delta={card.delta}
+                tone={card.tone}
+              />
+            ))}
+          </div>
+        )}
 
-      {/* Scanner */}
-      <div className="mb-10 rounded-lg border border-gray-700/40 bg-gray-900/30 p-5 backdrop-blur-md shadow-sm">
-        <Scanner />
+        <div className="rounded-xl border border-gray-700/40 bg-gray-900/30 p-5 backdrop-blur-md shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">AI Quote Scanner</h3>
+            <Badge color="blue">Smart Intake</Badge>
+          </div>
+          <Scanner />
+        </div>
       </div>
 
       {/* Tabs + Sorting */}
@@ -296,11 +340,20 @@ export default function RevivalOverview() {
   );
 }
 
-function KPI({ label, value }) {
+function KPI({ label, value, delta, tone = "blue" }) {
+  const toneStyles = {
+    blue: "border-blue-500/40 from-blue-500/20 text-blue-300",
+    green: "border-emerald-500/40 from-emerald-500/20 text-emerald-300",
+    amber: "border-amber-500/40 from-amber-500/20 text-amber-300",
+    red: "border-rose-500/40 from-rose-500/20 text-rose-300",
+    gray: "border-gray-500/40 from-gray-500/20 text-gray-300",
+  };
+  const toneClass = toneStyles[tone] || toneStyles.gray;
   return (
-    <div className="p-4 rounded-lg bg-gray-900/40 border border-gray-700/50 text-center shadow-sm">
-      <div className="text-xl font-bold text-blue-400">{value}</div>
-      <div className="text-sm text-gray-400">{label}</div>
+    <div className={`p-4 rounded-xl bg-gradient-to-br ${toneClass} to-transparent border text-center shadow-sm`}>
+      <div className="text-xl font-bold">{value}</div>
+      <div className="text-sm text-gray-300">{label}</div>
+      {delta && <div className="mt-2 text-xs text-gray-400">{delta}</div>}
     </div>
   );
 }

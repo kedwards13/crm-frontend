@@ -1,323 +1,463 @@
-:root {
-  --bg-dark: #1e1e24;
-  --bg: #ffffff;
+/***************************************************************
+   ABON AI — CUSTOMER POPUP v16 (Ultra Premium • Final)
+   Apple + Stripe + Palantir Unified Design System
+***************************************************************/
 
-  --text-dark: #f5f5f5;
-  --text: #1c1c1e;
+/* ============================================================
+   ROOT COLORS (light/dark auto)
+============================================================ */
+.customer-popup-wrapper {
+  --bg-0: #101215;
+  --bg-1: #14171c;
+  --bg-2: #1a1e24;
+  --bg-3: #232830;
 
-  --accent: #0a84ff;
-  --glow: rgba(0, 212, 255, 0.2);
-  --border-dark: #333;
-  --card-dark: #26262a;
+  --text-0: #f5f7fa;
+  --text-1: #d3d7de;
+  --text-2: #9ca2ad;
 
-  --gradient-dark: linear-gradient(135deg, #1e1e24, #151518);
+  --border-1: rgba(255,255,255,0.12);
+
+  --accent-0: #0a84ff;
+  --accent-1: #4aa3ff;
+
+  --input-bg: #141820;
+  --input-border: rgba(255,255,255,0.14);
+  --input-text: var(--text-0);
+  --input-placeholder: var(--text-2);
 }
 
-body[data-theme='light'] {
-  --bg: #ffffff;
-  --text: #1c1c1e;
-  --border-dark: #ddd;
-  --card-dark: #f5f5f5;
-  --gradient-dark: linear-gradient(135deg, #f9f9fb, #f0f0f4);
+body.light-mode .customer-popup-wrapper {
+  --bg-0: #ffffff;
+  --bg-1: #f8f9fb;
+  --bg-2: #f1f2f5;
+  --bg-3: #e2e5ea;
+
+  --text-0: #0b0e14;
+  --text-1: #3c4048;
+  --text-2: #6c7178;
+
+  --border-1: rgba(0,0,0,0.10);
+
+  --accent-0: #0a84ff;
+  --accent-1: #4aa3ff;
+
+  --input-bg: #f6f7fa;
+  --input-border: rgba(0,0,0,0.12);
+  --input-text: var(--text-0);
+  --input-placeholder: var(--text-2);
 }
 
-.popup {
+
+/* ============================================================
+   MODAL ROOT
+============================================================ */
+#modal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999999;
+}
+
+
+/* ============================================================
+   OVERLAY
+============================================================ */
+.customer-popup-wrapper {
+  pointer-events: auto;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 92%;
-  max-width: 1100px;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0,0,0,0.32);
+  backdrop-filter: blur(4px);
+
+  animation: overlayFade .25s ease-out;
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ============================================================
+   MAIN POPUP CARD — Apple Style Glass
+============================================================ */
+.popup {
+  width: 880px;
+  max-width: 94vw;
+
   height: 88vh;
-  background: var(--gradient-dark);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 2px var(--glow);
-  z-index: 1000;
-  animation: fadeIn 0.4s ease;
+  background: var(--bg-0);
+  color: var(--text-0);
+
+  border-radius: 22px;
+  border: 1px solid var(--border-1);
+
   display: flex;
   flex-direction: column;
-  padding: 0;
+
+  box-shadow:
+    0 20px 48px rgba(0,0,0,0.25),
+    0 12px 24px rgba(0,0,0,0.18),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+
+  animation: popupIn .28s cubic-bezier(0.19,1,0.22,1);
   overflow: hidden;
-  color: var(--text-dark);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -60%) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+@keyframes popupIn {
+  from { transform: translateY(32px) scale(.96); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* Header */
+
+/* ============================================================
+   HEADER — Glass + Subtle Shadow
+============================================================ */
 .popup-header {
-  background: #2a2a2e;
-  color: white;
-  padding: 18px 24px;
-  font-size: 20px;
-  font-weight: 600;
-  border-radius: 20px 20px 0 0;
+  height: 76px;
+  padding: 0 30px;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-dark);
+  justify-content: space-between;
+
+  background: var(--bg-1);
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid var(--border-1);
 }
 
-/* Tab Nav */
+.popup-title {
+  font-size: 23px;
+  font-weight: 600;
+}
+
+.popup-subtitle {
+  font-size: 13px;
+  margin-top: -3px;
+  color: var(--text-2);
+}
+
+.close-btn {
+  font-size: 32px;
+  line-height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 10px;
+  color: var(--text-2);
+  transition: .15s ease;
+}
+.close-btn:hover {
+  color: var(--accent-0);
+}
+
+
+/* ============================================================
+   TAB BAR — Fortune 50 Segmented Control
+============================================================ */
 .popup-navbar {
+  height: 56px;
+  padding: 0 20px;
+
   display: flex;
-  flex-wrap: wrap;
-  padding: 12px 20px;
-  background: transparent;
-  gap: 10px;
-  border-bottom: 1px solid var(--border-dark);
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border-1);
+
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.popup-navbar::-webkit-scrollbar {
+  display: none;
 }
 
 .popup-navbar button {
-  background: transparent;
-  border: 1px solid rgba(100, 255, 255, 0.2);
-  color: #ccc;
-  font-size: 0.9rem;
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
   font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
+
+  transition: .18s ease;
+  white-space: nowrap;
 }
 
 .popup-navbar button:hover {
-  background-color: rgba(83, 249, 255, 0.05);
-  color: white;
-  border-color: var(--accent);
+  color: var(--text-0);
+  background: var(--bg-2);
+  border-color: var(--border-1);
 }
 
 .popup-navbar button.active {
-  background: rgba(10, 132, 255, 0.15);
-  color: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 0 6px rgba(10, 132, 255, 0.3);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-0), var(--accent-1));
+  border: none;
+
+  box-shadow:
+    0 4px 12px rgba(32, 110, 255, .38),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
 }
 
-/* Scrollable Area */
+.popup-navbar button.active:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   CONTENT AREA
+============================================================ */
 .popup-content {
+  flex: 1;
+  padding: 28px 32px;
+
+  background: var(--bg-0);
   overflow-y: auto;
-  flex: 1;
-  padding: 24px 28px;
-  background: transparent;
+
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Section Headers */
-.popup-content h4 {
-  font-size: 17px;
-  font-weight: 600;
-  margin: 1rem 0 0.5rem;
-  color: white;
+.popup-content::-webkit-scrollbar {
+  width: 8px;
+}
+.popup-content::-webkit-scrollbar-thumb {
+  background: var(--bg-3);
+  border-radius: 6px;
 }
 
-/* InfoSection Layout */
-.info-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin-bottom: 2.5rem;
-}
 
-.info-left,
-.info-right {
-  flex: 1;
-  min-width: 300px;
-}
-
-/* Form Fields */
-.info-section label {
-  display: block;
-  color: #bbb;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-
-.info-section input,
-.info-section textarea {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 18px;
-  border-radius: 8px;
-  background: #2c2c31;
-  border: 1px solid #444;
-  color: #f0f0f0;
-  font-size: 15px;
-}
-
-/* Google Map Container */
-.google-map-container {
-  height: 280px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid #444;
-}
-
-/* Footer Buttons */
+/* ============================================================
+   FOOTER — Apple Buttons
+============================================================ */
 .popup-actions {
+  height: 72px;
+  padding: 14px 26px;
+
   display: flex;
   justify-content: flex-end;
-  padding: 16px 28px;
-  border-top: 1px solid var(--border-dark);
-  background: transparent;
+  align-items: center;
   gap: 12px;
+
+  background: var(--bg-1);
+  border-top: 1px solid var(--border-1);
 }
 
-.popup-actions button {
-  padding: 10px 18px;
-  font-size: 15px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid #555;
-  color: white;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.popup-actions button:hover {
-  background-color: #2f2f35;
-  border-color: #888;
-}
-
-/* Enrichment Card */
-.enrich-card {
-  background: #292b30;
-  border: 1px solid #3d3d45;
-  padding: 16px;
-  border-radius: 10px;
-  color: #eaeaea;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.enrich-card a {
-  color: #61dafb;
-  text-decoration: underline;
-}
-
-/* Chat & AI Area */
-.ai-panel-container {
-  margin-top: 1rem;
-  background: var(--card-dark);
+.action-btn {
+  padding: 10px 20px;
   border-radius: 12px;
-  padding: 1rem;
+
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 500;
+  transition: .18s ease;
 }
 
-.chat-messages {
-  max-height: 220px;
-  overflow-y: auto;
-  padding: 0.5rem;
-  background: #1e1e24;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
+/* ============================================================
+   INPUTS (Popup scope)
+============================================================ */
+.customer-popup-wrapper input,
+.customer-popup-wrapper textarea,
+.customer-popup-wrapper select {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
 }
 
-.chat-bubble {
-  max-width: 80%;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  margin-bottom: 0.4rem;
-  word-break: break-word;
+.customer-popup-wrapper input::placeholder,
+.customer-popup-wrapper textarea::placeholder {
+  color: var(--input-placeholder);
+}
+.action-btn:hover {
+  background: var(--bg-3);
+  color: var(--text-0);
 }
 
-.chat-bubble.user {
-  background: #4cd964;
-  color: white;
-  align-self: flex-end;
-}
-
-.chat-bubble.ai {
-  background: #0a84ff;
-  color: white;
-  align-self: flex-start;
-}
-
-.chat-input {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.chat-input input {
-  flex: 1;
-  padding: 0.6rem;
-  border-radius: 6px;
-  background: #2e2e33;
-  border: 1px solid #444;
-  color: #f5f5f5;
-}
-
-.chat-input button {
-  padding: 0.6rem 1rem;
+.action-btn.primary {
+  background: var(--accent-0);
   border: none;
-  background: #0a84ff;
   color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+
+  box-shadow: 0 4px 16px rgba(32,110,255,.35);
+}
+.action-btn.primary:hover {
+  background: var(--accent-1);
 }
 
-.chat-input button:hover {
-  background: #0066cc;
-}
 
-/* Status Popup Modal */
+/* ============================================================
+   STATUS + SCHEDULE MODALS
+============================================================ */
 .status-popup {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #2b2b30;
-  color: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  z-index: 2000;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000000;
 }
 
-.status-popup h3 {
-  margin-bottom: 12px;
+.status-popup-inner {
+  width: 360px;
+  padding: 28px;
+
+  background: var(--bg-0);
+  border-radius: 20px;
+  border: 1px solid var(--border-1);
+
+  animation: statusIn .22s ease-out;
+}
+
+@keyframes statusIn {
+  from { transform: translateY(20px) scale(.95); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.status-title {
   font-size: 18px;
-  text-align: center;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-0);
 }
 
-.status-btn {
-  width: 100%;
-  padding: 10px 0;
-  margin: 4px 0;
-  background: #444;
-  color: #f5f5f5;
-  font-size: 15px;
-  border: none;
-  border-radius: 6px;
+.status-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-option {
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--bg-1);
+  border: 1px solid var(--border-1);
+  color: var(--text-1);
   cursor: pointer;
-  transition: background 0.2s;
+  text-align: center;
+  transition: .18s ease;
 }
 
-.status-btn:hover {
-  background: #0a84ff;
+.status-option:hover {
+  background: var(--accent-0);
+  color: white;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .popup {
-    width: 95%;
-    height: 94vh;
-    max-height: 94vh;
-  }
+.status-cancel {
+  margin-top: 14px;
+  padding: 8px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.status-cancel:hover {
+  color: var(--accent-0);
+}
 
-  .popup-navbar {
-    flex-direction: column;
-  }
+.schedule-popup-inner {
+  width: min(760px, 92vw);
+}
 
-  .info-section {
-    flex-direction: column;
-  }
+.schedule-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.schedule-modal-column label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.schedule-modal-column input,
+.schedule-modal-column select,
+.schedule-modal-column textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-1);
+  color: var(--text-0);
+  font-size: 13px;
+}
+
+.schedule-modal-column textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.schedule-availability {
+  margin-top: 10px;
+}
+
+.schedule-availability-title {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.schedule-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.schedule-slot {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border 0.15s ease, transform 0.15s ease;
+}
+
+.schedule-slot:hover {
+  border-color: var(--accent-0);
+  transform: translateY(-1px);
+}
+
+.schedule-slot.active {
+  border-color: var(--accent-0);
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.4);
+}
+
+.schedule-time-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.schedule-error {
+  font-size: 12px;
+  color: #fca5a5;
+}
+
+.schedule-actions {
+  margin-top: 18px;
 }

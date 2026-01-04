@@ -98,6 +98,12 @@
 .pl-value{ font-weight: 700; }
 
 /* Meta + chips */
+.pl-chip-row{
+  margin-top: .35rem;
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+}
 .pl-card-meta{ margin-top: .25rem; font-size: .85rem; opacity: .9; }
 .pl-chips{ margin-top: .35rem; display: flex; gap: .35rem; flex-wrap: wrap; }
 

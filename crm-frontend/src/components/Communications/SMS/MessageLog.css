@@ -1,66 +1,62 @@
-/* src/components/Communication/MessageLog.css */
+.message-log {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
 
-.message-log-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 1.5rem;
-  }
-  
-  .message-log-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  
-  .message-log-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Each message record */
-  .message-record {
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.3s;
-  }
-  
-  /* Light hover highlight */
-  .message-record:hover {
-    background-color: #f9f9f9;
-  }
-  
-  /* Different styling for incoming vs outgoing */
-  .message-record.incoming .msg-text {
-    color: #333;
-    font-weight: 500;
-  }
-  
-  .message-record.outgoing .msg-text {
-    color: #28a745;
-    font-weight: 600;
-  }
-  
-  .msg-text {
-    margin-bottom: 0.25rem;
-    font-size: 1rem;
-  }
-  
-  .msg-time {
-    font-size: 0.9rem;
-    color: #777;
-  }
-  
-  /* Simple mobile responsiveness */
-  @media (max-width: 600px) {
-    .message-log-card {
-      padding: 1rem;
-    }
-    .message-log-title {
-      font-size: 1.25rem;
-    }
-  }
+.message-log-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--popup-muted);
+}
+
+.message-log-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.msg-bubble {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--popup-card);
+  border: 1px solid var(--popup-border);
+  box-shadow: var(--popup-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.msg-bubble.in {
+  align-self: flex-start;
+  background: #1e293b;
+}
+
+.msg-bubble.out {
+  align-self: flex-end;
+  background: #0ea5e9;
+  color: white;
+}
+
+.msg-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.msg-body p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
+.msg-image {
+  margin-top: 10px;
+  width: 140px;
+  border-radius: 8px;
+}

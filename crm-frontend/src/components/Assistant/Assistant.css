@@ -1,87 +1,164 @@
-/* Container for the entire assistant widget */
-.assistant-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  background: #1c1c1e;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+/* Lead assistant panel (matches Assistant.js markup) */
+.ai-panel-container {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: background 0.3s, color 0.3s;
+  gap: 12px;
+  color: var(--color-text, #eaeaea);
+  min-height: 0;
 }
 
-/* Chat window area */
-.chat-window {
-  flex: 1;
-  padding: 1rem;
-  background: #2a2a2a;
-  overflow-y: auto;
-}
-
-/* Individual chat message */
-.chat-message {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-/* Bot messages styling */
-.chat-message.bot {
-  background: #0a84ff;
-  color: #fff;
+.ai-orb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent, #0a84ff);
+  box-shadow: 0 0 12px rgba(10, 132, 255, 0.4);
   align-self: flex-start;
 }
 
-/* User messages styling */
-.chat-message.user {
-  background: #4cd964;
-  color: #fff;
-  align-self: flex-end;
-}
-
-/* Input container for text and buttons */
-.chat-input-container {
+.ai-panel-body {
   display: flex;
-  align-items: center;
-  padding: 0.75rem;
-  border-top: 1px solid #444;
-  background: #1c1c1e;
-}
-
-/* Input field styling */
-.chat-input {
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
   flex: 1;
-  padding: 0.75rem;
-  border: 1px solid #444;
-  border-radius: 6px;
-  font-size: 1rem;
-  background: #2a2a2a;
-  color: #fff;
 }
 
-/* Send and voice button common styling */
-.send-button,
-.voice-button {
-  margin-left: 0.5rem;
-  padding: 0.75rem 1rem;
-  border: none;
+/* Chat message history */
+.chat-messages {
+  background: color-mix(in srgb, var(--color-bg-card, #1b1d20) 92%, transparent);
+  border: 1px solid var(--color-border, #2a2a2a);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #2f3137;
   border-radius: 6px;
+}
+
+.chat-bubble {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 80%;
+  word-break: break-word;
+}
+
+.chat-bubble.bot {
+  align-self: flex-start;
+  background: var(--color-bg-elevated, #1f2329);
+  color: var(--color-text, #eaeaea);
+  border: 1px solid var(--color-border, #2a2a2a);
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
   background: var(--color-accent, #0a84ff);
   color: #fff;
+}
+
+/* Input row */
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-input input {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-bg-card, #1b1d20);
+  border: 1px solid var(--color-border, #2a2a2a);
+  color: var(--color-text, #eaeaea);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.chat-input button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--color-accent, #0a84ff);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
-/* Hover state for buttons */
-.send-button:hover,
-.voice-button:hover {
-  background: #0066cc;
+.chat-input button.listening {
+  background: #ef4444;
 }
 
-/* When voice is active, change the button to red */
-.voice-button.listening {
-  background: #ff3b30;
+/* Suggested tasks */
+.ai-section {
+  border-top: 1px solid var(--color-border, #2a2a2a);
+  padding-top: 10px;
+}
+
+.ai-section h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--color-text, #eaeaea);
+}
+
+.tasks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.task-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text, #eaeaea);
+}
+
+.task-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.approve-btn,
+.deny-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #2a2a2a);
+  background: var(--color-bg-elevated, #1f2329);
+  color: var(--color-text, #eaeaea);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.approve-btn {
+  border-color: color-mix(in srgb, var(--color-accent, #0a84ff) 60%, #2a2a2a);
+  color: #22c55e;
+}
+
+.deny-btn {
+  border-color: color-mix(in srgb, #ef4444 60%, #2a2a2a);
+  color: #ef4444;
 }

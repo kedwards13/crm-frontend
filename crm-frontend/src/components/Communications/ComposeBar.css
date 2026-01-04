@@ -1,0 +1,96 @@
+.compose-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-bg, #f9f9fb);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    border-radius: 0 0 12px 12px;
+    transition: all 0.2s ease;
+  }
+  
+  .compose-bar textarea {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    resize: none;
+    outline: none;
+    min-height: 38px;
+    max-height: 120px;
+    background: #fff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    transition: border 0.2s ease;
+  }
+  
+  .compose-bar textarea:focus {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+  }
+  
+  .compose-channel-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  
+  .compose-channel-toggle button {
+    background: none;
+    border: 1px solid transparent;
+    color: #666;
+    padding: 0.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .compose-channel-toggle button.active {
+    color: #007aff;
+    background: rgba(0,122,255,0.08);
+    border-color: rgba(0,122,255,0.2);
+  }
+  
+  .compose-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .attach-btn,
+  .send-btn,
+  .ai-btn {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .ai-btn:hover {
+    background: #f5f5ff;
+    color: #007aff;
+  }
+  
+  .send-btn:hover {
+    background: #007aff;
+    color: white;
+  }
+  
+  .send-btn.sending {
+    background: #ddd;
+    color: #999;
+    cursor: wait;
+  }
+  
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }

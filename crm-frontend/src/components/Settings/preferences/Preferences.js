@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import api from '../../../apiClient';
 import { getIndustry } from '../../../helpers/tenantHelpers';
 import '../SettingsCommon.css';
-
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:808';
 
 const DEFAULTS = {
   general: {
@@ -41,17 +39,22 @@ export default function Preferences() {
   const [prefs, setPrefs] = useState(seed);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
-  const token = localStorage.getItem('token');
-
+  const [aiContext, setAiContext] = useState({
+    tone: '',
+    bio: '',
+    instructions: '',
+    metadata: null,
+  });
+  const [aiMeta, setAiMeta] = useState('');
+  const [aiMsg, setAiMsg] = useState('');
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/api/settings/preferences/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await api.get("/accounts/preferences/");
+        const serverPrefs = data?.preferences || {};
         if (!mounted) return;
-        setPrefs({ ...seed, ...(data || {}) });
+        setPrefs({ ...seed, ...serverPrefs });
       } catch {
         setPrefs(seed);
       } finally {
@@ -59,7 +62,27 @@ export default function Preferences() {
       }
     })();
     return () => { mounted = false; };
-  }, [token, industryKey]); // re-seed if industry changes
+  }, [industryKey]); // re-seed if industry changes
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await api.get('/accounts/ai-context/');
+        if (!mounted) return;
+        setAiContext({
+          tone: data?.tone || '',
+          bio: data?.bio || '',
+          instructions: data?.instructions || '',
+          metadata: data?.metadata || null,
+        });
+        setAiMeta(data?.metadata ? JSON.stringify(data.metadata, null, 2) : '');
+      } catch {
+        if (mounted) setAiContext({ tone: '', bio: '', instructions: '', metadata: null });
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const onToggle = (k) => setPrefs(p => ({ ...p, [k]: !p[k] }));
   const onChange = (k, v) => setPrefs(p => ({ ...p, [k]: v }));
@@ -69,12 +92,35 @@ export default function Preferences() {
   const save = async () => {
     setMsg('');
     try {
-      await axios.put(`${API}/api/settings/preferences/`, prefs, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch("/accounts/preferences/", { preferences: prefs });
       setMsg('Saved ✓');
     } catch {
       setMsg('Save failed.');
+    }
+  };
+
+  const saveAi = async () => {
+    setAiMsg('');
+    let metadata = null;
+    if (aiMeta.trim()) {
+      try {
+        metadata = JSON.parse(aiMeta);
+      } catch {
+        setAiMsg('Metadata must be valid JSON.');
+        return;
+      }
+    }
+
+    try {
+      await api.patch('/accounts/ai-context/', {
+        tone: aiContext.tone,
+        bio: aiContext.bio,
+        instructions: aiContext.instructions,
+        metadata,
+      });
+      setAiMsg('AI context saved ✓');
+    } catch {
+      setAiMsg('AI context save failed.');
     }
   };
 
@@ -156,7 +202,42 @@ export default function Preferences() {
         </div>
       )}
 
-      <button className="settings-primary" onClick={save}>Save</button>
+      <button className="settings-primary" onClick={save}>Save Preferences</button>
+
+      <div className="settings-card">
+        <h3>AI Context</h3>
+        {aiMsg && <p className="settings-msg">{aiMsg}</p>}
+        <label>Tone
+          <input
+            value={aiContext.tone}
+            onChange={(e) => setAiContext((prev) => ({ ...prev, tone: e.target.value }))}
+            placeholder="Professional, warm, concise…"
+          />
+        </label>
+        <label>Bio
+          <textarea
+            rows="3"
+            value={aiContext.bio}
+            onChange={(e) => setAiContext((prev) => ({ ...prev, bio: e.target.value }))}
+          />
+        </label>
+        <label>Instructions
+          <textarea
+            rows="4"
+            value={aiContext.instructions}
+            onChange={(e) => setAiContext((prev) => ({ ...prev, instructions: e.target.value }))}
+          />
+        </label>
+        <label>Metadata (JSON)
+          <textarea
+            rows="4"
+            value={aiMeta}
+            onChange={(e) => setAiMeta(e.target.value)}
+            placeholder='{"region":"South"}'
+          />
+        </label>
+        <button className="settings-primary" onClick={saveAi}>Save AI Context</button>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import api from '../../apiClient';
+import { listCrmLeads, updateCrmLead } from '../../api/leadsApi';
 import './Marketplace.css';
 
 const MarketplaceView = () => {
@@ -8,26 +10,39 @@ const MarketplaceView = () => {
   const [filters, setFilters] = useState({ city: '', min: '', max: '' });
   const [selectedLead, setSelectedLead] = useState(null);
   const [matchedBuyers, setMatchedBuyers] = useState([]);
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchData = async () => {
-      const resLeads = await fetch('http://127.0.0.1:808/api/leads/crm-leads/', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const allLeads = await resLeads.json();
-      const underContract = (Array.isArray(allLeads) ? allLeads : allLeads.results).filter(l => l.status === 'under_contract');
+      let allLeads = [];
+      try {
+        const resLeads = await listCrmLeads();
+        allLeads = Array.isArray(resLeads.data)
+          ? resLeads.data
+          : resLeads.data?.results || [];
+      } catch {
+        allLeads = [];
+      }
+
+      const underContract = allLeads.filter((lead) =>
+        lead.status === 'scheduled' ||
+        lead.deal_stage === 'under_contract' ||
+        lead.attributes?.deal_stage === 'under_contract'
+      );
       setLeads(underContract);
       setFiltered(underContract);
 
-      const resBuyers = await fetch('http://127.0.0.1:808/api/buyers/', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const allBuyers = await resBuyers.json();
-      setBuyers(Array.isArray(allBuyers) ? allBuyers : allBuyers.results);
+      try {
+        const resBuyers = await api.get('/buyers/');
+        const allBuyers = Array.isArray(resBuyers.data)
+          ? resBuyers.data
+          : resBuyers.data?.results || [];
+        setBuyers(allBuyers);
+      } catch {
+        setBuyers([]);
+      }
     };
     fetchData();
-  }, [token]);
+  }, []);
 
   const applyFilters = () => {
     let result = [...leads];
@@ -55,10 +70,7 @@ const MarketplaceView = () => {
   };
 
   const markAsClosed = async (leadId) => {
-    await fetch(`http://127.0.0.1:808/api/leads/${leadId}/close/`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await updateCrmLead(leadId, { status: 'closed' });
     setLeads(prev => prev.filter(l => l.id !== leadId));
     setFiltered(prev => prev.filter(l => l.id !== leadId));
   };

@@ -30,9 +30,9 @@ import OperationsRouter from './components/Operations/OperationsRouter';
 // Helpers
 import { setActiveTenant, getActiveTenant } from './helpers/tenantHelpers';
 
+// Styles
 import './App.css';
-import './themes.css';
-import './index.css'; // or './App.css'
+import './index.css';
 
 export const AuthContext = createContext();
 
@@ -135,7 +135,7 @@ const AuthenticatedApp = () => {
             <Route path="/schedule/*" element={<SchedulingDashboard />} />
             <Route path="/communication/*" element={<CommunicationsPage />} />
 
-            {/* ✅ Revival Section */}
+            {/* Revival */}
             <Route path="/revival/overview" element={<Overview />} />
             <Route path="/revival/scanner" element={<RevivalScanner />} />
             <Route path="/revival/campaigns" element={<Campaigns />} />
@@ -144,7 +144,7 @@ const AuthenticatedApp = () => {
             <Route path="/revival/ai" element={<AiInsights />} />
             <Route path="/revival/*" element={<Navigate to="/revival/overview" replace />} />
 
-            {/* ✅ Finance & Marketing */}
+            {/* Finance & Marketing */}
             <Route path="/finance/*" element={<FinancePage />} />
             <Route path="/marketing/*" element={<MarketingPage />} />
 
@@ -173,10 +173,16 @@ const AppRoutes = () => {
 
 const App = () => {
   const auth = useAuth();
+
   return (
     <AuthContext.Provider value={auth}>
       <Router>
+
+        {/* ⭐⭐⭐ GLOBAL MODAL ROOT — required for CustomerPopup */}
+        <div id="modal-root"></div>
+
         <AppRoutes />
+
       </Router>
     </AuthContext.Provider>
   );
