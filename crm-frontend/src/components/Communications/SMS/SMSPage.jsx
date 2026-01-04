@@ -1,140 +1,193 @@
-// crm-frontend/src/components/Communications/SMS/SMSPage.jsx
-import React, { useState, useEffect } from 'react';
-import MessageLog from './MessageLog';
-import './SMSPage.css';
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { Loader2, Sparkles, Send, Users, RefreshCw } from "lucide-react";
+import {
+  fetchThreadByTarget,
+  fetchSmartReply,
+  sendCommunication,
+} from "../../../api/communications";
+import MessageLog from "./MessageLog";
+import "./SMSPage.css";
 
-const Messages = () => {
-  const [message, setMessage] = useState('');
+/**
+ * SMSPage
+ * Full-featured AI + SMS Messaging Hub
+ * - View conversation threads
+ * - Send / receive messages
+ * - Generate AI follow-ups
+ * - Support group messages (multi-select recipients)
+ */
+const SMSPage = ({ leadId, customerId }) => {
   const [messages, setMessages] = useState([]);
-  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [message, setMessage] = useState("");
+  const [aiSuggestion, setAiSuggestion] = useState("");
+  const [loading, setLoading] = useState(false);
   const [loadingAi, setLoadingAi] = useState(false);
-  const [error, setError] = useState('');
-  const [taskCreated, setTaskCreated] = useState(false);
+  const [selectedRecipients, setSelectedRecipients] = useState([]); // For future group SMS
+  const [channel] = useState("sms");
 
-  // For demonstration, fetch existing conversation or missed caller info on mount
+  // 🔁 Fetch current conversation on mount
   useEffect(() => {
-    // Example initial message
-    const initialMessages = [
-      { text: 'Welcome to our service! How can we help you?', time: '09:00 AM', direction: 'in' },
-    ];
-    setMessages(initialMessages);
-  }, []);
+    loadThread();
+    // eslint-disable-next-line
+  }, [leadId, customerId]);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-    // Push new outbound message to local state; replace with API call as needed
-    const newMsg = {
-      text: message,
-      time: new Date().toLocaleTimeString(),
-      direction: 'out',
-    };
-    setMessages(prev => [newMsg, ...prev]);
-    setMessage('');
-    setAiSuggestion('');
+  const loadThread = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchThreadByTarget(leadId, customerId);
+      setMessages(data.reverse()); // oldest → newest
+    } catch (e) {
+      toast.error("Error loading messages.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!message.trim()) return toast.warn("Type a message first.");
+    try {
+      const res = await sendCommunication({
+        lead_id: leadId,
+        customer_id: customerId,
+        channel,
+        body: message.trim(),
+      });
+      if (res?.success) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: res.log_id,
+            direction: "outbound",
+            body: message,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+        setMessage("");
+        toast.success("📱 Message sent!");
+      } else {
+        toast.error("Failed to send message.");
+      }
+    } catch (e) {
+      toast.error(`Send error: ${e.message}`);
+    }
   };
 
   const handleAiSuggestion = async () => {
-    if (!message.trim()) return;
     setLoadingAi(true);
-
     try {
-      // Simulate a fetch to your AI suggestion endpoint
-      setTimeout(() => {
-        setAiSuggestion(`(AI) Perhaps mention our next available appointment slot?`);
-        setLoadingAi(false);
-      }, 1000);
-    } catch (err) {
-      console.error('Error fetching AI suggestion', err);
+      const res = await fetchSmartReply(leadId, customerId);
+      if (res.reply) {
+        setAiSuggestion(res.reply);
+        toast.info("🤖 Smart reply generated.");
+      } else {
+        toast.warn("No AI suggestion available.");
+      }
+    } catch (e) {
+      toast.error("AI error fetching suggestion.");
+    } finally {
       setLoadingAi(false);
     }
   };
 
-  // When user accepts the AI suggestion, send it as a message and create a follow-up task.
-  const handleAcceptAiSuggestion = async () => {
-    if (!aiSuggestion.trim()) return;
-    const newMsg = {
-      text: aiSuggestion,
-      time: new Date().toLocaleTimeString(),
-      direction: 'out',
-    };
-    setMessages(prev => [newMsg, ...prev]);
-    setAiSuggestion('');
+  const handleAcceptAi = async () => {
+    if (!aiSuggestion) return;
+    setMessage(aiSuggestion);
+    setAiSuggestion("");
+    toast.success("AI suggestion added to composer.");
+  };
 
-    // Call API to create a new task based on the AI suggestion.
+  const handleMassSend = async () => {
+    if (selectedRecipients.length === 0 || !message.trim())
+      return toast.warn("Select recipients and enter a message.");
+
     try {
-      const token = localStorage.getItem('token');
-      const taskPayload = {
-        title: "Follow-up: " + aiSuggestion.substring(0, 30) + "...",
-        description: aiSuggestion,
-        due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Due in 24 hours
-      };
-      const response = await fetch('/api/tasks/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: JSON.stringify(taskPayload),
-      });
-      if (response.ok) {
-        setTaskCreated(true);
-        // Optionally, you can update your UI or fetch the new task list.
-      } else {
-        console.error("Failed to create task");
-      }
+      const promises = selectedRecipients.map((r) =>
+        sendCommunication({
+          customer_id: r.id,
+          channel: "sms",
+          body: message,
+        })
+      );
+      await Promise.all(promises);
+      toast.success(`Sent to ${selectedRecipients.length} recipients.`);
     } catch (err) {
-      console.error("Error creating task:", err);
+      toast.error("Mass send failed.");
     }
   };
 
   return (
-    <div className="messages-container">
-      <h2 className="messages-title">Text Messaging</h2>
+    <div className="sms-page">
+      <div className="sms-header">
+        <h2>📨 SMS Messaging Hub</h2>
+        <button onClick={loadThread} className="icon-btn" title="Refresh thread">
+          <RefreshCw size={16} />
+        </button>
+      </div>
 
-      {/* Text input area */}
-      <div className="message-input">
+      {/* 🧠 AI Suggestion */}
+      <div className="ai-tools">
+        <button
+          onClick={handleAiSuggestion}
+          className={`secondary-button ${loadingAi ? "loading" : ""}`}
+          disabled={loadingAi}
+        >
+          {loadingAi ? (
+            <>
+              <Loader2 className="spin" size={14} /> AI Thinking…
+            </>
+          ) : (
+            <>
+              <Sparkles size={14} /> Get AI Suggestion
+            </>
+          )}
+        </button>
+
+        {aiSuggestion && (
+          <div className="ai-suggestion-box">
+            <p>{aiSuggestion}</p>
+            <div className="ai-buttons">
+              <button onClick={handleAcceptAi} className="accept-btn">
+                Use
+              </button>
+              <button onClick={() => setAiSuggestion("")} className="deny-btn">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 💬 Conversation */}
+      <div className="conversation-container">
+        {loading ? (
+          <div className="loading">
+            <Loader2 className="spin" /> Loading conversation...
+          </div>
+        ) : (
+          <MessageLog messages={messages} title="Conversation History" />
+        )}
+      </div>
+
+      {/* ✍️ Composer */}
+      <div className="composer">
         <textarea
           placeholder="Type your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="text-area"
+          rows={2}
         />
-        <div className="input-buttons">
+        <div className="composer-actions">
           <button onClick={handleSend} className="action-button">
-            Send
+            <Send size={16} /> Send
           </button>
-          <button
-            onClick={handleAiSuggestion}
-            className="secondary-button"
-            disabled={loadingAi}
-          >
-            {loadingAi ? 'AI...' : 'Get AI Suggestion'}
+          <button onClick={handleMassSend} className="group-button">
+            <Users size={16} /> Group Send
           </button>
         </div>
       </div>
-
-      {/* AI Suggestion box */}
-      {aiSuggestion && (
-        <div className="ai-suggestion-box">
-          <p className="ai-suggestion-text">AI Suggestion: {aiSuggestion}</p>
-          <button onClick={handleAcceptAiSuggestion} className="action-button">
-            Accept &amp; Create Follow-Up
-          </button>
-        </div>
-      )}
-
-      {/* Conversation log */}
-      <MessageLog messages={messages} title="Conversation History" />
-
-      {taskCreated && (
-        <div className="status-message">
-          Follow-up task created successfully.
-        </div>
-      )}
-
-      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };
 
-export default Messages;
+export default SMSPage;

@@ -1,136 +1,341 @@
-// src/components/Customers/CustomerList.jsx
-import React, { useState, useEffect, useRef } from "react";
-import { getIndustry } from "../../utils/tenantHelpers";
-import CustomerCard from "../Profile/CustomerPopup"; // new popup component
+// ---------------------------------------------------------
+// CustomersList — ABON OS Enterprise Table
+// ---------------------------------------------------------
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+  memo,
+} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const endpointMap = {
-  base: "/api/customers/base",
-  pest_control: "/api/customers/pest",
-  fitness: "/api/customers/fitness",
-  real_estate: "/api/customers/real-estate",
-  insurance: "/api/customers/insurance",
-};
+import {
+  getCustomers,
+  enrichBulk,
+  getCustomerMetrics,
+  assignToCampaign,
+} from "../../api/customersApi";
 
+import { toast } from "react-toastify";
+import { Brain, Eye, Zap } from "lucide-react";
+import { mapEntity } from "../../utils/contactMapper";
+import { getIndustry } from "../../helpers/tenantHelpers";
+
+import "./CustomerList.css";
+
+const CustomerPopup = lazy(() => import("../Profile/CustomerPopup"));
+
+// ---------------------------------------------------------
+// ROW — optimized for speed
+// ---------------------------------------------------------
+const CustomerRow = memo(({ c, checked, toggleCheck, openPopup }) => {
+  const mapped = mapEntity(c);
+
+  return (
+    <tr className="gt-row" onClick={() => openPopup(mapped)}>
+      <td className="gt-cell center w10">
+        <input
+          type="checkbox"
+          className="gt-checkbox"
+          checked={checked.includes(c.customer_id)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => toggleCheck(c.customer_id)}
+        />
+      </td>
+
+      <td className="gt-cell name-col">
+        {c.first_name} {c.last_name}
+      </td>
+
+      <td className="gt-cell">{c.primary_email || "—"}</td>
+      <td className="gt-cell">{c.primary_phone || "—"}</td>
+      <td className="gt-cell">{c.city || "—"}</td>
+      <td className="gt-cell">{c.state || "—"}</td>
+
+      <td className="gt-cell summary-col">
+        {c.ai_summary?.slice(0, 90) || "—"}
+      </td>
+
+      <td className="gt-cell center">
+        {c.is_enriched ? <span className="gt-badge-ok">✓</span> : "—"}
+      </td>
+
+      <td className="gt-cell actions-col">
+        <div className="gt-actions">
+          <button
+            title="View Profile"
+            onClick={(e) => {
+              e.stopPropagation();
+              openPopup(mapped);
+            }}
+            className="gt-icon-btn blue"
+          >
+            <Eye size={15} />
+          </button>
+
+          <button
+            title="AI Enrich"
+            onClick={(e) => {
+              e.stopPropagation();
+              enrichBulk([c.customer_id]);
+              toast.info(`Enriching ${c.first_name}…`);
+            }}
+            className="gt-icon-btn green"
+          >
+            <Brain size={15} />
+          </button>
+
+          <button
+            title="AI Summary"
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.info(c.ai_summary || "No summary yet.");
+            }}
+            className="gt-icon-btn amber"
+          >
+            <Zap size={15} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+// ---------------------------------------------------------
+// MAIN COMPONENT
+// ---------------------------------------------------------
 export default function CustomerList() {
-  const industryKey = getIndustry();
-  const endpoint = endpointMap[industryKey] || endpointMap.base;
-
-  const [search, setSearch] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState(localStorage.getItem("customerSearch") || "");
   const [customers, setCustomers] = useState([]);
   const [selected, setSelected] = useState(null);
+
+  const [checked, setChecked] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+
   const [loading, setLoading] = useState(false);
+  const [enriching, setEnriching] = useState(false);
+
+  const [campaignId, setCampaignId] = useState("");
   const [error, setError] = useState("");
-  const [visibleCols, setVisibleCols] = useState({
-    phone: true,
-    email: true,
-    address: true,
-    city: true,
-  });
 
-  // Debounce
   const debounceRef = useRef(null);
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(fetchCustomers, 300);
-    return () => clearTimeout(debounceRef.current);
-  }, [search]);
 
-  // Fetch
+  // ---------------------- Load customers ----------------------
   const fetchCustomers = async () => {
     setLoading(true);
     setError("");
+
     try {
-      const params = new URLSearchParams();
-      if (search) params.set("q", search);
-      const res = await fetch(`${endpoint}?${params}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (!res.ok) throw new Error("Failed to load customers.");
-      setCustomers(await res.json());
+      const { data } = await getCustomers(search ? { q: search } : {});
+      setCustomers(data.results || data);
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError("Failed to load customers.");
       setCustomers([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchMetrics = async () => {
+    try {
+      const { data } = await getCustomerMetrics();
+      setMetrics(data);
+    } catch {}
+  };
+
+  useEffect(() => {
+    localStorage.setItem("customerSearch", search);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(fetchCustomers, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
+
   useEffect(() => {
     fetchCustomers();
+    fetchMetrics();
   }, []);
 
-  const toggleCol = (key) =>
-    setVisibleCols((prev) => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    if (location.state?.create !== "customer") return;
+    const industry = getIndustry("general");
+    setSelected(
+      mapEntity({
+        object: "customer",
+        first_name: "",
+        last_name: "",
+        primary_email: "",
+        primary_phone: "",
+        industry,
+      })
+    );
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.pathname, location.state, navigate]);
 
+  // ---------------------- Bulk actions ----------------------
+  const toggleCheck = (id) =>
+    setChecked((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+
+  const toggleSelectAll = () =>
+    setChecked(
+      checked.length === customers.length
+        ? []
+        : customers.map((c) => c.customer_id)
+    );
+
+  const bulkEnrich = async () => {
+    if (!checked.length) return toast.info("Select customers.");
+
+    setEnriching(true);
+
+    try {
+      await enrichBulk(checked);
+      toast.success("Enrichment started.");
+      fetchCustomers();
+      fetchMetrics();
+    } catch {
+      toast.error("Enrichment failed.");
+    } finally {
+      setEnriching(false);
+    }
+  };
+
+  const bulkAssign = async () => {
+    if (!checked.length) return toast.info("Select customers.");
+    if (!campaignId) return toast.info("Choose a campaign.");
+
+    try {
+      await assignToCampaign(campaignId, checked);
+      toast.success("Campaign assigned.");
+      setChecked([]);
+    } catch {
+      toast.error("Assignment failed.");
+    }
+  };
+
+  // ---------------------- Render ----------------------
   return (
-    <div className="p-4">
-      {/* Search + column toggles */}
-      <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+    <div className="gt-customerlist">
+
+      {/* Toolbar */}
+      <div className="gt-toolbar">
         <input
-          type="text"
-          placeholder="Search customers…"
+          className="gt-search"
           value={search}
+          placeholder="Search customers…"
           onChange={(e) => setSearch(e.target.value)}
-          className="border rounded p-2 flex-1"
         />
-        <div className="flex gap-2 text-sm">
-          {Object.keys(visibleCols).map((key) => (
-            <label key={key} className="flex items-center space-x-1">
-              <input
-                type="checkbox"
-                checked={visibleCols[key]}
-                onChange={() => toggleCol(key)}
-              />
-              <span>{key}</span>
-            </label>
-          ))}
+
+        <div className="gt-toolbar-actions">
+          <select
+            className="gt-select"
+            value={campaignId}
+            onChange={(e) => setCampaignId(e.target.value)}
+          >
+            <option value="">Assign to campaign…</option>
+            <option value="1">Welcome Series</option>
+            <option value="2">Follow-Up</option>
+            <option value="3">Reactivation</option>
+          </select>
+
+          <button
+            className="gt-btn blue"
+            disabled={!checked.length}
+            onClick={bulkAssign}
+          >
+            Assign
+          </button>
+
+          <button
+            className="gt-btn green"
+            disabled={!checked.length || enriching}
+            onClick={bulkEnrich}
+          >
+            {enriching ? "Enriching…" : "AI Enrich"}
+          </button>
         </div>
       </div>
 
-      {error && <div className="text-red-600 mb-4">{error}</div>}
-      {loading ? (
-        <div>Loading…</div>
-      ) : !customers.length ? (
-        <div className="text-gray-600">No customers found.</div>
-      ) : (
-        <table className="min-w-full border text-sm bg-white shadow rounded-lg">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Name</th>
-              {visibleCols.phone && <th className="px-4 py-2">Phone</th>}
-              {visibleCols.email && <th className="px-4 py-2">Email</th>}
-              {visibleCols.address && <th className="px-4 py-2">Address</th>}
-              {visibleCols.city && <th className="px-4 py-2">City</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((c) => (
-              <tr
-                key={c.customer_id}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => setSelected(c)}
-              >
-                <td className="px-4 py-2 font-medium">
-                  {c.first_name} {c.last_name}
-                </td>
-                {visibleCols.phone && <td className="px-4 py-2">{c.primary_phone || "—"}</td>}
-                {visibleCols.email && <td className="px-4 py-2">{c.primary_email || "—"}</td>}
-                {visibleCols.address && <td className="px-4 py-2">{c.address || "—"}</td>}
-                {visibleCols.city && <td className="px-4 py-2">{c.city || "—"}</td>}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Metrics */}
+      {metrics && (
+        <div className="gt-metrics">
+          {[
+            ["Customers", metrics.total_customers],
+            ["Active", metrics.active_customers],
+            ["Enriched", metrics.enriched_customers],
+            ["No-Show Rate", `${metrics.no_show_rate}%`],
+            ["Avg Visits", metrics.average_visits_per_customer],
+          ].map(([label, value]) => (
+            <div key={label} className="gt-metric-card">
+              <div className="label">{label}</div>
+              <div className="value">{value}</div>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Popup modal */}
+      {/* Table */}
+      {error && <div className="gt-error">{error}</div>}
+
+      {loading ? (
+        <div className="gt-loading">Loading customers…</div>
+      ) : !customers.length ? (
+        <div className="gt-empty">No customers found.</div>
+      ) : (
+        <div className="gt-table-wrapper">
+          <table className="gt-table">
+            <thead>
+              <tr>
+                <th className="center w10">
+                  <input
+                    type="checkbox"
+                    className="gt-checkbox"
+                    checked={checked.length === customers.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
+                {["Name", "Email", "Phone", "City", "State", "AI Summary", "AI", "⚡"].map(
+                  (h) => (
+                    <th key={h}>{h}</th>
+                  )
+                )}
+              </tr>
+            </thead>
+
+            <tbody>
+              {customers.map((c) => (
+                <CustomerRow
+                  key={c.customer_id}
+                  c={c}
+                  checked={checked}
+                  toggleCheck={toggleCheck}
+                  openPopup={(mapped) => setSelected(mapped)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Popup */}
       {selected && (
-        <CustomerCard
-          customer={selected}
-          onClose={() => setSelected(null)}
-          refresh={fetchCustomers}
-        />
+        <Suspense fallback={<div className="gt-loading p-6">Loading…</div>}>
+          <CustomerPopup
+            lead={selected}
+            leadType="customer"
+            onClose={() => {
+              setSelected(null);
+              fetchCustomers();
+              fetchMetrics();
+            }}
+          />
+        </Suspense>
       )}
     </div>
   );

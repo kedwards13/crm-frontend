@@ -15,6 +15,16 @@
   box-sizing: border-box;
 }
 
+.calendar-status {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  color: #c9d3e1;
+}
+
+.calendar-status.error {
+  color: #ff9f0a;
+}
+
 /* 
   Force RBC to be transparent so we see the .calendar-wrapper background.
 */

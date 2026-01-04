@@ -1,225 +1,458 @@
 /* ============================================================
-   TopBar — Refined Palantir-Inspired Styling
-   ============================================================ */
+   ABON.AI — EXECUTIVE TOP BAR (Final Polished Version)
+   Clean • Flat • Glass • Modern • Zero Visual Noise
+=============================================================== */
 
-   :root {
-    --topbar-height: 64px;
-    --sidebar-current-width: var(--sidebar-width, 240px);
-    --content-gutter: 20px;
-  
-    --tb-bg: var(--color-bg, #0f141b);
-    --tb-border: var(--color-border, #263241);
-    --tb-surface: var(--color-bg-card, #1a1f26);
-    --tb-text: var(--color-text, #e5ecf3);
-    --tb-primary: var(--primary, #1badf1);
-    --tb-primary-ink: #ffffff;
-  
-    --tb-pill-radius: 999px;
-    --tb-pill-py: 0.42rem;
-    --tb-pill-px: 1rem;
-    --tb-font-size: 14.5px;
-    --tb-font-weight: 600;
-  
-    --tb-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.3);
-  }
-  
-  /* ----------------------------------------------
-     Shell and Blur Backdrop
-  ---------------------------------------------- */
-  .top-bar {
-    position: fixed;
-    inset: 0 0 auto 0;
-    height: var(--topbar-height);
-    background: rgba(15, 20, 27, 0.84);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--tb-border);
-    z-index: 1100;
-    transition: background 0.3s ease;
-  }
-  
-  .top-bar * {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
+:root {
+  --topbar-height: 64px;
+
+  --tb-blur: 22px;
+  --tb-bg-dark: rgba(12, 16, 22, 0.78);
+  --tb-bg-light: rgba(255, 255, 255, 0.78);
+
+  --tb-border-dark: rgba(255, 255, 255, 0.06);
+  --tb-border-light: rgba(0, 0, 0, 0.08);
+
+  --tb-text-dark: #e5edf6;
+  --tb-text-light: #111827;
+
+  --tb-primary: #1badf1;
+  --tb-primary-hover: #33c6ff;
+  --tb-primary-ink: #ffffff;
+
+  --tb-radius: 12px;
+  --tb-pill-radius: 999px;
+
+  --tb-font-size: 14px;
+  --tb-font-weight: 600;
+
+  --tb-ring: 0 0 0 3px rgba(27, 173, 241, 0.35);
+
+  --content-gutter: 22px;
+  --sidebar-current-width: 240px;
+}
+
+/* ============================================================
+   TOP BAR WRAPPER
+=============================================================== */
+
+.top-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--topbar-height);
+
+  display: flex;
+  align-items: center;
+
+  background: var(--tb-bg-dark);
+  backdrop-filter: blur(var(--tb-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--tb-blur)) saturate(180%);
+
+  border-bottom: 1px solid var(--tb-border-dark);
+  z-index: 1100;
+
+  transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+  color: var(--tb-text-dark);
+}
+
+/* Light mode */
+body.light-mode .top-bar {
+  background: var(--tb-bg-light);
+  border-bottom-color: var(--tb-border-light);
+  color: var(--tb-text-light);
+}
+
+/* ============================================================
+   INNER ALIGNMENT / SPACING
+=============================================================== */
+
+.top-bar-inner {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding-left: calc(var(--sidebar-current-width) + var(--content-gutter));
+  padding-right: var(--content-gutter);
+  gap: 16px;
+
+  transition: padding-left 0.25s ease;
+}
+
+/* ============================================================
+   SUBNAV / TAB AREA
+=============================================================== */
+
+.top-bar-subnav-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.top-bar-subnav-wrap.no-tabs {
+  flex: 0 0 auto;
+}
+
+.top-bar-subnav-scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.top-bar-subnav-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.top-bar-subnav {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* Tabs (Pill style) */
+.top-bar-subnav-button {
+  position: relative;
+  background: transparent;
+  border: none;
+
+  padding: 8px 18px;
+  border-radius: var(--tb-pill-radius);
+
+  font-size: var(--tb-font-size);
+  font-weight: var(--tb-font-weight);
+  letter-spacing: 0.01em;
+  color: inherit;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.top-bar-subnav-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tb-primary);
+}
+
+/* Active pill */
+.top-bar-subnav-button.active {
+  background: radial-gradient(
+    circle at 0% 0%,
+    #38bdf8,
+    #2563eb 55%,
+    #4f46e5 100%
+  );
+  color: var(--tb-primary-ink);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.4);
+}
+
+/* Thin floating underline */
+.top-bar-subnav-button.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 24%;
+  width: 52%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.95);
+}
+
+/* Tab scroll arrows */
+.tabs-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+  color: rgba(209, 213, 219, 0.8);
+
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.tabs-arrow:hover {
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--tb-primary);
+  transform: translateY(-1px);
+}
+
+.tabs-arrow.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tabs-arrow.left {
+  margin-right: 4px;
+}
+
+.tabs-arrow.right {
+  margin-left: 4px;
+}
+
+body.light-mode .tabs-arrow {
+  color: #4b5563;
+}
+
+/* ============================================================
+   RIGHT TOOLBAR
+=============================================================== */
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------
+   CLEAN SEARCH FIELD (GlobalSearch wrapper)
+------------------------------------------------------------ */
+
+.top-bar-search {
+  flex: 0 1 420px;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+}
+
+.top-bar-search .global-search-container {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------
+   TOOL BUTTONS (Inbox, Theme)
+------------------------------------------------------------ */
+
+.top-bar-btn {
+  position: relative;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: var(--tb-radius);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  background: rgba(15, 23, 42, 0.7);
+  color: inherit;
+
+  transition: all 0.2s ease;
+}
+
+.top-bar-btn:hover {
+  border-color: var(--tb-primary);
+  color: var(--tb-primary);
+  background: rgba(27, 173, 241, 0.14);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
+}
+
+body.light-mode .top-bar-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+body.light-mode .top-bar-btn:hover {
+  background: #eef2ff;
+}
+
+/* Inbox wrapper (for badge) */
+.inbox-wrapper {
+  position: relative;
+}
+
+/* Badge */
+.inbox-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+
+  min-width: 18px;
+  height: 18px;
+
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 18px;
+
+  color: #ffffff;
+  background: #ff3b30;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 1);
+}
+
+body.light-mode .inbox-count {
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+/* ============================================================
+   "+ NEW" BUTTON + MENU
+=============================================================== */
+
+.top-bar-new-container {
+  position: relative;
+}
+
+.top-bar-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  color: #ffffff;
+  background: linear-gradient(135deg, #2563eb, #1badf1);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.45);
+
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background 0.15s ease, opacity 0.15s ease;
+}
+
+.top-bar-new-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px rgba(37, 99, 235, 0.6);
+  background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+}
+
+.top-bar-new-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.8);
+}
+
+body.light-mode .top-bar-new-btn {
+  background: linear-gradient(135deg, #2563eb, #22c55e);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.35);
+}
+
+/* Dropdown menu */
+.top-bar-new-menu {
+  position: absolute;
+  right: 0;
+  top: 110%;
+
+  min-width: 210px;
+  padding: 8px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: #020617;
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.9);
+
+  z-index: 1300;
+}
+
+body.light-mode .top-bar-new-menu {
+  background: #ffffff;
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+}
+
+.top-bar-new-menu button {
+  width: 100%;
+  display: block;
+
+  border: none;
+  background: transparent;
+
+  padding: 8px 10px;
+  margin: 1px 0;
+
+  text-align: left;
+  font-size: 13px;
+  color: #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.top-bar-new-menu button:hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+body.light-mode .top-bar-new-menu button {
+  color: #111827;
+}
+
+body.light-mode .top-bar-new-menu button:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+/* ============================================================
+   RESPONSIVE
+=============================================================== */
+
+@media (max-width: 1200px) {
   .top-bar-inner {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  
-    padding-left: calc(var(--sidebar-current-width) + var(--content-gutter));
-    padding-right: var(--content-gutter);
-    max-width: calc(var(--content-max, 1400px) + var(--sidebar-current-width) + 2 * var(--content-gutter));
-    margin: 0 auto;
-    color: var(--tb-text);
+    padding-left: calc(var(--sidebar-current-width) + 14px);
+    padding-right: 16px;
   }
-  
-  /* ----------------------------------------------
-     Subnav Scroller + Tabs
-  ---------------------------------------------- */
-  .top-bar-subnav-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow-x: auto;
-    min-width: 0;
-    flex: 1;
-  }
-  .top-bar-subnav-wrap.no-tabs { display: none; }
-  
-  .tabs-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: 1px solid var(--tb-border);
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--tb-text);
-    cursor: pointer;
-  }
-  .tabs-arrow:hover {
-    filter: brightness(1.08);
-  }
-  .tabs-arrow.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  .top-bar-subnav-scroller {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .top-bar-subnav-scroller::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .top-bar-subnav {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0 4px;
-  }
-  
-  /* ----------------------------------------------
-     Subnav Pills (Solid Tabs)
-  ---------------------------------------------- */
-  .top-bar-subnav-button {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--tb-text);
-    border: 1px solid transparent;
-    padding: var(--tb-pill-py) var(--tb-pill-px);
-    border-radius: var(--tb-pill-radius);
-    font-size: var(--tb-font-size);
-    font-weight: var(--tb-font-weight);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .top-bar-subnav-button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--tb-primary);
-  }
-  
-  .top-bar-subnav-button:active {
-    transform: scale(0.98);
-  }
-  
-  .top-bar-subnav-button:focus-visible {
-    outline: none;
-    box-shadow: var(--tb-focus-ring);
-  }
-  
-  .top-bar-subnav-button.active,
-  .top-bar-subnav-button[aria-selected="true"],
-  .top-bar-subnav-button[aria-current="page"] {
-    background: var(--tb-primary);
-    color: var(--tb-primary-ink);
-    border-color: var(--tb-primary);
-  }
-  
-  /* ----------------------------------------------
-     Right Tools Cluster
-  ---------------------------------------------- */
-  .top-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-self: end;
-  }
+
   .top-bar-search {
-    display: flex;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 6px 10px;
-    border-radius: 8px;
-    color: var(--tb-text);
+    flex: 1 1 320px;
   }
-  .top-bar-inbox {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 0.75rem;
-    background: transparent;
-    border: 1px solid var(--tb-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+}
+
+@media (max-width: 900px) {
+  .top-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding-left: var(--content-gutter);
+    padding-right: var(--content-gutter);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    gap: 10px;
   }
-  .top-bar-inbox:hover {
-    border-color: var(--tb-primary);
-    color: var(--tb-primary);
-    background: rgba(27, 173, 241, 0.1);
+
+  .top-bar-subnav-wrap {
+    justify-content: flex-start;
   }
-  
-  .inbox-count {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    min-width: 16px;
-    height: 16px;
-    line-height: 16px;
-    padding: 0 4px;
-    background: #ff3b30;
-    color: #fff;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
+
+  .top-bar-right {
+    width: 100%;
+    justify-content: space-between;
   }
-  
-  /* ----------------------------------------------
-     Responsive Mobile Adjustments
-  ---------------------------------------------- */
-  @media (max-width: 900px) {
-    .top-bar-inner {
-      flex-direction: column;
-      align-items: flex-start;
-      padding-left: var(--content-gutter);
-      padding-right: var(--content-gutter);
-      gap: 12px;
-      height: auto;
-      padding-top: 12px;
-      padding-bottom: 12px;
-    }
-  
-    .top-bar-subnav-wrap {
-      width: 100%;
-      justify-content: space-between;
-    }
-  
-    .top-bar-right {
-      justify-content: space-between;
-      width: 100%;
-      gap: 8px;
-    }
-  
-    .top-bar-search {
-      flex: 1;
-      min-width: 0;
-    }
+
+  .top-bar-search {
+    flex: 1 1 auto;
+    max-width: none;
   }
+}
+
+@media (max-width: 640px) {
+  .top-bar-subnav-button {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .top-bar-new-btn span {
+    display: none; /* icon-only on very small screens */
+  }
+
+  .top-bar-new-btn {
+    padding-inline: 10px;
+  }
+}

@@ -6,12 +6,13 @@ function Enrichment({ lead }) {
   const [enriched, setEnriched] = useState(null);
 
   useEffect(() => {
-    if (!lead.name || !lead.phone_number) return;
+    const phone = lead.primary_phone || lead.phone_number;
+    if (!lead.name || !phone) return;
 
     const [first_name, ...rest] = lead.name.split(' ');
     const last_name = rest.join(' ') || '';
 
-    fetchEnrichedLead(first_name, last_name, lead.address, lead.phone_number)
+    fetchEnrichedLead(first_name, last_name, lead.address, phone)
       .then(setEnriched)
       .catch(console.error);
   }, [lead]);

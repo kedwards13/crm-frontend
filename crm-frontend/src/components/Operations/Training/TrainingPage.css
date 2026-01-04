@@ -1,0 +1,44 @@
+.ops-training .training-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.training-card {
+  border: 1px solid var(--color-border, #2c2f36);
+  border-radius: 12px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--color-bg-card, #12151b) 90%, #000 10%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.training-card h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.training-card p {
+  margin: 0;
+  color: var(--text-2, #9ca3af);
+  font-size: 13px;
+}
+
+.training-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-2, #9ca3af);
+}
+
+.training-progress {
+  color: #34d399;
+}
+
+.training-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}

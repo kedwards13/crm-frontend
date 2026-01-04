@@ -1,173 +1,264 @@
-/* src/components/Communication/Messages.css */
+/* ============================================================
+   SMS Messaging Hub — Unified Communications Console
+   ============================================================ */
 
-.messages {
-    max-width: 600px;
-    margin: 2rem auto;
-    background: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   :root {
+    --sms-bg-dark: #0f141b;
+    --sms-bg-light: #ffffff;
+    --sms-border-dark: #263241;
+    --sms-border-light: #e0e6ed;
+    --sms-surface-dark: #161c25;
+    --sms-surface-light: #f8f9fb;
+    --sms-text-dark: #e5ecf3;
+    --sms-text-light: #1c1f23;
+    --sms-primary: #1badf1;
+    --sms-accent: #38c1ff;
+    --sms-radius: 10px;
   }
   
-  .messages-title {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-    color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .message-input {
+  .sms-page {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    height: 100%;
+    padding: 1.5rem;
+    background: var(--sms-bg-dark);
+    color: var(--sms-text-dark);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-y: auto;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light-mode .sms-page {
+    background: var(--sms-bg-light);
+    color: var(--sms-text-light);
   }
   
-  .text-area {
-    width: 100%;
-    height: 100px;
-    padding: 1rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    resize: vertical;
-  }
-  
-  .input-buttons {
+  /* ------------------------------------------------------------
+     Header
+  ------------------------------------------------------------ */
+  .sms-header {
     display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
   
-  .action-button {
-    background: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+  .sms-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--sms-primary);
+  }
+  
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--sms-border-dark);
+    background: rgba(255, 255, 255, 0.05);
+    color: inherit;
+    padding: 6px 10px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.25s ease;
+  }
+  .icon-btn:hover {
+    border-color: var(--sms-primary);
+    color: var(--sms-primary);
   }
   
-  .action-button:hover:not(:disabled) {
-    background: #218838;
+  /* ------------------------------------------------------------
+     AI Tools Section
+  ------------------------------------------------------------ */
+  .ai-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
   
   .secondary-button {
-    background: #007bff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--sms-primary);
     color: #fff;
+    font-weight: 500;
     border: none;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+    border-radius: var(--sms-radius);
+    padding: 0.6rem 1rem;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.25s ease;
   }
-  
-  .secondary-button:hover:not(:disabled) {
-    background: #0069d9;
+  .secondary-button:hover {
+    background: var(--sms-accent);
   }
-  
-  .action-button:disabled,
-  .secondary-button:disabled {
-    background: #aaa;
+  .secondary-button.loading {
+    opacity: 0.7;
     cursor: not-allowed;
   }
   
-  .ai-suggestion {
-    background: #f1f8e9;
-    border: 1px solid #dcedc8;
-    border-radius: 6px;
+  .ai-suggestion-box {
+    background: var(--sms-surface-dark);
+    border: 1px solid var(--sms-border-dark);
     padding: 1rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    border-radius: var(--sms-radius);
+    animation: fadeIn 0.3s ease;
+  }
+  body.light-mode .ai-suggestion-box {
+    background: var(--sms-surface-light);
+    border: 1px solid var(--sms-border-light);
+  }
+  .ai-suggestion-box p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  .ai-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .accept-btn,
+  .deny-btn {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: var(--sms-radius);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .accept-btn {
+    background: var(--sms-primary);
+    color: #fff;
+  }
+  .accept-btn:hover {
+    background: var(--sms-accent);
+  }
+  .deny-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+  }
+  .deny-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
   }
   
-  .ai-suggestion-text {
-    font-size: 1.1rem;
-    color: #33691e;
+  /* ------------------------------------------------------------
+     Conversation
+  ------------------------------------------------------------ */
+  .conversation-container {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--sms-surface-dark);
+    border: 1px solid var(--sms-border-dark);
+    border-radius: var(--sms-radius);
+    padding: 1rem;
     margin-bottom: 1rem;
+    scroll-behavior: smooth;
+  }
+  body.light-mode .conversation-container {
+    background: var(--sms-surface-light);
+    border-color: var(--sms-border-light);
   }
   
-  .error-message {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 1rem;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 1.5rem;
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.8;
   }
   
-  /* Message Log Styles */
-  .message-log {
-    border-top: 1px solid #eee;
-    padding-top: 1rem;
-  }
-  
-  .message-log-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .message-record {
+  /* ------------------------------------------------------------
+     Composer
+  ------------------------------------------------------------ */
+  .composer {
+    display: flex;
+    flex-direction: column;
+    background: var(--sms-surface-dark);
+    border: 1px solid var(--sms-border-dark);
+    border-radius: var(--sms-radius);
     padding: 0.75rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #f0f0f0;
+  }
+  body.light-mode .composer {
+    background: var(--sms-surface-light);
+    border-color: var(--sms-border-light);
+  }
+  .composer textarea {
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font-size: 0.95rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .composer textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  body.light-mode .composer textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4);
   }
   
-  .message-record.agent {
-    text-align: right;
+  .composer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
   }
   
-  .message-record.system {
-    text-align: center;
-    font-style: italic;
-    color: #555;
-  }
-  
-  .msg-text {
-    display: block;
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-    color: #333;
-  }
-  
-  .msg-time {
+  .action-button,
+  .group-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    font-weight: 500;
+    border-radius: var(--sms-radius);
+    padding: 0.55rem 1rem;
     font-size: 0.9rem;
-    color: #777;
+    cursor: pointer;
+    transition: all 0.25s ease;
   }
   
-  /* Link to customer card */
-  .customer-link {
-    display: inline-block;
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #007bff;
-    text-decoration: none;
+  .action-button {
+    background: var(--sms-primary);
+    color: #fff;
+  }
+  .action-button:hover {
+    background: var(--sms-accent);
   }
   
-  .customer-link:hover {
-    text-decoration: underline;
+  .group-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+    border: 1px solid var(--sms-border-dark);
+  }
+  .group-button:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: var(--sms-primary);
+    color: var(--sms-primary);
   }
   
-  /* Responsive adjustments */
-  @media (max-width: 600px) {
-    .messages {
-      margin: 1rem;
+  /* ------------------------------------------------------------
+     Animations
+  ------------------------------------------------------------ */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* ------------------------------------------------------------
+     Mobile Responsiveness
+  ------------------------------------------------------------ */
+  @media (max-width: 900px) {
+    .sms-page {
       padding: 1rem;
     }
-    .messages-title {
-      font-size: 1.5rem;
+    .sms-header h2 {
+      font-size: 1.2rem;
     }
-    .action-button,
-    .secondary-button {
-      padding: 0.5rem 1rem;
+    .composer textarea {
       font-size: 0.9rem;
-    }
-    .text-area {
-      height: 80px;
     }
   }

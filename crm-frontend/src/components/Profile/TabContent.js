@@ -63,8 +63,8 @@ function TabContent({ tab, lead }) {
         <section>
           <h3>Basic Information</h3>
           <p><b>Name:</b> {lead.name || lead.customer_name || 'N/A'}</p>
-          <p><b>Phone:</b> {lead.phone_number || 'N/A'}</p>
-          <p><b>Email:</b> {lead.email || 'N/A'}</p>
+          <p><b>Phone:</b> {lead.primary_phone || lead.phone_number || 'N/A'}</p>
+          <p><b>Email:</b> {lead.primary_email || lead.email || 'N/A'}</p>
           <p><b>Address:</b> {lead.address || 'N/A'}</p>
           <GoogleMapsEmbed address={lead.address || ''} />
 

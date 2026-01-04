@@ -1,35 +1,55 @@
-// src/components/Communication/MessageLog.js
-import React from 'react';
-import './MessageLog.css';
+// src/components/Communications/MessageLog.jsx
+import React, { useEffect, useRef } from "react";
+import "./MessageLog.css";
 
-/**
- * messages = [
- *   { text: "Hello there!", time: "09:15 AM", direction: "out" },
- *   { text: "Welcome! How can we assist you?", time: "09:00 AM", direction: "in" },
- * ]
- * direction: 'in' means from the customer, 'out' means from the agent
- */
-const MessageLog = ({ messages, title = "Conversation" }) => {
+export default function MessageLog({ messages = [], title = "Conversation" }) {
+  const bottomRef = useRef(null);
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  if (!messages.length)
+    return <p className="no-messages">No messages yet.</p>;
+
   return (
-    <div className="message-log-card">
+    <div className="message-log">
       <h3 className="message-log-title">{title}</h3>
-      {messages.length === 0 ? (
-        <p className="no-messages">No messages yet.</p>
-      ) : (
-        <ul className="message-log-list">
-          {messages.map((msg, index) => (
-            <li 
-              key={index} 
-              className={`message-record ${msg.direction === 'in' ? 'incoming' : 'outgoing'}`}
-            >
-              <div className="msg-text">{msg.text}</div>
-              <div className="msg-time">{msg.time}</div>
+
+      <ul className="message-log-list">
+        {messages.map((msg, i) => {
+          const direction =
+            msg.direction === "inbound" || msg.direction === "in" ? "in" : "out";
+
+          const text = msg.body || msg.text || "";
+          const image = msg.media_url; // Twilio MMS
+          const time = msg.timestamp
+            ? new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "";
+
+          return (
+            <li key={msg.id || i} className={`msg-bubble ${direction}`}>
+              <div className="msg-body">
+                {text && <p>{text}</p>}
+                {image && (
+                  <img src={image} alt="mms" className="msg-image" />
+                )}
+              </div>
+
+              <div className="msg-meta">
+                {direction === "in" ? "Customer • " : "You • "}
+                {time}
+              </div>
             </li>
-          ))}
-        </ul>
-      )}
+          );
+        })}
+      </ul>
+
+      <div ref={bottomRef}></div>
     </div>
   );
-};
-
-export default MessageLog;
+}

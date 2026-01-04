@@ -1,0 +1,271 @@
+/****************************************************
+    ABON GLOBAL ACCENTS
+****************************************************/
+:root {
+    --abon-blue: #4fc3f7;
+    --abon-blue-hover: #7edcff;
+    --abon-green: #3cd17c;
+    --abon-green-hover: #59e699;
+  
+    --abon-glow-blue: 0 0 14px rgba(79, 195, 247, 0.55);
+    --abon-glow-green: 0 0 14px rgba(60, 209, 124, 0.55);
+  
+    /* Light mode */
+    --lm-bg: #ffffff;
+    --lm-card: #f7f9fb;
+    --lm-border: #e2e6ea;
+    --lm-text: #20242a;
+    --lm-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  
+    /* Dark mode */
+    --dm-bg: #0e1116;
+    --dm-card: #161a21;
+    --dm-border: #28313d;
+    --dm-text: #e6e9ef;
+    --dm-shadow: 0 4px 28px rgba(0,0,0,0.42);
+  }
+  
+  /****************************************************
+      COLOR MODE CONTROL
+  ****************************************************/
+  body.light-mode {
+    --color-bg: var(--lm-bg);
+    --color-bg-card: var(--lm-card);
+    --color-border: var(--lm-border);
+    --color-text: var(--lm-text);
+    --shadow: var(--lm-shadow);
+  }
+  
+  body.dark-mode {
+    --color-bg: var(--dm-bg);
+    --color-bg-card: var(--dm-card);
+    --color-border: var(--dm-border);
+    --color-text: var(--dm-text);
+    --shadow: var(--dm-shadow);
+  }
+  
+
+/* Wrapper */
+.gt-customerlist {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  /* -----------------------------------------------
+     Toolbar
+  ------------------------------------------------ */
+  .gt-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .gt-search {
+    flex: 1;
+    min-width: 260px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+  
+    background: var(--popup-card);
+    border: 1px solid var(--popup-border);
+    color: var(--popup-text);
+  }
+  
+  .gt-toolbar-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .gt-select {
+    padding: 10px 14px;
+    border-radius: 10px;
+  
+    background: var(--popup-card);
+    border: 1px solid var(--popup-border);
+    color: var(--popup-text);
+  
+    font-size: 14px;
+  }
+  
+  .gt-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  
+    background: var(--popup-card);
+    border: 1px solid var(--popup-border);
+    color: var(--popup-text);
+  }
+  
+  .gt-btn.blue {
+    background: #3b82f6;
+    border: none;
+    color: white;
+  }
+  
+  .gt-btn.green {
+    background: #16a34a;
+    border: none;
+    color: white;
+  }
+  
+  .gt-btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* -----------------------------------------------
+     Metrics
+  ------------------------------------------------ */
+  .gt-metrics {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .gt-metric-card {
+    background: var(--popup-card);
+    border: 1px solid var(--popup-border);
+    border-radius: 12px;
+  
+    padding: 16px;
+    width: 170px;
+  }
+  
+  .gt-metric-card .label {
+    font-size: 13px;
+    color: var(--popup-muted);
+  }
+  
+  .gt-metric-card .value {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--popup-text);
+  }
+  
+  /* -----------------------------------------------
+     Table
+  ------------------------------------------------ */
+  .gt-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid var(--popup-border);
+  }
+  
+  .gt-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .gt-table thead th {
+    padding: 14px 8px;
+    font-size: 13px;
+    font-weight: 600;
+  
+    background: var(--popup-card);
+    border-bottom: 1px solid var(--popup-border);
+  
+    color: var(--popup-muted);
+    text-align: left;
+  }
+  
+  .gt-table tbody tr {
+    border-bottom: 1px solid var(--popup-border);
+    cursor: pointer;
+  }
+  
+  .gt-table tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  
+  .gt-cell {
+    padding: 12px 8px;
+    font-size: 14px;
+    color: var(--popup-text);
+  }
+  
+  /* Slimmer columns */
+  .name-col {
+    font-weight: 500;
+  }
+  
+  .summary-col {
+    max-width: 240px;
+  }
+  
+  /* -----------------------------------------------
+     Checkboxes
+  ------------------------------------------------ */
+  .gt-checkbox {
+    width: 16px;
+    height: 16px;
+  
+    accent-color: var(--popup-accent);
+  }
+  
+  /* Mobile fix */
+  @media (max-width: 600px) {
+    .gt-checkbox {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  /* -----------------------------------------------
+     Row Action Buttons
+  ------------------------------------------------ */
+  .gt-actions {
+    display: flex;
+    gap: 6px;
+  }
+  
+  .gt-icon-btn {
+    background: var(--popup-card);
+    border: 1px solid var(--popup-border);
+  
+    width: 32px;
+    height: 32px;
+  
+    border-radius: 8px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  
+  .gt-icon-btn.blue:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+  
+  .gt-icon-btn.green:hover {
+    border-color: #16a34a;
+    color: #16a34a;
+  }
+  
+  .gt-icon-btn.amber:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+  }
+  
+  /* -----------------------------------------------
+     Empty / Loading / Error States
+  ------------------------------------------------ */
+  .gt-loading,
+  .gt-empty,
+  .gt-error {
+    padding: 24px;
+    text-align: center;
+    font-size: 15px;
+    color: var(--popup-muted);
+  }

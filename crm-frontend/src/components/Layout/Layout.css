@@ -1,101 +1,181 @@
-/* ======= Shell scales & theme tokens ======= */
-:root{
-  /* Dimensions */
+/* =========================================================
+   ABON OS — ENTERPRISE LAYOUT SHELL (FINAL VERSION)
+   Ultra-stable stacking, popup-safe, mobile-safe
+========================================================= */
+
+/* =========================================================
+   LAYOUT TOKENS ONLY
+========================================================= */
+:root {
   --sidebar-width: 240px;
   --sidebar-width-collapsed: 64px;
+  --sidebar-current-width: var(--sidebar-width);
+
   --topbar-height: 64px;
-  --subnav-height: 0px;         /* set >0 only if you show a second row under TopBar */
-  --content-gutter: 16px;        /* single source of truth for horizontal padding */
-  --content-max: 1380px;
+  --subnav-height: 48px;
 
-  /* Dark theme */
-  --color-bg: #1c1c1e;
-  --color-bg-sidebar: #2c2c2e;
-  --color-bg-card: #2a2a2d;
-  --color-text: #f5f5f7;
-  --color-accent: #0a84ff;
-  --color-border: #3d3d3c;
-  --shadow: 0 8px 24px rgba(0,0,0,.35);
+  --content-gutter: 20px;
+  --content-max: 1420px;
+
+  --color-bg: var(--bg-0);
+  --color-bg-sidebar: var(--bg-1);
+  --color-bg-card: var(--bg-1);
+  --color-text: var(--text-0);
+  --color-border: var(--border-1);
+  --color-accent: var(--accent-0);
+
+  --shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 
-/* Light mode overrides toggled by body.light-mode */
-body.light-mode{
-  --color-bg: #f7f7f9;
-  --color-bg-sidebar: #ffffff;
-  --color-bg-card: #ffffff;
-  --color-text: #1c1c1e;
-  --color-accent: #007aff;
-  --color-border: #e4e4e7;
-  --shadow: 0 8px 24px rgba(0,0,0,.09);
+/* Collapsed */
+.layout-shell.collapsed {
+  --sidebar-current-width: var(--sidebar-width-collapsed);
 }
 
-/* Shell exposes “current” sidebar width (expanded/collapsed) */
-.layout-shell{ --sidebar-current-width: var(--sidebar-width); }
-.layout-shell.collapsed{ --sidebar-current-width: var(--sidebar-width-collapsed); }
+/* =========================================================
+   ROOT LAYOUT SHELL
+   IMPORTANT: REMOVE z-index to avoid stacking context
+========================================================= */
+.layout-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
 
-/* ======= Base ======= */
-html, body{ height:100%; margin:0; }
-*, *::before, *::after{ box-sizing: border-box; }
-
-body{
+  /* ❌ removed z-index: 0 */
+  /* no stacking context */
+  
   background: var(--color-bg);
-  color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
 }
 
-/* ======= Sidebar (fixed) ======= */
-.sidebar{
+/* =========================================================
+   SIDEBAR (fixed)
+========================================================= */
+.sidebar {
   position: fixed;
-  inset: 0 auto 0 0;
+  top: 0;
+  left: 0;
+
   width: var(--sidebar-current-width);
+  height: 100vh;
+
   background: var(--color-bg-sidebar);
   border-right: 1px solid var(--color-border);
-  box-shadow: var(--shadow);
-  z-index: 1000;
-  overflow-y: auto;
+
+  overflow: hidden;
   transition: width .25s ease;
+
+  z-index: 800;
 }
 
-/* ======= Content area (the only scroller) ======= */
-.content-area{
+/* =========================================================
+   TOP BAR (fixed)
+========================================================= */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-current-width);
+  right: 0;
+
+  height: var(--topbar-height);
+
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+
+  background: rgba(28,28,30,0.50);
+  backdrop-filter: blur(16px);
+
+  border-bottom: 1px solid var(--color-border);
+  transition: left .25s ease;
+
+  z-index: 900; /* correct */
+}
+
+/* Ensure topbar ALWAYS clears sidebar */
+.layout-shell.collapsed .topbar {
+  left: var(--sidebar-width-collapsed);
+}
+
+/* =========================================================
+   SUBNAV
+========================================================= */
+.subnav {
+  position: fixed;
+  top: var(--topbar-height);
+  left: var(--sidebar-current-width);
+  right: 0;
+
+  height: var(--subnav-height);
+
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+
+  background: rgba(28,28,30,0.35);
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid var(--color-border);
+  transition: left .25s ease;
+
+  z-index: 850;
+}
+
+.layout-shell.collapsed .subnav {
+  left: var(--sidebar-width-collapsed);
+}
+
+/* =========================================================
+   CONTENT AREA (scrollable)
+   IMPORTANT: REMOVE z-index so modal can pass over it
+========================================================= */
+.content-area {
   position: relative;
+  margin-left: var(--sidebar-current-width);
 
-  /* Clear the fixed bars up top */
-  padding-top: calc(var(--topbar-height) + var(--subnav-height) + 340px);
-
-  /* Align left edge to the same baseline as TopBar content */
-  padding-left:  var(--content-gutter);
+  padding-top: calc(var(--topbar-height) + var(--subnav-height) + 24px);
+  padding-left: var(--content-gutter);
   padding-right: var(--content-gutter);
 
-  /* Room at bottom for sticky things */
-  padding-bottom: 32px;
-
+  width: calc(100% - var(--sidebar-current-width));
   min-height: 100vh;
-  transition: padding-left .25s ease;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  transition: margin-left .25s ease;
+
+  /* ❌ REMOVE z-index: 0 
+     if this exists, popups can NEVER appear above */
 }
 
-/* Optional centered container for pages */
-.container{
-  width: 100%;
-  max-width: var(--content-max);
-  margin: 0 auto;
+/* Collapsed mode */
+.layout-shell.collapsed .content-area {
+  margin-left: var(--sidebar-width-collapsed);
+  width: calc(100% - var(--sidebar-width-collapsed));
 }
 
-/* Common card surface */
-.card{
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-}
+/* =========================================================
+   MOBILE
+========================================================= */
+@media (max-width: 720px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
 
-/* ======= Responsive tweaks ======= */
-@media (max-width: 1024px){
-  :root{ --topbar-height: 56px; }
-}
+  .sidebar.open {
+    transform: translateX(0);
+  }
 
-@media (max-width: 720px){
-  .layout-shell{ --sidebar-current-width: var(--sidebar-width-collapsed); }
-  .sidebar{ width: var(--sidebar-width-collapsed); }
-  .content-area{ padding-bottom: 24px; }
+  .topbar,
+  .subnav {
+    left: 0 !important;
+  }
+
+  .content-area {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-top: calc(var(--topbar-height) + var(--subnav-height) + 20px);
+  }
 }

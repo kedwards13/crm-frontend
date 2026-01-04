@@ -31,6 +31,14 @@
   text-align: center;
 }
 
+.dialer-subtitle {
+  margin: -0.5rem 0 1rem;
+  color: var(--color-text, #f5f5f7);
+  opacity: 0.75;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
 /* Input area for dialer */
 .dialer-input {
   display: flex;
@@ -47,6 +55,11 @@
   border-radius: 6px;
   background: var(--color-bg, #1c1c1e);
   color: var(--color-text, #f5f5f7);
+}
+
+.call-filter {
+  max-width: 160px;
+  flex: 0 0 160px;
 }
 
 /* Action button */
@@ -187,6 +200,12 @@
   font-size: 0.9rem;
   color: var(--color-text, #f5f5f7);
   margin-bottom: 0.5rem;
+}
+
+.record-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 /* Call back button */

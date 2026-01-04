@@ -16,6 +16,117 @@
   
   /* Head / filters */
   .inventory-head h1{ color:var(--text); }
+
+  .inventory-page{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    color:var(--text);
+  }
+
+  .inventory-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .inventory-head .filters{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .inventory-head input,
+  .inventory-head select{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:8px;
+    padding:8px 10px;
+    min-height:36px;
+  }
+
+  .inventory-grid{
+    display:grid;
+    gap:12px;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  }
+
+  .inventory-stat{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+  }
+
+  .inventory-stat .label{
+    color:var(--text-muted);
+    font-size:12px;
+  }
+
+  .inventory-stat .value{
+    font-size:20px;
+    font-weight:600;
+    color:var(--text);
+  }
+
+  .inventory-table{
+    display:grid;
+    gap:10px;
+    --inventory-columns: repeat(9, minmax(0, 1fr));
+  }
+
+  .inventory-thead,
+  .inventory-row{
+    display:grid;
+    gap:12px;
+    grid-template-columns: var(--inventory-columns);
+    align-items:center;
+  }
+
+  .inventory-thead{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--text-muted);
+    padding:0 4px;
+  }
+
+  .inventory-row{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+
+  .inventory-row .cap{ text-transform:capitalize; }
+
+  .inventory-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+
+  .inventory-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 9px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--bg);
+    font-size:12px;
+    color:var(--text-muted);
+  }
+
+  .inventory-pill.success{ color:#34d399; border-color:rgba(52,211,153,.5); }
+  .inventory-pill.warn{ color:#fbbf24; border-color:rgba(251,191,36,.5); }
+  .inventory-pill.danger{ color:#f87171; border-color:rgba(248,113,113,.5); }
+
+  .muted{ color:var(--text-muted); }
   
   /* Form */
   .inventory-form{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }

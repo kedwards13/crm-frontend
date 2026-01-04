@@ -131,6 +131,7 @@ const base = {
         { key: 'team',         label: 'Team & Roles',    path: '/settings/team' },
         { key: 'preferences',  label: 'Preferences',     path: '/settings/preferences' },
         { key: 'branding',     label: 'Branding',        path: '/settings/branding' },
+        { key: 'scheduling',   label: 'Scheduling',      path: '/settings/scheduling' },
         { key: 'integrations', label: 'Integrations',    path: '/settings/integrations' },
         { key: 'security',     label: 'Security',        path: '/settings/security' },
         ],
@@ -150,6 +151,13 @@ const base = {
       analytics: ['dateRange','segment','source'],
       finance: ['status','dateFrom','dateTo','min','max'],
       marketing: ['status','owner','channel'],
+    },
+
+    scheduling: {
+      serviceLabel: 'Service Type',
+      staffLabel: 'Assignee',
+      locationLabel: 'Location',
+      defaultDurationMins: 60,
     },
   
     // Feature flags (can be checked by routes/components to conditionally render)
@@ -206,6 +214,12 @@ const base = {
         leads:     ['name','phone_number','email','property_address','ask_price','motivation','timeline','created_at'],
         customers: ['company','contact','phone','email','buy_box','notes'],
       },
+      scheduling: {
+        serviceLabel: 'Deal Type',
+        staffLabel: 'Acquisition Rep',
+        locationLabel: 'Property Address',
+        defaultDurationMins: 30,
+      },
       features: {
         ...base.features,
         subscriptions: false,
@@ -251,6 +265,12 @@ const base = {
         leads:     ['name','phone_number','email','property_address','motivation','timeline','created_at'],
         customers: ['name','email','phone','criteria','budget','notes'],
       },
+      scheduling: {
+        serviceLabel: 'Showing Type',
+        staffLabel: 'Agent',
+        locationLabel: 'Property Address',
+        defaultDurationMins: 45,
+      },
       features: {
         ...base.features,
         subscriptions: false,
@@ -273,6 +293,7 @@ const base = {
         { path: '/communication', label: 'Communications', icon: 'FiPhone' },
         { path: '/analytics',     label: 'Analytics',      icon: 'FiTrendingUp' },
         { path: '/finance',       label: 'Finance',        icon: 'FiBarChart2' },
+        { path: '/revival',       label: 'Revival',        icon: 'FiBarChart2' },
         { path: '/marketing',     label: 'Marketing',      icon: 'FiTag' },
         { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' }, // consider adding a truck/wrench icon in ICON_MAP
         { path: '/settings',      label: 'Settings',       icon: 'FiSettings' },
@@ -326,6 +347,12 @@ const base = {
         leads:     ['name','phone_number','email','service','service_address','message','created_at'],
         customers: ['name','email','phone','service_plan','last_service','next_service'],
       },
+      scheduling: {
+        serviceLabel: 'Service Type',
+        staffLabel: 'Technician',
+        locationLabel: 'Service Address',
+        defaultDurationMins: 90,
+      },
       features: {
         ...base.features,
         subscriptions: false,
@@ -374,6 +401,12 @@ const base = {
       fieldSchemas: {
         leads:     ['name','phone_number','email','preferred_time','package_type','instructor_pref','created_at'],
         customers: ['name','email','phone','membership','trainer','renewal_date'],
+      },
+      scheduling: {
+        serviceLabel: 'Session Type',
+        staffLabel: 'Trainer',
+        locationLabel: 'Studio',
+        defaultDurationMins: 60,
       },
       features: {
         ...base.features,
@@ -468,7 +501,12 @@ const base = {
     const cfg = getIndustryConfig(industryKey);
     return cfg.filters?.[section] || industries.general.filters?.[section] || [];
   }
-  
+
+  export function getSchedulingConfig(industryKey) {
+    const cfg = getIndustryConfig(industryKey);
+    return cfg.scheduling || industries.general.scheduling || {};
+  }
+
   export function getFeatures(industryKey) {
     const cfg = getIndustryConfig(industryKey);
     return cfg.features || industries.general.features || {};

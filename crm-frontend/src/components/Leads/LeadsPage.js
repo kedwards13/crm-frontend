@@ -6,12 +6,22 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import TianLeads from "./TianLeads";
 import Assistant from "../Assistant/Assistant";
 import FiltersBar from "../Layout/FiltersBar";
 import { AuthContext } from "../../App";
-import api from "../../apiClient";
+import CustomerPopup from "../Profile/CustomerPopup";
+import { getIndustry } from "../../helpers/tenantHelpers";
+import {
+  listCrmLeads,
+  listWebLeads,
+  archiveWebLead,
+  spamWebLead,
+  transferLead,
+} from "../../api/leadsApi";
+import { normalizeLead } from "../../utils/normalizeLead";
+import { getPipelineConfig } from "../../constants/pipelineRegistry";
 import "./LeadsPage.css";
 
 function useDebouncedValue(value, delayMs = 250) {
@@ -25,13 +35,16 @@ function useDebouncedValue(value, delayMs = 250) {
 
 export default function LeadsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, token } = useContext(AuthContext);
+  const industry = getIndustry("general");
+  const pipelineConfig = getPipelineConfig(industry);
 
-  const [webLeads, setWebLeads] = useState([]);
+  const [inboxLeads, setInboxLeads] = useState([]);
+  const [loadingInbox, setLoadingInbox] = useState(false);
+  const [errorInbox, setErrorInbox] = useState("");
   const [crmLeads, setCrmLeads] = useState([]);
-  const [loadingWeb, setLoadingWeb] = useState(false);
   const [loadingCrm, setLoadingCrm] = useState(false);
-  const [errorWeb, setErrorWeb] = useState("");
   const [errorCrm, setErrorCrm] = useState("");
 
   const [query, setQuery] = useState("");
@@ -40,10 +53,33 @@ export default function LeadsPage() {
   const [selected, setSelected] = useState(new Set());
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [activeLead, setActiveLead] = useState(null);
 
   const debouncedQuery = useDebouncedValue(query, 250);
   const didRef = useRef(false);
   const searchRef = useRef(null);
+
+  const subPath = useMemo(() => {
+    const trimmed = location.pathname.replace(/^\/leads\/?/, "");
+    return trimmed.split("/")[0];
+  }, [location.pathname]);
+
+  const isWebView = !subPath || subPath === "intake" || subPath === "new";
+  const stageKeys = new Set((pipelineConfig?.stages || []).map((s) => s.key));
+  const stageLabelBySlug = new Map(
+    (pipelineConfig?.stages || []).map((s) => [
+      String(s.label || s.key)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
+      s.key,
+    ])
+  );
+  const crmStatus = isWebView
+    ? null
+    : stageKeys.has(subPath)
+    ? subPath
+    : stageLabelBySlug.get(subPath) || null;
 
   // Scroll reset
   useEffect(() => {
@@ -67,56 +103,125 @@ export default function LeadsPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selected]);
 
+  const loadInboxLeads = useCallback(async () => {
+    setLoadingInbox(true);
+    setErrorInbox("");
+    try {
+      const resWeb = await listWebLeads();
+      const rows = Array.isArray(resWeb.data)
+        ? resWeb.data
+        : resWeb.data?.results || [];
+      setInboxLeads(rows.map(normalizeLead));
+    } catch (e) {
+      setErrorInbox(e.message || "Web leads fetch failed");
+    } finally {
+      setLoadingInbox(false);
+    }
+  }, []);
+
+  const loadCrmLeads = useCallback(async () => {
+    setLoadingCrm(true);
+    setErrorCrm("");
+    try {
+      const resCrm = await listCrmLeads();
+      const rows = Array.isArray(resCrm.data)
+        ? resCrm.data
+        : resCrm.data?.results || [];
+      setCrmLeads(rows.map(normalizeLead));
+    } catch (e) {
+      setErrorCrm(e.message || "CRM fetch failed");
+    } finally {
+      setLoadingCrm(false);
+    }
+  }, []);
+
   // Load leads (web + CRM)
   useEffect(() => {
     if (!isAuthenticated || !token) return navigate("/login");
     if (didRef.current) return;
     didRef.current = true;
 
-    (async () => {
-      setLoadingWeb(true);
-      setErrorWeb("");
-      try {
-        const resWeb = await api.get("/leads/web-leads/");
-        const rows = Array.isArray(resWeb.data)
-          ? resWeb.data
-          : resWeb.data?.results || [];
-        setWebLeads(rows);
-      } catch (e) {
-        setErrorWeb(e.message || "Web lead fetch failed");
-      } finally {
-        setLoadingWeb(false);
-      }
+    loadInboxLeads();
+    loadCrmLeads();
+  }, [isAuthenticated, token, navigate, loadInboxLeads, loadCrmLeads]);
 
-      setLoadingCrm(true);
-      setErrorCrm("");
-      try {
-        const resCrm = await api.get("/leads/crm-leads/");
-        const rows = Array.isArray(resCrm.data)
-          ? resCrm.data
-          : resCrm.data?.results || [];
-        setCrmLeads(rows);
-      } catch (e) {
-        setErrorCrm(e.message || "CRM lead fetch failed");
-      } finally {
-        setLoadingCrm(false);
-      }
-    })();
-  }, [isAuthenticated, token, navigate]);
+  useEffect(() => {
+    if (!isWebView || sortBy === "newest") return;
+    setSortBy("newest");
+  }, [isWebView, sortBy]);
+
+  useEffect(() => {
+    if (location.state?.create !== "lead") return;
+    const industry = getIndustry("general");
+    setActiveLead({
+      object: "lead",
+      name: "",
+      email: "",
+      phone_number: "",
+      industry,
+      status: "new",
+      address: "",
+      attributes: {},
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.pathname, location.state, navigate]);
 
   // Filtering + Sorting logic
   const filteredLeads = useMemo(() => {
-    let rows = Array.isArray(webLeads) ? [...webLeads] : [];
+    let rows = Array.isArray(inboxLeads) ? [...inboxLeads] : [];
 
     const q = debouncedQuery.trim().toLowerCase();
     if (q) {
       rows = rows.filter((r) => {
         const fields = [
-          r.name,
-          r.email,
-          r.phone_number,
+          r.displayName,
+          r.displayEmail,
+          r.displayPhone,
+          r.serviceLabel || r.service,
           r.message,
-          r.address,
+        ].map((x) => (x || "").toString().toLowerCase());
+        return fields.some((f) => f.includes(q));
+      });
+    }
+
+    if (dateFrom)
+      rows = rows.filter(
+        (r) => r.created_at && new Date(r.created_at) >= new Date(dateFrom)
+      );
+    if (dateTo)
+      rows = rows.filter(
+        (r) => r.created_at && new Date(r.created_at) <= new Date(dateTo)
+      );
+
+    rows.sort(
+      (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    );
+
+    return rows;
+  }, [inboxLeads, debouncedQuery, dateFrom, dateTo]);
+
+  const filteredCrmLeads = useMemo(() => {
+    let rows = Array.isArray(crmLeads) ? [...crmLeads] : [];
+
+    if (crmStatus) {
+      rows = rows.filter((lead) => {
+        const safe = String(lead.safeStatus || "new");
+        if (safe === crmStatus) return true;
+        if (crmStatus === "new" && !stageKeys.has(safe)) return true;
+        return false;
+      });
+    }
+
+    const q = debouncedQuery.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter((r) => {
+        const fields = [
+          r.displayName,
+          r.displayEmail,
+          r.displayPhone,
+          r.serviceLabel || r.service,
+          r.message,
+          r.summary,
         ].map((x) => (x || "").toString().toLowerCase());
         return fields.some((f) => f.includes(q));
       });
@@ -133,17 +238,19 @@ export default function LeadsPage() {
 
     rows.sort((a, b) => {
       if (sortBy === "name")
-        return (a.name || "").localeCompare(b.name || "");
+        return (a.displayName || "").localeCompare(b.displayName || "");
       if (sortBy === "oldest")
         return new Date(a.created_at || 0) - new Date(b.created_at || 0);
       return new Date(b.created_at || 0) - new Date(a.created_at || 0);
     });
 
     return rows;
-  }, [webLeads, debouncedQuery, sortBy, dateFrom, dateTo]);
+  }, [crmLeads, crmStatus, debouncedQuery, sortBy, dateFrom, dateTo]);
 
   // Selection logic
-  const allVisibleIds = filteredLeads.map((r) => r.id);
+  const allVisibleIds = filteredLeads
+    .map((lead) => lead.id)
+    .filter((id) => id != null);
   const allSelected =
     allVisibleIds.length > 0 &&
     allVisibleIds.every((id) => selected.has(id));
@@ -156,6 +263,7 @@ export default function LeadsPage() {
   }, [selected, allSelected, allVisibleIds]);
 
   const toggleOne = (id) => {
+    if (id == null) return;
     const next = new Set(selected);
     next.has(id) ? next.delete(id) : next.add(id);
     setSelected(next);
@@ -164,13 +272,15 @@ export default function LeadsPage() {
   // Save handlers
   const handleSaveToCrm = async (webLead) => {
     try {
-      await api.post("/leads/transfer-lead/", { lead_id: webLead.id });
-      setWebLeads((rows) => rows.filter((r) => r.id !== webLead.id));
-      const res = await api.get("/leads/crm-leads/");
-      const newRows = Array.isArray(res.data)
-        ? res.data
-        : res.data?.results || [];
-      setCrmLeads(newRows);
+      const webLeadId = webLead.id;
+      if (!webLeadId) throw new Error("Missing web lead id");
+      await transferLead({ lead_id: webLeadId });
+      setSelected((prev) => {
+        const next = new Set(prev);
+        next.delete(webLeadId);
+        return next;
+      });
+      await Promise.all([loadInboxLeads(), loadCrmLeads()]);
     } catch (err) {
       alert(`Save to CRM failed: ${String(err).slice(0, 200)}`);
     }
@@ -179,11 +289,47 @@ export default function LeadsPage() {
   const handleBulkSave = async () => {
     const ids = Array.from(selected);
     if (!ids.length) return;
-    for (const id of ids) {
-      const lead = webLeads.find((r) => r.id === id);
-      if (lead) await handleSaveToCrm(lead);
+    try {
+      for (const id of ids) {
+        await transferLead({ lead_id: id });
+      }
+      setSelected(new Set());
+      await Promise.all([loadInboxLeads(), loadCrmLeads()]);
+    } catch (err) {
+      alert(`Bulk save failed: ${String(err).slice(0, 200)}`);
     }
-    setSelected(new Set());
+  };
+
+  const handleArchive = async (webLead) => {
+    try {
+      const webLeadId = webLead.id;
+      if (!webLeadId) throw new Error("Missing web lead id");
+      await archiveWebLead(webLeadId);
+      setSelected((prev) => {
+        const next = new Set(prev);
+        next.delete(webLeadId);
+        return next;
+      });
+      await loadInboxLeads();
+    } catch (err) {
+      alert(`Archive failed: ${String(err).slice(0, 200)}`);
+    }
+  };
+
+  const handleSpam = async (webLead) => {
+    try {
+      const webLeadId = webLead.id;
+      if (!webLeadId) throw new Error("Missing web lead id");
+      await spamWebLead(webLeadId);
+      setSelected((prev) => {
+        const next = new Set(prev);
+        next.delete(webLeadId);
+        return next;
+      });
+      await loadInboxLeads();
+    } catch (err) {
+      alert(`Spam failed: ${String(err).slice(0, 200)}`);
+    }
   };
 
   // Filter reset
@@ -194,27 +340,38 @@ export default function LeadsPage() {
     setSortBy("newest");
   };
 
+  const listTitle = isWebView ? "New Requests" : "Leads";
+  const listCount = isWebView ? filteredLeads.length : filteredCrmLeads.length;
+  const listLoading = isWebView ? loadingInbox : loadingCrm;
+  const listError = isWebView ? errorInbox : errorCrm;
+  const statusLabel = crmStatus
+    ? pipelineConfig?.stages?.find((s) => s.key === crmStatus)?.label || subPath
+    : "all";
+
   return (
     <div className="leads-page">
       {/* 🔹 Filters */}
       <FiltersBar
         left={
-          <button
-            className="filters-button"
-            onClick={toggleAll}
-            title={
-              allSelected ? "Unselect all visible" : "Select all visible leads"
-            }
-          >
-            {allSelected ? "☑︎" : "☐"}
-          </button>
+          isWebView ? (
+            <button
+              className="filters-button"
+              onClick={toggleAll}
+              title={
+                allSelected ? "Unselect all visible" : "Select all visible leads"
+              }
+              disabled={!allVisibleIds.length}
+            >
+              {allSelected ? "☑︎" : "☐"}
+            </button>
+          ) : null
         }
         center={
           <>
             <input
               ref={searchRef}
               className="filters-input"
-              placeholder="Search name, email, phone, address…"
+              placeholder="Search name, email, phone, service, message…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -245,6 +402,7 @@ export default function LeadsPage() {
               className="filters-select"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
+              disabled={isWebView}
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -278,13 +436,15 @@ export default function LeadsPage() {
               </button>
             </div>
 
-            <button
-              className="filters-button primary"
-              disabled={selected.size === 0}
-              onClick={handleBulkSave}
-            >
-              Save {selected.size || ""} to CRM
-            </button>
+            {isWebView && (
+              <button
+                className="filters-button primary"
+                disabled={selected.size === 0}
+                onClick={handleBulkSave}
+              >
+                Add {selected.size || ""} to Pipeline
+              </button>
+            )}
           </>
         }
       />
@@ -292,45 +452,80 @@ export default function LeadsPage() {
       {/* 🔹 Main Leads Layout */}
       <div className="leads-layout">
         <div className={`leads-list-panel ${view}`}>
+          {isWebView && (
+            <div className="inbox-tabs" role="tablist" aria-label="Lead inbox">
+              <button className="inbox-tab active" role="tab" aria-selected="true">
+                New Requests
+              </button>
+              <button className="inbox-tab" role="tab" aria-selected="false" disabled>
+                Archived
+              </button>
+              <button className="inbox-tab" role="tab" aria-selected="false" disabled>
+                Spam
+              </button>
+            </div>
+          )}
           <h2 className="lead-section-title">
-            Intake • {filteredLeads.length} result
-            {filteredLeads.length === 1 ? "" : "s"}
+            {listTitle} • {listCount} result
+            {listCount === 1 ? "" : "s"}
+            {!isWebView && crmStatus && ` (${statusLabel})`}
           </h2>
 
-          {loadingWeb && <p className="loading">Loading…</p>}
-          {errorWeb && <p className="error">{errorWeb}</p>}
+          {listLoading && <p className="loading">Loading…</p>}
+          {listError && <p className="error">{listError}</p>}
 
-          {!loadingWeb && !errorWeb && filteredLeads.length > 0 && (
+          {!listLoading && !listError && isWebView && filteredLeads.length > 0 && (
             <div className={`lead-grid ${view}`}>
-              {filteredLeads.map((lead) => (
-                <div
-                  key={lead.id}
-                  className={`selectable ${
-                    selected.has(lead.id) ? "selected" : ""
-                  }`}
-                >
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(lead.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={() => toggleOne(lead.id)}
-                    />
-                  </label>
+              {filteredLeads.map((lead) => {
+                const leadKey = `web-${lead.id ?? lead.created_at}`;
+                const selectable = lead.id != null;
+                return (
+                  <div
+                    key={leadKey}
+                    className={
+                      selectable
+                        ? `selectable ${selected.has(lead.id) ? "selected" : ""}`
+                        : ""
+                    }
+                  >
+                    {selectable && (
+                      <label className="checkbox">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(lead.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => toggleOne(lead.id)}
+                        />
+                      </label>
+                    )}
 
-                  <TianLeads
-                    bare
-                    leads={[lead]}
-                    onLeadClick={() => {}}
-                    onSaveToCrm={handleSaveToCrm}
-                    mode="website"
-                  />
-                </div>
-              ))}
+                    <TianLeads
+                      bare
+                      leads={[lead]}
+                      onSaveToCrm={handleSaveToCrm}
+                      onArchive={handleArchive}
+                      onSpam={handleSpam}
+                      onViewInPipeline={() => navigate("/leads/pipeline")}
+                      mode="website"
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {!loadingWeb && !errorWeb && filteredLeads.length === 0 && (
+          {!listLoading && !listError && !isWebView && filteredCrmLeads.length > 0 && (
+            <div className={`lead-grid ${view}`}>
+              <TianLeads
+                bare
+                leads={filteredCrmLeads}
+                mode="crm"
+                onLeadClick={(lead) => setActiveLead(lead)}
+              />
+            </div>
+          )}
+
+          {!listLoading && !listError && listCount === 0 && (
             <div className="empty">No leads match your filters.</div>
           )}
         </div>
@@ -344,13 +539,25 @@ export default function LeadsPage() {
             />
           </div>
 
-          {errorCrm && (
+          {listError && isWebView && (
             <div className="error" style={{ marginTop: 8 }}>
-              {errorCrm}
+              {listError}
             </div>
           )}
         </div>
       </div>
+
+      {activeLead && (
+        <CustomerPopup
+          lead={activeLead}
+          leadType="lead"
+          onClose={() => {
+            setActiveLead(null);
+            loadInboxLeads();
+            loadCrmLeads();
+          }}
+        />
+      )}
     </div>
   );
 }

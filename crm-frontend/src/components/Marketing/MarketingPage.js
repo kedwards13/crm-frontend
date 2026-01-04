@@ -1,6 +1,8 @@
 // src/components/Marketing/MarketingPage.js
 
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Campaigns from './Campaigns';
 import {
   LineChart,
   Line,
@@ -32,7 +34,7 @@ const adsPerformanceData = [
 
 const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
-const MarketingPage = () => {
+const MarketingDashboard = () => {
   return (
     <div className="marketing-page">
       <h1 className="marketing-title">Marketing Dashboard</h1>
@@ -167,5 +169,24 @@ const MarketingPage = () => {
     </div>
   );
 };
+
+const Placeholder = ({ title }) => (
+  <div className="marketing-page">
+    <h1 className="marketing-title">{title}</h1>
+    <p className="muted">This section is ready for the next build-out.</p>
+  </div>
+);
+
+const MarketingPage = () => (
+  <Routes>
+    <Route index element={<MarketingDashboard />} />
+    <Route path="campaigns" element={<Campaigns />} />
+    <Route path="automations" element={<Placeholder title="Automations" />} />
+    <Route path="segments" element={<Placeholder title="Segments" />} />
+    <Route path="forms" element={<Placeholder title="Forms & Pages" />} />
+    <Route path="ai" element={<Placeholder title="AI Studio" />} />
+    <Route path="*" element={<MarketingDashboard />} />
+  </Routes>
+);
 
 export default MarketingPage;

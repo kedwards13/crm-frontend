@@ -1,0 +1,142 @@
+.billing-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 18px;
+}
+
+.billing-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.billing-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.billing-card-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.billing-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: var(--bg-2);
+  color: var(--text-1);
+  border: 1px solid var(--border-1);
+}
+
+.billing-pill.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.billing-pill.warn {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.billing-pill.muted {
+  color: var(--text-2);
+}
+
+.billing-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.billing-stat-label {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.billing-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-0);
+}
+
+.billing-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.billing-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.billing-method {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+}
+
+.billing-method-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.billing-method-sub {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.billing-table {
+  display: grid;
+  gap: 10px;
+}
+
+.billing-table-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.7fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  font-size: 13px;
+}
+
+.billing-table-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
+
+@media (max-width: 900px) {
+  .billing-grid {
+    grid-template-columns: 1fr;
+  }
+}

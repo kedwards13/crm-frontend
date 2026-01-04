@@ -28,6 +28,39 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 0;
+  align-self: start;
+  position: sticky;
+  top: calc(var(--topbar-height, 64px) + var(--subnav-height, 48px) + 12px);
+  max-height: calc(100vh - var(--topbar-height, 64px) - var(--subnav-height, 48px) - 24px);
+  overflow: auto;
+}
+
+.inbox-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.inbox-tab {
+  border-radius: 999px;
+  border: 1px solid var(--color-border, #2a2a2a);
+  background: var(--color-bg-card, #111);
+  color: var(--color-text, #eaeaea);
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.inbox-tab.active {
+  background: var(--color-accent, #0a84ff);
+  border-color: transparent;
+  color: #fff;
+}
+
+.inbox-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* AI Assistant Box */
@@ -38,14 +71,19 @@
   padding: 1rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   transition: background 0.3s ease, border 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
 }
 
 /* Support dark mode override via class or :root */
-body.dark .leads-page {
+body.dark-mode .leads-page {
   background-color: var(--color-bg, #0f0f0f);
   color: var(--color-text, #f1f1f1);
 }
-body.dark .ai-assistant-box {
+body.dark-mode .ai-assistant-box {
   background: var(--color-bg-card, #151515);
   border-color: var(--color-border, #2a2a2a);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
@@ -97,6 +135,10 @@ body.dark .ai-assistant-box {
   }
   .lead-grid.grid {
     grid-template-columns: 1fr;
+  }
+  .leads-right-panel {
+    position: static;
+    top: auto;
   }
 }
 @media (max-width: 600px) {

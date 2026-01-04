@@ -1,75 +1,56 @@
-/* src/components/GlobalSearch.css */
-
+/* Unified clean, centered alignment */
 .global-search-container {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    padding: 0.5rem;
-  }
-  
-  .search-icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ccc;
-  }
-  
-  @keyframes orbGlow {
-    0% {
-      transform: scale(1);
-      box-shadow: 0 0 10px rgba(50, 205, 50, 0.4);
-    }
-    100% {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(30, 144, 255, 0.6);
-    }
-  }
-  
-  .global-search-input {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.3s, box-shadow 0.3s;
-  }
-  
-  .global-search-input:focus {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 8px var(--color-accent);
-  }
-  
-  .global-search-results {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    right: 0;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    max-height: 300px;
-    overflow-y: auto;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    z-index: 1002;
-  }
-  
-  .global-search-results li {
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
-  }
-  
-  .global-search-results li:hover {
-    background: var(--color-accent);
-    color: #fff;
-  }
+  height: 38px;
+  min-width: 300px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+}
+
+.global-search-input {
+  flex: 1;
+  font-size: 15px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  height: 100%;
+  padding: 0;
+}
+
+.global-search-input:focus {
+  outline: none;
+}
+
+/* Results dropdown */
+.global-search-results {
+  margin-top: 6px;
+  background: rgba(20,22,28,0.94);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 6px 0;
+
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 42px;
+  z-index: 2000;
+
+  backdrop-filter: blur(14px);
+}
