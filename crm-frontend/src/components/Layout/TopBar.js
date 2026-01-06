@@ -6,11 +6,11 @@ import {
   FiInbox,
   FiChevronLeft,
   FiChevronRight,
-  FiSun,
-  FiMoon,
   FiPlus,
   FiSearch,
 } from "react-icons/fi";
+import { getIndustry } from "../../helpers/tenantHelpers";
+import { getIndustryCopy } from "../../constants/industryCopy";
 
 import "./TopBar.css";
 
@@ -20,8 +20,6 @@ export default function TopBar({
   tabs = [],
   activeTab,
   onTabChange,
-  theme = "system",
-  onThemeChange,
 }) {
   const navigate = useNavigate();
   const scrollerRef = useRef(null);
@@ -30,6 +28,8 @@ export default function TopBar({
 
   const [showNewMenu, setShowNewMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const industry = getIndustry("general");
+  const copy = getIndustryCopy(industry);
 
   /* --------------------------------------------------------------------------
      🌟 Overflow Handling for Scrolling Pills
@@ -69,9 +69,6 @@ export default function TopBar({
       behavior: "smooth",
     });
   };
-
-  const handleThemeToggle = () =>
-    onThemeChange(theme === "dark" ? "light" : "dark");
 
   const hasTabs = useMemo(() => tabs?.length > 0, [tabs]);
 
@@ -175,7 +172,7 @@ export default function TopBar({
             />
             <input
               type="text"
-              placeholder="Search for customers, deals, tasks..."
+              placeholder={copy.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -196,15 +193,6 @@ export default function TopBar({
             )}
           </div>
 
-          {/* Theme Toggle */}
-          <button
-            className="top-bar-btn"
-            onClick={handleThemeToggle}
-            aria-label="Theme Toggle"
-          >
-            {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
-          </button>
-
           {/* + NEW BUTTON */}
           <div className="top-bar-new-container">
             <button
@@ -218,10 +206,10 @@ export default function TopBar({
             {showNewMenu && (
               <div className="top-bar-new-menu">
                 <button onClick={() => handleNewAction("/customers/new")}>
-                  Add Customer
+                  Add {copy.customer}
                 </button>
                 <button onClick={() => handleNewAction("/leads/new")}>
-                  Add Lead
+                  Add {copy.lead}
                 </button>
                 <button onClick={() => handleNewAction("/revival/scan")}>
                   Scan Quote

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   LineChart,
   Line,
@@ -25,31 +25,13 @@ function getDynamicRevenueData() {
 }
 
 const RevenueChartWidget = ({ data = getDynamicRevenueData() }) => {
-  useEffect(() => {
-    console.log('Revenue data:', data);
-  }, [data]);
-
   return (
     <div className="revenue-chart-widget">
       <h3 className="widget-title">Revenue</h3>
       <div className="chart-container">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-            <defs>
-              <linearGradient id="revenueGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#00f2fe" />
-                <stop offset="100%" stopColor="#ff8c00" />
-              </linearGradient>
-              <filter id="lineShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow
-                  dx="0"
-                  dy="0"
-                  stdDeviation="5"
-                  floodColor="rgba(0,242,254,0.6)"
-                />
-              </filter>
-            </defs>
-            <CartesianGrid stroke="#444446" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--border-0)" strokeDasharray="3 3" />
             <XAxis
               dataKey="month"
               type="category"
@@ -57,7 +39,7 @@ const RevenueChartWidget = ({ data = getDynamicRevenueData() }) => {
               interval={0}
               tick={{
                 fontSize: 10,
-                fill: '#ccc',
+                fill: 'var(--text-2)',
                 angle: -45,
                 textAnchor: 'end',
               }}
@@ -65,15 +47,14 @@ const RevenueChartWidget = ({ data = getDynamicRevenueData() }) => {
             />
             <YAxis hide />
             <Tooltip
-              contentStyle={{ backgroundColor: '#2c2c2e', border: 'none', color: '#fff' }}
+              contentStyle={{ backgroundColor: 'var(--bg-1)', border: '1px solid var(--border-0)', color: 'var(--text-0)' }}
             />
             <Line
               type="monotone"
               dataKey="revenue"
-              stroke="url(#revenueGradient)"
+              stroke="var(--accent-0)"
               strokeWidth={3}
               dot={false}
-              filter="url(#lineShadow)"
             />
           </LineChart>
         </ResponsiveContainer>

@@ -22,6 +22,7 @@ import {
 } from "../../api/leadsApi";
 import { normalizeLead } from "../../utils/normalizeLead";
 import { getPipelineConfig } from "../../constants/pipelineRegistry";
+import { getIndustryCopy } from "../../constants/industryCopy";
 import "./LeadsPage.css";
 
 function useDebouncedValue(value, delayMs = 250) {
@@ -38,6 +39,7 @@ export default function LeadsPage() {
   const location = useLocation();
   const { isAuthenticated, token } = useContext(AuthContext);
   const industry = getIndustry("general");
+  const copy = getIndustryCopy(industry);
   const pipelineConfig = getPipelineConfig(industry);
 
   const [inboxLeads, setInboxLeads] = useState([]);
@@ -340,7 +342,7 @@ export default function LeadsPage() {
     setSortBy("newest");
   };
 
-  const listTitle = isWebView ? "New Requests" : "Leads";
+  const listTitle = isWebView ? copy.webLeadTitle : copy.leads;
   const listCount = isWebView ? filteredLeads.length : filteredCrmLeads.length;
   const listLoading = isWebView ? loadingInbox : loadingCrm;
   const listError = isWebView ? errorInbox : errorCrm;
@@ -350,7 +352,7 @@ export default function LeadsPage() {
 
   return (
     <div className="leads-page">
-      {/* 🔹 Filters */}
+      {/* Filters */}
       <FiltersBar
         left={
           isWebView ? (
@@ -362,7 +364,7 @@ export default function LeadsPage() {
               }
               disabled={!allVisibleIds.length}
             >
-              {allSelected ? "☑︎" : "☐"}
+              {allSelected ? "None" : "All"}
             </button>
           ) : null
         }
@@ -371,7 +373,7 @@ export default function LeadsPage() {
             <input
               ref={searchRef}
               className="filters-input"
-              placeholder="Search name, email, phone, service, message…"
+              placeholder="Search name, email, phone, service, message..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -406,7 +408,7 @@ export default function LeadsPage() {
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
-              <option value="name">Name A–Z</option>
+              <option value="name">Name A-Z</option>
             </select>
 
             <div
@@ -422,7 +424,7 @@ export default function LeadsPage() {
                 role="tab"
                 aria-selected={view === "grid"}
               >
-                ▦
+                Grid
               </button>
               <button
                 className={`filters-button ${
@@ -432,7 +434,7 @@ export default function LeadsPage() {
                 role="tab"
                 aria-selected={view === "list"}
               >
-                ☰
+                List
               </button>
             </div>
 
@@ -449,7 +451,7 @@ export default function LeadsPage() {
         }
       />
 
-      {/* 🔹 Main Leads Layout */}
+      {/* Main Leads Layout */}
       <div className="leads-layout">
         <div className={`leads-list-panel ${view}`}>
           {isWebView && (
@@ -466,12 +468,12 @@ export default function LeadsPage() {
             </div>
           )}
           <h2 className="lead-section-title">
-            {listTitle} • {listCount} result
+            {listTitle} - {listCount} result
             {listCount === 1 ? "" : "s"}
             {!isWebView && crmStatus && ` (${statusLabel})`}
           </h2>
 
-          {listLoading && <p className="loading">Loading…</p>}
+          {listLoading && <p className="loading">Loading...</p>}
           {listError && <p className="error">{listError}</p>}
 
           {!listLoading && !listError && isWebView && filteredLeads.length > 0 && (
@@ -526,16 +528,16 @@ export default function LeadsPage() {
           )}
 
           {!listLoading && !listError && listCount === 0 && (
-            <div className="empty">No leads match your filters.</div>
+            <div className="empty">{copy.leadsEmpty}</div>
           )}
         </div>
 
-        {/* 🔹 AI Assistant */}
+        {/* AI Assistant */}
         <div className="leads-right-panel">
           <div className="ai-assistant-box">
             <Assistant
               context="leads"
-              placeholder="Ask: summarize leads, draft SMS, rank by intent…"
+              placeholder="Ask: summarize leads, draft SMS, rank by intent..."
             />
           </div>
 

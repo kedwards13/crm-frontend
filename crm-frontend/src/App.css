@@ -13,68 +13,86 @@
 ------------------------------------------------------------ */
 :root {
   /* BACKGROUNDS */
-  --bg-0: #0e0f11;   /* app shell */
-  --bg-1: #141618;   /* cards / panels */
-  --bg-2: #1b1d20;   /* hover / deep surfaces */
-  --bg-3: #26292d;   /* borders / outlines */
+  --bg-0: #f7f7f5;   /* app shell */
+  --bg-1: #ffffff;   /* cards / panels */
+  --bg-2: #f1f3f2;   /* hover / deep surfaces */
+  --bg-3: #e6eae6;   /* borders / outlines */
 
   /* TEXT */
-  --text-0: #f7f9fb;
-  --text-1: #c3c7cc;
-  --text-2: #8e949c;
+  --text-0: #1f2a24;
+  --text-1: #2f3b33;
+  --text-2: #5f6b63;
 
-  /* ACCENT */
-  --accent-0: #4ea3ff;
-  --accent-1: #77c0ff;
-  --accent-2: #b0ddff;
+  /* ACCENT (neutral gray only) */
+  --accent-0: #5c636a;
+  --accent-1: #4f565d;
+  --accent-2: #5c636a;
+  --accent-gradient: var(--accent-0);
 
   /* BUTTONS */
-  --btn-bg: #222427;
-  --btn-bg-hover: #2b2e32;
+  --btn-bg: #f4f6f4;
+  --btn-bg-hover: #eef1ee;
 
   /* BORDERS */
-  --border-0: #2d2f33;
-  --border-1: #3a3d41;
+  --border-0: #d9ddd7;
+  --border-1: #cfd5ce;
 
   /* RADII & SHADOWS */
-  --radius: 10px;
+  --radius: 8px;
   --radius-sm: 6px;
-  --shadow-0: 0 4px 22px rgba(0,0,0,0.35);
+  --shadow-0: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-1: 0 2px 6px rgba(15, 23, 42, 0.08);
 
   /* INPUTS */
-  --input-bg: #101214;
-  --input-border: #2c2e33;
-  --input-focus: 0 0 10px rgba(78,163,255,0.45);
+  --input-bg: #ffffff;
+  --input-border: #d9ddd7;
+  --input-focus: 0 0 0 3px rgba(92, 99, 106, 0.18);
 
-  --transition: 0.22s ease;
+  /* SHARED */
+  --transition: 0.18s ease;
+
+  --color-bg: var(--bg-0);
+  --color-bg-card: var(--bg-1);
+  --color-bg-elevated: var(--bg-2);
+  --color-border: var(--border-0);
+  --color-text: var(--text-0);
+  --color-muted: var(--text-2);
+  --color-accent: var(--accent-0);
+
+  --popup-card: var(--bg-1);
+  --popup-border: var(--border-0);
+  --popup-text: var(--text-0);
+  --popup-muted: var(--text-2);
+  --popup-accent: var(--accent-0);
+  --popup-shadow: var(--shadow-0);
 }
 
 /* ------------------------------------------------------------
    LIGHT MODE OVERRIDE
 ------------------------------------------------------------ */
 body.light-mode {
-  --bg-0: #ffffff;
-  --bg-1: #f7f8fa;
-  --bg-2: #ffffff;
-  --bg-3: #e5e8ec;
+  --bg-0: var(--bg-0);
+  --bg-1: var(--bg-1);
+  --bg-2: var(--bg-2);
+  --bg-3: var(--bg-3);
 
-  --text-0: #1c1d1f;
-  --text-1: #44484d;
-  --text-2: #6b6f75;
+  --text-0: var(--text-0);
+  --text-1: var(--text-1);
+  --text-2: var(--text-2);
 
-  --accent-0: #007aff;
-  --accent-1: #339cff;
-  --accent-2: #79befc;
+  --accent-0: var(--accent-0);
+  --accent-1: var(--accent-1);
+  --accent-2: var(--accent-2);
 
-  --btn-bg: #f3f4f7;
-  --btn-bg-hover: #e6e8eb;
+  --btn-bg: var(--btn-bg);
+  --btn-bg-hover: var(--btn-bg-hover);
 
-  --border-0: #d9dbe0;
-  --border-1: #c9ccd1;
+  --border-0: var(--border-0);
+  --border-1: var(--border-1);
 
-  --input-bg: #f3f4f7;
-  --input-border: #c9ccd1;
-  --input-focus: 0 0 10px rgba(0,122,255,0.25);
+  --input-bg: var(--input-bg);
+  --input-border: var(--input-border);
+  --input-focus: var(--input-focus);
 }
 
 /* ------------------------------------------------------------
@@ -142,7 +160,7 @@ button:active {
   background: var(--accent-0) !important;
   border: none !important;
   color: #fff !important;
-  box-shadow: 0 0 12px rgba(78,163,255,0.35);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 .btn-primary:hover,

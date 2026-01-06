@@ -13,6 +13,7 @@ export const industryLabels = {
   real_estate: getLabels('real_estate'),
   pest_control: getLabels('pest_control'),
   fitness: getLabels('fitness'),
+  food_wellness: getLabels('food_wellness'),
 };
 
 /** Preferred helper for dynamic lookups */

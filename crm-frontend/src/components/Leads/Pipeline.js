@@ -3,7 +3,9 @@ import Assistant from '../Assistant/Assistant';
 import CustomerPopup from '../Profile/CustomerPopup';
 import FiltersBar from '../Layout/FiltersBar';
 import { getIndustry } from '../../utils/tenantHelpers';
+import { normalizeIndustry } from '../../helpers/tenantHelpers';
 import { getPipelineConfig } from '../../constants/pipelineRegistry';
+import { getIndustryCopy } from '../../constants/industryCopy';
 import { listCrmLeads } from '../../api/leadsApi';
 import { normalizeLead } from '../../utils/normalizeLead';
 import './Pipeline.css';
@@ -36,8 +38,9 @@ const bucketByStage = (leads, stageConfig) => {
 };
 
 export default function PipelineView() {
-  const industry = (getIndustry?.() || 'general').toLowerCase();
+  const industry = normalizeIndustry(getIndustry?.() || 'general');
   const config   = getPipelineConfig(industry);
+  const copy = getIndustryCopy(industry);
 
   const [allLeads, setAllLeads] = useState([]);
   const [loading, setLoading]   = useState(true);
@@ -238,7 +241,7 @@ export default function PipelineView() {
       <FiltersBar
         left={
           <button className="filters-button" onClick={toggleAllVisible} title={allVisibleSelected ? 'Unselect all' : 'Select all (visible)'}>
-            {allVisibleSelected ? '☑︎' : '☐'}
+            {allVisibleSelected ? 'None' : 'All'}
           </button>
         }
         center={
@@ -246,7 +249,7 @@ export default function PipelineView() {
             <input
               ref={searchRef}
               className="filters-input"
-              placeholder="Search (⌘/Ctrl+F) name, email, phone, address, notes…"
+              placeholder="Search (Cmd/Ctrl+F) name, email, phone, address, notes..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -261,8 +264,8 @@ export default function PipelineView() {
             <select className="filters-select" value={sortBy} onChange={(e)=>setSortBy(e.target.value)}>
               <option value="updated_desc">Updated: Newest</option>
               <option value="updated_asc">Updated: Oldest</option>
-              <option value="value_desc">Value: High → Low</option>
-              <option value="value_asc">Value: Low → High</option>
+              <option value="value_desc">Value: High - Low</option>
+              <option value="value_asc">Value: Low - High</option>
             </select>
           </>
         }
@@ -270,16 +273,13 @@ export default function PipelineView() {
 
       <div className="pipeline container">
         <div className="pipeline-header">
-          <h1>{industry === 'pest_control' ? 'Service Pipeline' :
-                industry === 'fitness' ? 'Membership Pipeline' :
-                industry === 'auto' ? 'Shop Pipeline' :
-                'Deals Pipeline'}</h1>
+          <h1>{copy.pipelineTitle}</h1>
           <div className="pipeline-ai-top">
             <Assistant context="pipeline" tianLeads={allLeads} />
           </div>
         </div>
 
-        {loading && <p className="pl-loading">Loading…</p>}
+        {loading && <p className="pl-loading">Loading...</p>}
         {error && <p className="pl-error">{error}</p>}
 
         {!loading && !error && (
@@ -344,7 +344,7 @@ export default function PipelineView() {
                           <div className="pl-card-meta">
                             <span className="pl-updated" title={lead.updated_at || lead.created_at}>
                               Updated: {lead.updated_at ? String(lead.updated_at).slice(0,10) :
-                                       lead.created_at ? String(lead.created_at).slice(0,10) : '—'}
+                                       lead.created_at ? String(lead.created_at).slice(0,10) : '--'}
                             </span>
                           </div>
 
