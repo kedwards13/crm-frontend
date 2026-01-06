@@ -1,6 +1,6 @@
 .marketplace {
     padding: 2rem;
-    color: #fff;
+    color: var(--text-0);
   }
   
   .filters {
@@ -11,10 +11,10 @@
   
   .filters input {
     padding: 0.5rem;
-    border: 1px solid #444;
-    background: #1e1e1e;
-    color: #fff;
-    border-radius: 6px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-0);
+    border-radius: var(--radius-sm);
   }
   
   .property-grid {
@@ -24,19 +24,20 @@
   }
   
   .property-card {
-    background: #1c1c1e;
+    background: var(--bg-1);
     padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px #00000055;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-0);
+    box-shadow: var(--shadow-0);
   }
   
   .tags span {
-    background: #333;
-    color: #ddd;
+    background: var(--bg-2);
+    color: var(--text-1);
     font-size: 0.75rem;
     padding: 4px 8px;
     margin-right: 6px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
   }
   
   .card-actions {
@@ -48,23 +49,22 @@
   .card-actions button {
     flex: 1;
     padding: 0.5rem;
-    background: #0a84ff;
-    color: white;
-    border: none;
-    border-radius: 6px;
+    background: var(--btn-bg);
+    color: var(--text-0);
+    border: 1px solid var(--border-0);
+    border-radius: var(--radius-sm);
     cursor: pointer;
   }
   
   .card-actions button:hover {
-    background: #0070d1;
+    background: var(--btn-bg-hover);
   }
   
   /* === Modal === */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
+    background: rgba(10, 10, 10, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -72,10 +72,11 @@
   }
   
   .modal {
-    background: #1c1c1e;
+    background: var(--bg-1);
     padding: 2rem;
-    border-radius: 12px;
-    color: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-0);
+    color: var(--text-0);
     max-width: 600px;
     width: 90%;
   }

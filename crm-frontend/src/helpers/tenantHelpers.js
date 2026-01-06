@@ -7,7 +7,7 @@ export function normalizeIndustry(raw) {
     const s = String(s0 || 'general').trim().toLowerCase().replace(/\s+/g, ' ');
   
     // Already-normalized keys (idempotent)
-    if (['pest_control', 'real_estate', 'wholesaler', 'fitness', 'auto', 'general'].includes(s)) {
+    if (['pest_control', 'real_estate', 'wholesaler', 'fitness', 'food_wellness', 'auto', 'general'].includes(s)) {
       return s;
     }
   
@@ -30,6 +30,12 @@ export function normalizeIndustry(raw) {
       'studio', 'yoga', 'pilates', 'spin', 'boxing',
       'medspa', 'med spa', 'spa', 'salon'
     ].includes(s)) return 'fitness';
+
+    if ([
+      'food', 'food_wellness', 'food-wellness', 'food wellness',
+      'wellness', 'nutrition', 'meal', 'meal plan', 'meal plans',
+      'farm2farmacy', 'f2f'
+    ].includes(s)) return 'food_wellness';
   
     if (['auto', 'automotive', 'car', 'dealership'].includes(s)) return 'auto';
   
@@ -46,11 +52,15 @@ export function normalizeIndustry(raw) {
     if (/\b(real|rei|invest)\b/.test(n)) return 'real_estate';
     if (/\bwholesal/.test(n)) return 'wholesaler';
     if (/\bfit|gym|club\b/.test(n)) return 'fitness';
+    if (/\bfarm2farmacy\b/.test(n) || /\bf2f\b/.test(n) || /\bwellness\b/.test(n) || /\bmeal\b/.test(n)) {
+      return 'food_wellness';
+    }
     if (/\bauto|car\b/.test(n)) return 'auto';
   
     // Domain hints (optional)
     if (/\bpest\b/.test(d)) return 'pest_control';
     if (/\breal|rei\b/.test(d)) return 'real_estate';
+    if (/\bfarm2farmacy\b/.test(d) || /\bf2f\b/.test(d)) return 'food_wellness';
   
     return 'general';
   }

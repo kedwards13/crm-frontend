@@ -189,12 +189,12 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
     });
     const startTime = timeFormatter.format(startDate);
     const dateLabel = dateFormatter.format(startDate);
-    if (!end) return `${dateLabel} • ${startTime}`;
+    if (!end) return `${dateLabel} - ${startTime}`;
 
     const endDate = new Date(end);
-    if (Number.isNaN(endDate.getTime())) return `${dateLabel} • ${startTime}`;
+    if (Number.isNaN(endDate.getTime())) return `${dateLabel} - ${startTime}`;
     const endTime = timeFormatter.format(endDate);
-    return `${dateLabel} • ${startTime}–${endTime}`;
+    return `${dateLabel} ${startTime} - ${endTime}`;
   };
 
   const fetchAvailability = useCallback(async () => {
@@ -363,7 +363,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   if (!record) {
     return (
       <div className="customer-popup-wrapper no-blur">
-        <div className="popup">Loading…</div>
+        <div className="popup">Loading...</div>
       </div>
     );
   }
@@ -736,11 +736,11 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
                 : record.object === "revival"
                 ? "Revival"
                 : "Customer"}{" "}
-              • {displayIndustry}
+              - {displayIndustry}
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
-            ×
+            X
           </button>
         </div>
 
@@ -849,7 +849,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
                         {service.name || `Service ${service.id}`}
                       </option>
                     ))}
-                    <option value="custom">Custom service…</option>
+                    <option value="custom">Custom service</option>
                   </select>
                 ) : (
                   <input
@@ -933,7 +933,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
                       </div>
                     ) : loadingAvailability ? (
                       <div className="schedule-muted">
-                        Loading availability…
+                        Loading availability...
                       </div>
                     ) : availabilityError ? (
                       <div className="schedule-error">{availabilityError}</div>

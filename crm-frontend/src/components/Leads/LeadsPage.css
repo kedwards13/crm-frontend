@@ -1,8 +1,8 @@
 /* Core page layout */
 .leads-page {
   padding: 0 1rem 2rem;
-  background-color: var(--color-bg, #ffffff);
-  color: var(--color-text, #111111);
+  background-color: var(--bg-0);
+  color: var(--text-0);
 }
 
 /* Two-pane desktop layout */
@@ -43,17 +43,17 @@
 }
 
 .inbox-tab {
-  border-radius: 999px;
-  border: 1px solid var(--color-border, #2a2a2a);
-  background: var(--color-bg-card, #111);
-  color: var(--color-text, #eaeaea);
+  border-radius: 8px;
+  border: 1px solid var(--border-0);
+  background: var(--bg-1);
+  color: var(--text-0);
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
 }
 
 .inbox-tab.active {
-  background: var(--color-accent, #0a84ff);
+  background: var(--accent-0);
   border-color: transparent;
   color: #fff;
 }
@@ -65,28 +65,17 @@
 
 /* AI Assistant Box */
 .ai-assistant-box {
-  border: 1px solid var(--color-border, #ccc);
-  background: var(--color-bg-card, #f9f9f9);
+  border: 1px solid var(--border-0);
+  background: var(--bg-1);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-  transition: background 0.3s ease, border 0.3s ease;
+  box-shadow: var(--shadow-0);
+  transition: background 0.2s ease, border 0.2s ease;
   display: flex;
   flex-direction: column;
   min-height: 0;
   max-height: none;
   overflow: auto;
-}
-
-/* Support dark mode override via class or :root */
-body.dark-mode .leads-page {
-  background-color: var(--color-bg, #0f0f0f);
-  color: var(--color-text, #f1f1f1);
-}
-body.dark-mode .ai-assistant-box {
-  background: var(--color-bg-card, #151515);
-  border-color: var(--color-border, #2a2a2a);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
 /* Grid Layout for Lead Cards */

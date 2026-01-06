@@ -7,43 +7,43 @@
    ROOT COLORS (light/dark auto)
 ============================================================ */
 .customer-popup-wrapper {
-  --bg-0: #101215;
-  --bg-1: #14171c;
-  --bg-2: #1a1e24;
-  --bg-3: #232830;
+  --bg-0: #ffffff;
+  --bg-1: #f7f7f5;
+  --bg-2: #f1f3f2;
+  --bg-3: #e6eae6;
 
-  --text-0: #f5f7fa;
-  --text-1: #d3d7de;
-  --text-2: #9ca2ad;
+  --text-0: #1f2a24;
+  --text-1: #2f3b33;
+  --text-2: #5f6b63;
 
-  --border-1: rgba(255,255,255,0.12);
+  --border-1: var(--border-0);
 
-  --accent-0: #0a84ff;
-  --accent-1: #4aa3ff;
+  --accent-0: #5c636a;
+  --accent-1: #4f565d;
 
-  --input-bg: #141820;
-  --input-border: rgba(255,255,255,0.14);
+  --input-bg: #ffffff;
+  --input-border: var(--border-0);
   --input-text: var(--text-0);
   --input-placeholder: var(--text-2);
 }
 
 body.light-mode .customer-popup-wrapper {
   --bg-0: #ffffff;
-  --bg-1: #f8f9fb;
-  --bg-2: #f1f2f5;
-  --bg-3: #e2e5ea;
+  --bg-1: #f7f7f5;
+  --bg-2: #f1f3f2;
+  --bg-3: #e6eae6;
 
-  --text-0: #0b0e14;
-  --text-1: #3c4048;
-  --text-2: #6c7178;
+  --text-0: #1f2a24;
+  --text-1: #2f3b33;
+  --text-2: #5f6b63;
 
-  --border-1: rgba(0,0,0,0.10);
+  --border-1: var(--border-0);
 
-  --accent-0: #0a84ff;
-  --accent-1: #4aa3ff;
+  --accent-0: #5c636a;
+  --accent-1: #4f565d;
 
-  --input-bg: #f6f7fa;
-  --input-border: rgba(0,0,0,0.12);
+  --input-bg: #ffffff;
+  --input-border: var(--border-0);
   --input-text: var(--text-0);
   --input-placeholder: var(--text-2);
 }
@@ -73,8 +73,8 @@ body.light-mode .customer-popup-wrapper {
   justify-content: center;
   align-items: center;
 
-  background: rgba(0,0,0,0.32);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.18);
+  backdrop-filter: none;
 
   animation: overlayFade .25s ease-out;
 }
@@ -96,16 +96,13 @@ body.light-mode .customer-popup-wrapper {
   background: var(--bg-0);
   color: var(--text-0);
 
-  border-radius: 22px;
+  border-radius: 12px;
   border: 1px solid var(--border-1);
 
   display: flex;
   flex-direction: column;
 
-  box-shadow:
-    0 20px 48px rgba(0,0,0,0.25),
-    0 12px 24px rgba(0,0,0,0.18),
-    0 0 0 1px rgba(255,255,255,0.04) inset;
+  box-shadow: var(--shadow-1);
 
   animation: popupIn .28s cubic-bezier(0.19,1,0.22,1);
   overflow: hidden;
@@ -129,8 +126,6 @@ body.light-mode .customer-popup-wrapper {
   justify-content: space-between;
 
   background: var(--bg-1);
-  backdrop-filter: blur(12px);
-
   border-bottom: 1px solid var(--border-1);
 }
 
@@ -205,17 +200,14 @@ body.light-mode .customer-popup-wrapper {
 
 .popup-navbar button.active {
   color: #fff;
-  background: linear-gradient(135deg, var(--accent-0), var(--accent-1));
+  background: var(--accent-0);
   border: none;
-
-  box-shadow:
-    0 4px 12px rgba(32, 110, 255, .38),
-    inset 0 0 0 1px rgba(255,255,255,0.06);
+  box-shadow: none;
 }
 
 .popup-navbar button.active:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
+  filter: none;
+  transform: none;
 }
 
 
@@ -293,8 +285,6 @@ body.light-mode .customer-popup-wrapper {
   background: var(--accent-0);
   border: none;
   color: white;
-
-  box-shadow: 0 4px 16px rgba(32,110,255,.35);
 }
 .action-btn.primary:hover {
   background: var(--accent-1);
@@ -319,7 +309,7 @@ body.light-mode .customer-popup-wrapper {
   padding: 28px;
 
   background: var(--bg-0);
-  border-radius: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border-1);
 
   animation: statusIn .22s ease-out;
@@ -433,17 +423,17 @@ body.light-mode .customer-popup-wrapper {
   font-size: 12px;
   cursor: pointer;
   text-align: left;
-  transition: border 0.15s ease, transform 0.15s ease;
+  transition: border 0.15s ease;
 }
 
 .schedule-slot:hover {
   border-color: var(--accent-0);
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .schedule-slot.active {
   border-color: var(--accent-0);
-  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.4);
+  box-shadow: none;
 }
 
 .schedule-time-row {
@@ -455,7 +445,7 @@ body.light-mode .customer-popup-wrapper {
 
 .schedule-error {
   font-size: 12px;
-  color: #fca5a5;
+  color: var(--text-2);
 }
 
 .schedule-actions {

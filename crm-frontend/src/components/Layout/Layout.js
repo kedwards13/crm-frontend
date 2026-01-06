@@ -17,37 +17,18 @@ export default function Layout({ children }) {
   const [tabs, setTabs] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
-  const [theme, setTheme] = useState("system");
 
   /* ---------------------------------------------
-     THEME SYSTEM
+     THEME SYSTEM (LIGHT MODE ONLY)
   --------------------------------------------- */
   useEffect(() => {
-    setTheme(localStorage.getItem("theme") || "system");
+    document.body.classList.add("light-mode");
+    document.body.classList.remove("dark-mode");
+    document.body.classList.remove("dark");
+    document.body.classList.add("light");
+    document.body.dataset.theme = "light";
+    document.documentElement.dataset.theme = "light";
   }, []);
-
-  useEffect(() => {
-    const mm = window.matchMedia?.("(prefers-color-scheme: dark)");
-
-    const applyTheme = () => {
-      const prefersDark = !!mm?.matches;
-      const isDark = theme === "dark" || (theme === "system" && prefersDark);
-
-      document.body.classList.toggle("light-mode", !isDark);
-      document.body.classList.toggle("dark-mode", isDark);
-      document.body.classList.toggle("light", !isDark);
-      document.body.classList.toggle("dark", isDark);
-      document.body.dataset.theme = isDark ? "dark" : "light";
-      document.documentElement.dataset.theme = isDark ? "dark" : "light";
-    };
-
-    applyTheme();
-
-    if (theme === "system" && mm?.addEventListener) {
-      mm.addEventListener("change", applyTheme);
-      return () => mm.removeEventListener("change", applyTheme);
-    }
-  }, [theme]);
 
   /* ---------------------------------------------
      SUBNAV CONTROL
@@ -100,8 +81,8 @@ export default function Layout({ children }) {
   const toggleSidebar = () => setCollapsed((v) => !v);
 
   const shellContext = useMemo(
-    () => ({ collapsed, theme, setTheme }),
-    [collapsed, theme]
+    () => ({ collapsed }),
+    [collapsed]
   );
 
   /* ---------------------------------------------
@@ -119,11 +100,6 @@ export default function Layout({ children }) {
           onTabChange={handleTabChange}
           inboxCount={3}
           onSearchSelect={(item) => item?.path && navigate(item.path)}
-          theme={theme}
-          onThemeChange={(next) => {
-            localStorage.setItem("theme", next);
-            setTheme(next);
-          }}
         />
 
         <main className="content-area" data-shell={JSON.stringify(shellContext)}>

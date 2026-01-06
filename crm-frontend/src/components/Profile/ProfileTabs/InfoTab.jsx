@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import StreetViewEmbed from "../../../utils/StreetViewEmbed";
 import { toast } from "react-toastify";
 import { enrichCustomer } from "../../../api/customersApi";
+import { getIndustry } from "../../../helpers/tenantHelpers";
+import { getIndustryUIConfig } from "../../../constants/industryUIRegistry";
+import {
+  extractOrderCollections,
+  summarizeOrders,
+  extractConstraints,
+  getOrderIdLabel,
+  getOrderDateValue,
+  formatShortDate,
+  getOrderAmountValue,
+  formatCurrency,
+} from "../../../utils/orderUtils";
 import "./info-tab.css";
 
 export default function InfoTab({ lead, onChange }) {
@@ -10,6 +22,51 @@ export default function InfoTab({ lead, onChange }) {
   if (!lead) return <div className="info-empty">Loading...</div>;
 
   const isCustomer = lead.object === "customer" || lead.customer_id != null;
+  const tenantIndustry = getIndustry("general");
+  const uiConfig = getIndustryUIConfig(tenantIndustry, lead);
+  const { orders, history } = useMemo(
+    () => extractOrderCollections(lead),
+    [lead]
+  );
+  const orderSummary = useMemo(() => {
+    const source = orders.length ? orders : history;
+    return summarizeOrders(source);
+  }, [orders, history]);
+  const constraints = useMemo(() => extractConstraints(lead), [lead]);
+  const rawNotes =
+    lead.notes ||
+    lead.special_instructions ||
+    lead.delivery_notes ||
+    lead.instructions ||
+    "";
+  const opsNotes = Array.isArray(rawNotes)
+    ? rawNotes.filter(Boolean).join(", ")
+    : typeof rawNotes === "string"
+    ? rawNotes
+    : "";
+  const hasConstraints =
+    constraints.allergies.length > 0 || constraints.dietary.length > 0;
+  const hasNotes = Boolean(opsNotes);
+  const historyOrders =
+    history.length > 0 ? history : orderSummary.buckets.Fulfilled || [];
+  const showOrderOps =
+    isCustomer &&
+    uiConfig.primaryObject === "orders" &&
+    (orders.length > 0 || historyOrders.length > 0 || hasConstraints || hasNotes);
+
+  const upcomingDates = useMemo(() => {
+    const upcoming = [
+      ...orderSummary.buckets.Draft,
+      ...orderSummary.buckets.Scheduled,
+    ];
+    const dates = upcoming
+      .map((order) => getOrderDateValue(order))
+      .filter(Boolean)
+      .map((val) => new Date(val))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .sort((a, b) => a - b);
+    return dates;
+  }, [orderSummary.buckets]);
 
   const updateField = (field, value) => {
     onChange({ target: { name: field, value } });
@@ -184,6 +241,150 @@ export default function InfoTab({ lead, onChange }) {
 
   return (
     <div className="info-tab">
+      {showOrderOps && (
+        <div className="info-group ops-summary">
+          <div className="ops-header">
+            <div>
+              <div className="info-section-title">Operations Summary</div>
+              <div className="ops-title">
+                {lead.full_name || lead.name || "Customer"}
+              </div>
+              <div className="ops-subtitle">
+                Account {lead.customer_id || lead.id || "N/A"}
+              </div>
+            </div>
+            {upcomingDates.length > 0 && (
+              <div className="ops-next">
+                Next delivery: {formatShortDate(upcomingDates[0])}
+              </div>
+            )}
+          </div>
+
+          <div className="ops-grid">
+            <div className="ops-kv">
+              <div className="ops-label">Active Orders</div>
+              <div className="ops-value">{orderSummary.activeCount}</div>
+              <div className="ops-meta">Scheduled or in progress</div>
+            </div>
+            <div className="ops-kv">
+              <div className="ops-label">Upcoming</div>
+              <div className="ops-value">{orderSummary.upcomingCount}</div>
+              <div className="ops-meta">Draft or scheduled</div>
+            </div>
+            <div className="ops-kv">
+              <div className="ops-label">Fulfilled</div>
+              <div className="ops-value">{orderSummary.fulfilledCount}</div>
+              <div className="ops-meta">Completed deliveries</div>
+            </div>
+            <div className="ops-kv">
+              <div className="ops-label">Outstanding</div>
+              <div className="ops-value">{orderSummary.unpaidCount}</div>
+              <div className="ops-meta">
+                {orderSummary.unpaidTotal
+                  ? formatCurrency(orderSummary.unpaidTotal)
+                  : "Balance due"}
+              </div>
+            </div>
+          </div>
+
+          {(hasConstraints || opsNotes) && (
+            <div className="ops-constraints">
+              {constraints.allergies.length > 0 && (
+                <div className="ops-constraint-row">
+                  <div className="ops-label">Allergies</div>
+                  <div className="ops-list">
+                    {constraints.allergies.map((item) => (
+                      <span key={item} className="ops-chip">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {constraints.dietary.length > 0 && (
+                <div className="ops-constraint-row">
+                  <div className="ops-label">Dietary</div>
+                  <div className="ops-list">
+                    {constraints.dietary.map((item) => (
+                      <span key={item} className="ops-chip">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {opsNotes && (
+                <div className="ops-constraint-row">
+                  <div className="ops-label">Notes</div>
+                  <div className="ops-note">{String(opsNotes)}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {orders.length > 0 && uiConfig.pipelines.includes("order_pipeline") && (
+            <div className="ops-pipeline">
+              {["Draft", "Scheduled", "Preparing", "Ready", "Fulfilled"].map(
+                (stage) => {
+                  const items = orderSummary.buckets[stage] || [];
+                  return (
+                    <div key={stage} className="ops-stage">
+                      <div className="ops-stage-header">
+                        <div className="ops-stage-title">{stage}</div>
+                        <div className="ops-stage-count">{items.length}</div>
+                      </div>
+                      <div className="ops-stage-list">
+                        {items.slice(0, 3).map((order, index) => {
+                          const id = getOrderIdLabel(order);
+                          const date = formatShortDate(getOrderDateValue(order));
+                          const total = formatCurrency(getOrderAmountValue(order));
+                          const line = [id ? `#${id}` : "Order", date, total]
+                            .filter(Boolean)
+                            .join(" | ");
+                          return (
+                            <div
+                              key={`${id || "order"}-${date || "date"}-${index}`}
+                              className="ops-stage-item"
+                            >
+                              {line}
+                            </div>
+                          );
+                        })}
+                        {items.length === 0 && (
+                          <div className="ops-stage-empty">No items</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
+
+          {historyOrders.length > 0 && (
+            <details className="ops-history">
+              <summary>Order history ({historyOrders.length})</summary>
+              <div className="ops-history-list">
+                {historyOrders.map((order, index) => {
+                  const id = getOrderIdLabel(order);
+                  const date = formatShortDate(getOrderDateValue(order));
+                  const total = formatCurrency(getOrderAmountValue(order));
+                  return (
+                    <div
+                      key={`${id || "order"}-${date || "date"}-${index}`}
+                      className="ops-history-row"
+                    >
+                      <div className="ops-history-id">
+                        {id ? `#${id}` : "Order"}
+                      </div>
+                      <div className="ops-history-meta">
+                        {[date, total].filter(Boolean).join(" | ")}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+
       <div className="info-main-row">
         {/* LEFT SIDE */}
         <div className="info-main-left">
@@ -213,13 +414,13 @@ export default function InfoTab({ lead, onChange }) {
           <div className="info-group info-address-group">
             <div className="info-section-title">Address</div>
 
-            {/* TOP ROW — STREET + ZIP */}
+            {/* TOP ROW - STREET + ZIP */}
             <div className="info-grid-2">
               <Field label="Street Address" name="address" className="field-wide" />
               <Field label="Zip" name="zip_code" />
             </div>
 
-            {/* SECOND ROW — CITY, STATE, COUNTY, COUNTRY */}
+            {/* SECOND ROW - CITY, STATE, COUNTY, COUNTRY */}
             <div className="info-grid-4">
               <Field label="City" name="city" />
               <Field label="State" name="state" />
@@ -250,7 +451,7 @@ export default function InfoTab({ lead, onChange }) {
             <div className="ai-summary">{lead.ai?.summary || "No AI summary yet."}</div>
             {isCustomer ? (
               <button className="ai-btn" onClick={runEnrichment} disabled={loadingEnrich}>
-                {loadingEnrich ? "Enriching…" : "Run Enrichment"}
+                {loadingEnrich ? "Enriching..." : "Run Enrichment"}
               </button>
             ) : (
               <div className="ai-disabled">Convert to customer to enable enrichment.</div>

@@ -1,50 +1,3 @@
-/****************************************************
-    ABON GLOBAL ACCENTS
-****************************************************/
-:root {
-    --abon-blue: #4fc3f7;
-    --abon-blue-hover: #7edcff;
-    --abon-green: #3cd17c;
-    --abon-green-hover: #59e699;
-  
-    --abon-glow-blue: 0 0 14px rgba(79, 195, 247, 0.55);
-    --abon-glow-green: 0 0 14px rgba(60, 209, 124, 0.55);
-  
-    /* Light mode */
-    --lm-bg: #ffffff;
-    --lm-card: #f7f9fb;
-    --lm-border: #e2e6ea;
-    --lm-text: #20242a;
-    --lm-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  
-    /* Dark mode */
-    --dm-bg: #0e1116;
-    --dm-card: #161a21;
-    --dm-border: #28313d;
-    --dm-text: #e6e9ef;
-    --dm-shadow: 0 4px 28px rgba(0,0,0,0.42);
-  }
-  
-  /****************************************************
-      COLOR MODE CONTROL
-  ****************************************************/
-  body.light-mode {
-    --color-bg: var(--lm-bg);
-    --color-bg-card: var(--lm-card);
-    --color-border: var(--lm-border);
-    --color-text: var(--lm-text);
-    --shadow: var(--lm-shadow);
-  }
-  
-  body.dark-mode {
-    --color-bg: var(--dm-bg);
-    --color-bg-card: var(--dm-card);
-    --color-border: var(--dm-border);
-    --color-text: var(--dm-text);
-    --shadow: var(--dm-shadow);
-  }
-  
-
 /* Wrapper */
 .gt-customerlist {
     padding: 24px;
@@ -103,16 +56,11 @@
     color: var(--popup-text);
   }
   
-  .gt-btn.blue {
-    background: #3b82f6;
-    border: none;
-    color: white;
-  }
-  
+  .gt-btn.blue,
   .gt-btn.green {
-    background: #16a34a;
+    background: var(--accent-0);
     border: none;
-    color: white;
+    color: #fff;
   }
   
   .gt-btn:hover {
@@ -243,19 +191,11 @@
     transition: 0.15s;
   }
   
-  .gt-icon-btn.blue:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-  }
-  
-  .gt-icon-btn.green:hover {
-    border-color: #16a34a;
-    color: #16a34a;
-  }
-  
+  .gt-icon-btn.blue:hover,
+  .gt-icon-btn.green:hover,
   .gt-icon-btn.amber:hover {
-    border-color: #f59e0b;
-    color: #f59e0b;
+    border-color: var(--accent-0);
+    color: var(--accent-0);
   }
   
   /* -----------------------------------------------

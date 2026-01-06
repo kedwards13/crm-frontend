@@ -28,7 +28,7 @@ const MarketplaceView = () => {
 
   return (
     <div className="marketplace-view">
-      <h1 className="marketplace-title">🏠 Properties Under Contract</h1>
+      <h1 className="marketplace-title">Properties Under Contract</h1>
       {loading ? (
         <p>Loading...</p>
       ) : leads.length === 0 ? (

@@ -2,11 +2,9 @@
   position: sticky;
   top: calc(var(--topbar-height, 64px));
   z-index: 1050;
-  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  background: var(--bg-1);
   border-bottom: 1px solid var(--color-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: none;
   padding: 0.25rem 0.6rem;
   overflow-x: auto;
 }
@@ -82,8 +80,8 @@
 }
 
 .filters-button:hover {
-  background: color-mix(in srgb, var(--color-bg-card) 85%, var(--color-accent) 5%);
-  border-color: color-mix(in srgb, var(--color-accent) 25%, var(--color-border));
+  background: var(--bg-2);
+  border-color: var(--color-border);
 }
 
 .filters-button.primary {
@@ -91,7 +89,7 @@
   color: white;
   font-weight: 500;
   border: none;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  box-shadow: none;
 }
 
 .filters-button.primary:hover {
@@ -116,7 +114,7 @@
   background: var(--color-accent);
   color: #fff;
   border: none;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  box-shadow: none;
 }
 
 /* === Mobile cleanup === */

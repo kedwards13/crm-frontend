@@ -414,6 +414,59 @@ const base = {
         operations: false,
       },
     },
+
+    food_wellness: {
+      labels: {
+        customers: 'Subscribers',
+        leads: 'Requests',
+        deals: 'Subscriptions',
+      },
+      nav: [
+        { path: '/dashboard',     label: 'Dashboard',      icon: 'FiHome' },
+        { path: '/leads',         label: 'Requests',       icon: 'FiFileText' },
+        { path: '/customers',     label: 'Subscribers',    icon: 'FiUsers' },
+        { path: '/schedule',      label: 'Schedule',       icon: 'FiCalendar' },
+        { path: '/communication', label: 'Communications', icon: 'FiPhone' },
+        { path: '/analytics',     label: 'Analytics',      icon: 'FiTrendingUp' },
+        { path: '/finance',       label: 'Finance',        icon: 'FiBarChart2' },
+        { path: '/revival',       label: 'Revival',        icon: 'FiBarChart2' },
+        { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' },
+        { path: '/marketing',     label: 'Marketing',      icon: 'FiTag' },
+        { path: '/settings',      label: 'Settings',       icon: 'FiSettings' },
+      ],
+      subnav: {
+        ...base.subnav,
+        '/leads': [
+          { key: 'new',            label: 'New Requests',   path: '/leads/new' },
+          { key: 'contacted',      label: 'Contacted',      path: '/leads/contacted' },
+          { key: 'pipeline',       label: 'Pipeline View',  path: '/leads/pipeline' },
+          { key: 'under_contract', label: 'Under Contract', path: '/leads/under-contract' },
+          { key: 'closed',         label: 'Closed',         path: '/leads/closed' },
+          { key: 'disqualified',   label: 'Disqualified',   path: '/leads/disqualified' },
+        ],
+        '/customers': [
+          { key: 'list',   label: 'Subscribers',      path: '/customers/list' },
+          { key: 'import', label: 'Import',           path: '/customers/import', roles: ['Admin','Manager'] },
+          { key: 'care',   label: 'Subscriber Care',  path: '/customers/care' },
+          { key: 'ai',     label: 'AI Insights',      path: '/customers/ai' },
+          { key: 'revival', label: 'Revival Scans',   path: '/customers/revival' },
+        ],
+      },
+      fieldSchemas: {
+        ...base.fieldSchemas,
+      },
+      scheduling: {
+        serviceLabel: 'Plan Type',
+        staffLabel: 'Coordinator',
+        locationLabel: 'Delivery Area',
+        defaultDurationMins: 60,
+      },
+      features: {
+        ...base.features,
+        subscriptions: true,
+        operations: false,
+      },
+    },
   
     // Add "auto" industry the same way later if needed (fleet/inventory heavy)
   };

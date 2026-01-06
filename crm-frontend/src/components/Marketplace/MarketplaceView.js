@@ -97,8 +97,8 @@ const MarketplaceView = () => {
               <span>Status: {lead.status}</span>
             </div>
             <div className="card-actions">
-              <button onClick={() => handleViewMatches(lead)}>👥 Match Buyers</button>
-              <button onClick={() => markAsClosed(lead.id)}>✅ Mark as Closed</button>
+              <button onClick={() => handleViewMatches(lead)}>Match Buyers</button>
+              <button onClick={() => markAsClosed(lead.id)}>Mark as Closed</button>
             </div>
           </div>
         ))}

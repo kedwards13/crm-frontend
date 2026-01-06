@@ -56,7 +56,7 @@ const Login = () => {
         locale: rawTenant.locale || 'en-US',
       };
 
-      // ✅ Save tokens + context
+      // Save tokens + context
       localStorage.setItem('token', access || '');
       localStorage.setItem('access_token', access || '');
       if (refresh) localStorage.setItem('refresh', refresh);
@@ -64,10 +64,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(user));
 
       setActiveTenant(normalizedTenant);
-      login(access, refresh, expiry, normalizedTenant, user); // ✅ Added user
-
-      console.log('✅ Logged in as:', user);
-      console.log('✅ Tenant context:', normalizedTenant);
+      login(access, refresh, expiry, normalizedTenant, user); // Added user
 
       navigate(
         normalizedTenant.setupComplete ? '/dashboard' : '/settings/team',
@@ -89,7 +86,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    alert('Google login coming soon!');
+    alert('Google sign-in is not enabled for this workspace.');
   };
 
   return (
@@ -99,25 +96,24 @@ const Login = () => {
           <div className="brand-lockup">
             <div className="brand-mark">
               <span className="brand-lines" aria-hidden="true" />
-              <span className="brand-name">ABON</span>
+              <span className="brand-name">CRM</span>
             </div>
-            <span className="brand-chip">Operating cloud for accountable teams</span>
+            <span className="brand-chip">Operations workspace</span>
           </div>
           <p className="hero-eyebrow">Secure workspace access</p>
         </div>
 
-        <h1 className="hero-title">Sign in to your control center</h1>
+        <h1 className="hero-title">Sign in to your workspace</h1>
         <p className="hero-copy">
-          Crisp, resilient access to the ABON stack. Clean lines, fast auth, and a secure
-          bridge into your operating cloud.
+          Secure access to your CRM workspace. Use your company credentials to continue.
         </p>
 
         <div className="hero-actions">
-          <a href="https://abon.ai" target="_blank" rel="noreferrer" className="ghost-link">
-            Visit abon.ai
+          <a href="/forgot-password" className="ghost-link">
+            Forgot password?
           </a>
           <a href="/signup" className="primary-link">
-            Request access →
+            Request access
           </a>
         </div>
       </div>
@@ -125,7 +121,7 @@ const Login = () => {
       <div className="auth-panel">
         <div className="auth-container">
           <div className="form-header">
-            <div className="form-badge">AB</div>
+            <div className="form-badge">CR</div>
             <div>
               <p className="form-eyebrow">Secure workspace login</p>
               <h2 className="form-title">Welcome back</h2>
@@ -152,7 +148,7 @@ const Login = () => {
               <label>Password</label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -160,7 +156,7 @@ const Login = () => {
             </div>
 
             <button type="submit" className="login-btn" disabled={loading}>
-              {loading ? 'Logging In…' : 'Continue to dashboard'}
+              {loading ? 'Logging in...' : 'Continue to dashboard'}
             </button>
 
             <div className="alt-login">
@@ -175,9 +171,7 @@ const Login = () => {
 
             <div className="auth-links">
               <a href="/forgot-password">Forgot password?</a>
-              <a href="https://abon.ai" target="_blank" rel="noreferrer">
-                Create an account at abon.ai
-              </a>
+              <a href="/signup">Request access</a>
             </div>
           </form>
         </div>

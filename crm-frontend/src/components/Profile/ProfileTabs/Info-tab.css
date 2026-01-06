@@ -1,5 +1,5 @@
 /***************************************************************
-   ABON ENTERPRISE — INFO TAB (Clean Stripe × Palantir Style)
+   Enterprise - INFO TAB (Clean Stripe x Palantir Style)
 ***************************************************************/
 
 /* ============================================
@@ -122,7 +122,7 @@
 
 .info-input:focus {
   border-color: var(--info-focus);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--input-focus);
 }
 
 /* ============================================
@@ -172,8 +172,8 @@
 
 .ai-btn {
   padding: 10px 16px;
-  background: var(--focus);
-  color: white;
+  background: var(--accent-0);
+  color: #fff;
   font-size: 14px;
   border: none;
   border-radius: 6px;
@@ -184,8 +184,7 @@
 }
 
 .ai-btn:hover:not(:disabled) {
-  filter: brightness(1.15);
-  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 .ai-btn:disabled {
@@ -196,6 +195,209 @@
 .ai-disabled {
   font-size: 13px;
   opacity: 0.7;
+}
+
+/* ============================================
+   OPERATIONS SUMMARY
+============================================ */
+.ops-summary {
+  background: var(--bg-1);
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ops-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ops-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--info-text);
+}
+
+.ops-subtitle {
+  font-size: 12px;
+  color: var(--info-muted);
+}
+
+.ops-next {
+  font-size: 12px;
+  color: var(--info-muted);
+  padding: 6px 10px;
+  border: 1px solid var(--border-0);
+  border-radius: 999px;
+  background: var(--bg-2);
+}
+
+.ops-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ops-kv {
+  background: var(--bg-2);
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.ops-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--info-muted);
+}
+
+.ops-value {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.ops-meta {
+  font-size: 12px;
+  color: var(--info-muted);
+  margin-top: 2px;
+}
+
+.ops-constraints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ops-constraint-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.ops-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ops-chip {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-0);
+  background: var(--bg-1);
+  color: var(--info-text);
+}
+
+.ops-note {
+  font-size: 12px;
+  color: var(--info-text);
+  padding: 6px 8px;
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+
+.ops-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ops-stage {
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  padding: 8px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ops-stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ops-stage-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--info-muted);
+}
+
+.ops-stage-count {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ops-stage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--info-text);
+}
+
+.ops-stage-item {
+  padding: 4px 6px;
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+
+.ops-stage-empty {
+  font-size: 12px;
+  color: var(--info-muted);
+}
+
+.ops-history {
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: var(--bg-1);
+}
+
+.ops-history summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--info-text);
+}
+
+.ops-history-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.ops-history-row {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid var(--border-0);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  background: var(--bg-2);
+}
+
+.ops-history-id {
+  font-weight: 600;
+}
+
+.ops-history-meta {
+  color: var(--info-muted);
 }
 
 /* ============================================
@@ -214,5 +416,22 @@
 
   .field-wide {
     grid-column: span 2;
+  }
+
+  .ops-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ops-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ops-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ops-constraint-row {
+    grid-template-columns: 1fr;
   }
 }

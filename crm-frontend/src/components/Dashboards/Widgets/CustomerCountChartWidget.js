@@ -8,7 +8,7 @@ const data = [
   { name: 'Inactive', value: 30 },
 ];
 
-const COLORS = ['#00f2fe', '#ff3b30']; // Neon blue and red
+const COLORS = ['#5c636a', '#9aa0a6'];
 
 const CustomerCountChartWidget = () => {
   return (
@@ -17,30 +17,19 @@ const CustomerCountChartWidget = () => {
       <div className="chart-container">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <defs>
-              <filter id="pieShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow
-                  dx="0"
-                  dy="0"
-                  stdDeviation="5"
-                  floodColor="rgba(0, 242, 254, 0.6)"
-                />
-              </filter>
-            </defs>
             <Pie
               data={data}
               dataKey="value"
               outerRadius={60}
               innerRadius={40}
               label
-              filter="url(#pieShadow)"
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ backgroundColor: '#2c2c2e', border: 'none', color: '#fff' }}
+              contentStyle={{ backgroundColor: 'var(--bg-1)', border: '1px solid var(--border-0)', color: 'var(--text-0)' }}
             />
           </PieChart>
         </ResponsiveContainer>

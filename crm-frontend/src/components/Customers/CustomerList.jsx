@@ -1,5 +1,5 @@
 // ---------------------------------------------------------
-// CustomersList — ABON OS Enterprise Table
+// CustomersList - CRM Table
 // ---------------------------------------------------------
 import React, {
   useState,
@@ -22,13 +22,14 @@ import { toast } from "react-toastify";
 import { Brain, Eye, Zap } from "lucide-react";
 import { mapEntity } from "../../utils/contactMapper";
 import { getIndustry } from "../../helpers/tenantHelpers";
+import { getIndustryCopy } from "../../constants/industryCopy";
 
 import "./CustomerList.css";
 
 const CustomerPopup = lazy(() => import("../Profile/CustomerPopup"));
 
 // ---------------------------------------------------------
-// ROW — optimized for speed
+// ROW - optimized for speed
 // ---------------------------------------------------------
 const CustomerRow = memo(({ c, checked, toggleCheck, openPopup }) => {
   const mapped = mapEntity(c);
@@ -49,17 +50,17 @@ const CustomerRow = memo(({ c, checked, toggleCheck, openPopup }) => {
         {c.first_name} {c.last_name}
       </td>
 
-      <td className="gt-cell">{c.primary_email || "—"}</td>
-      <td className="gt-cell">{c.primary_phone || "—"}</td>
-      <td className="gt-cell">{c.city || "—"}</td>
-      <td className="gt-cell">{c.state || "—"}</td>
+      <td className="gt-cell">{c.primary_email || "N/A"}</td>
+      <td className="gt-cell">{c.primary_phone || "N/A"}</td>
+      <td className="gt-cell">{c.city || "N/A"}</td>
+      <td className="gt-cell">{c.state || "N/A"}</td>
 
       <td className="gt-cell summary-col">
-        {c.ai_summary?.slice(0, 90) || "—"}
+        {c.ai_summary?.slice(0, 90) || "N/A"}
       </td>
 
       <td className="gt-cell center">
-        {c.is_enriched ? <span className="gt-badge-ok">✓</span> : "—"}
+        {c.is_enriched ? <span className="gt-badge-ok">Yes</span> : "N/A"}
       </td>
 
       <td className="gt-cell actions-col">
@@ -80,7 +81,7 @@ const CustomerRow = memo(({ c, checked, toggleCheck, openPopup }) => {
             onClick={(e) => {
               e.stopPropagation();
               enrichBulk([c.customer_id]);
-              toast.info(`Enriching ${c.first_name}…`);
+              toast.info(`Enriching ${c.first_name}...`);
             }}
             className="gt-icon-btn green"
           >
@@ -109,6 +110,9 @@ const CustomerRow = memo(({ c, checked, toggleCheck, openPopup }) => {
 export default function CustomerList() {
   const location = useLocation();
   const navigate = useNavigate();
+  const industry = getIndustry("general");
+  const copy = getIndustryCopy(industry);
+  const customersLower = copy.customers.toLowerCase();
   const [search, setSearch] = useState(localStorage.getItem("customerSearch") || "");
   const [customers, setCustomers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -162,7 +166,6 @@ export default function CustomerList() {
 
   useEffect(() => {
     if (location.state?.create !== "customer") return;
-    const industry = getIndustry("general");
     setSelected(
       mapEntity({
         object: "customer",
@@ -190,7 +193,7 @@ export default function CustomerList() {
     );
 
   const bulkEnrich = async () => {
-    if (!checked.length) return toast.info("Select customers.");
+    if (!checked.length) return toast.info(`Select ${customersLower}.`);
 
     setEnriching(true);
 
@@ -207,7 +210,7 @@ export default function CustomerList() {
   };
 
   const bulkAssign = async () => {
-    if (!checked.length) return toast.info("Select customers.");
+    if (!checked.length) return toast.info(`Select ${customersLower}.`);
     if (!campaignId) return toast.info("Choose a campaign.");
 
     try {
@@ -228,7 +231,7 @@ export default function CustomerList() {
         <input
           className="gt-search"
           value={search}
-          placeholder="Search customers…"
+          placeholder={`Search ${customersLower}...`}
           onChange={(e) => setSearch(e.target.value)}
         />
 
@@ -238,7 +241,7 @@ export default function CustomerList() {
             value={campaignId}
             onChange={(e) => setCampaignId(e.target.value)}
           >
-            <option value="">Assign to campaign…</option>
+            <option value="">Assign to campaign...</option>
             <option value="1">Welcome Series</option>
             <option value="2">Follow-Up</option>
             <option value="3">Reactivation</option>
@@ -257,7 +260,7 @@ export default function CustomerList() {
             disabled={!checked.length || enriching}
             onClick={bulkEnrich}
           >
-            {enriching ? "Enriching…" : "AI Enrich"}
+            {enriching ? "Enriching..." : "AI Enrich"}
           </button>
         </div>
       </div>
@@ -266,7 +269,7 @@ export default function CustomerList() {
       {metrics && (
         <div className="gt-metrics">
           {[
-            ["Customers", metrics.total_customers],
+            [copy.customers, metrics.total_customers],
             ["Active", metrics.active_customers],
             ["Enriched", metrics.enriched_customers],
             ["No-Show Rate", `${metrics.no_show_rate}%`],
@@ -284,9 +287,9 @@ export default function CustomerList() {
       {error && <div className="gt-error">{error}</div>}
 
       {loading ? (
-        <div className="gt-loading">Loading customers…</div>
+        <div className="gt-loading">Loading {customersLower}...</div>
       ) : !customers.length ? (
-        <div className="gt-empty">No customers found.</div>
+        <div className="gt-empty">No {customersLower} found.</div>
       ) : (
         <div className="gt-table-wrapper">
           <table className="gt-table">
@@ -300,7 +303,7 @@ export default function CustomerList() {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                {["Name", "Email", "Phone", "City", "State", "AI Summary", "AI", "⚡"].map(
+                {["Name", "Email", "Phone", "City", "State", "AI Summary", "AI", "Actions"].map(
                   (h) => (
                     <th key={h}>{h}</th>
                   )
@@ -325,7 +328,7 @@ export default function CustomerList() {
 
       {/* Popup */}
       {selected && (
-        <Suspense fallback={<div className="gt-loading p-6">Loading…</div>}>
+        <Suspense fallback={<div className="gt-loading p-6">Loading...</div>}>
           <CustomerPopup
             lead={selected}
             leadType="customer"

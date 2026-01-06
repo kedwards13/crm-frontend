@@ -80,6 +80,21 @@ export const pipelineRegistry = {
       valueField: 'membership_value',
       emptyCopy: 'No prospects in this stage.',
     },
+
+    // ----- Food & Wellness (subscriptions) -----
+    food_wellness: {
+      stages: [
+        { key: 'new',        label: 'New' },
+        { key: 'contacted',  label: 'Contacted' },
+        { key: 'qualified',  label: 'Qualified' },
+        { key: 'scheduled',  label: 'Scheduled' },
+        { key: 'closed',     label: 'Active' },
+        { key: 'dead',       label: 'Canceled' },
+      ],
+      displayedFields: ['source', 'email', 'phone_number', 'message'],
+      valueField: 'estimated_price',
+      emptyCopy: 'No requests in this stage.',
+    },
   
     // ----- Auto Services (quote -> appointment -> done) -----
     auto: {

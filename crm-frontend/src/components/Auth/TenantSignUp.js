@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import './Auth.css'; // Uses our updated dark-themed styles
+import './Auth.css'; // Uses shared auth styles
 
 const TenantSignUp = () => {
   const [formData, setFormData] = useState({
@@ -111,8 +111,8 @@ const TenantSignUp = () => {
   return (
     <div className="auth-container signup-container">
       <div className="auth-header">
-        <h2>Tenant Sign Up</h2>
-        <p>Create your account to get started</p>
+        <h2>Request access</h2>
+        <p>Create your workspace profile to get started</p>
       </div>
       {success && <p className="success-message">{success}</p>}
       {error && <p className="error-message">{error}</p>}
@@ -255,18 +255,13 @@ const TenantSignUp = () => {
             required
           />
           <div className="password-strength">
-            <div
-              className="password-strength-inner"
-              style={{
-                width: `${passwordStrength}%`,
-                background:
-                  passwordStrength < 50
-                    ? '#ff453a'
-                    : passwordStrength < 80
-                    ? '#ff9f0a'
-                    : '#32d74b',
-              }}
-            />
+          <div
+            className="password-strength-inner"
+            style={{
+              width: `${passwordStrength}%`,
+              background: "var(--accent-0)",
+            }}
+          />
           </div>
         </div>
 
