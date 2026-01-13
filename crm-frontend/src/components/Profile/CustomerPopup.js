@@ -54,6 +54,8 @@ const getRoundedTime = () => {
 ============================================================ */
 function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   const [record, setRecord] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [preferences, setPreferences] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
 
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -72,6 +74,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   const [scheduleNotes, setScheduleNotes] = useState("");
   const [serviceTypes, setServiceTypes] = useState([]);
   const [loadingServiceTypes, setLoadingServiceTypes] = useState(false);
+  const [serviceTypesError, setServiceTypesError] = useState("");
   const [technicians, setTechnicians] = useState([]);
   const [loadingTechnicians, setLoadingTechnicians] = useState(false);
   const [assignedTechId, setAssignedTechId] = useState("");
@@ -99,15 +102,48 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   }, []);
 
   useEffect(() => {
+    if (!record) return;
+    setFormData(record.raw || {});
+  }, [record]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await api.get("/accounts/tenant/preferences/");
+        if (mounted) setPreferences(data || {});
+      } catch {
+        if (mounted) setPreferences(null);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
     (async () => {
       setLoadingServiceTypes(true);
+      setServiceTypesError("");
       try {
         const { data } = await listServiceTypes();
         const rows = Array.isArray(data) ? data : data?.results || [];
-        if (mounted) setServiceTypes(rows);
-      } catch {
-        if (mounted) setServiceTypes([]);
+        if (mounted) {
+          setServiceTypes(rows);
+          if (!rows.length) {
+            setServiceTypesError("No services configured. Add offerings in Settings.");
+          }
+        }
+      } catch (err) {
+        if (mounted) {
+          setServiceTypes([]);
+          setServiceTypesError(
+            err?.response?.data?.detail ||
+              err?.message ||
+              "Unable to load services."
+          );
+        }
       } finally {
         if (mounted) setLoadingServiceTypes(false);
       }
@@ -238,8 +274,16 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
         })
         .filter(Boolean);
       setAvailabilitySlots(slots);
-    } catch {
-      setAvailabilityError("Unable to load availability.");
+      if (slots.length === 0) {
+        setAvailabilityError("No available slots for this date.");
+      }
+    } catch (err) {
+      setAvailabilityError(
+        err?.response?.data?.detail ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Unable to load availability."
+      );
       setAvailabilitySlots([]);
     } finally {
       setLoadingAvailability(false);
@@ -445,7 +489,51 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
     if (raw.summary != null) payload.summary = raw.summary;
     if (raw.tags != null) payload.tags = raw.tags;
 
-    return payload;
+    const allowed = new Set([
+      "name",
+      "first_name",
+      "last_name",
+      "email",
+      "phone_number",
+      "primary_email",
+      "primary_phone",
+      "service",
+      "message",
+      "industry",
+      "industry_role",
+      "company_name",
+      "is_business",
+      "address",
+      "attributes",
+      "intake_attributes",
+      "source_host",
+      "recaptcha_score",
+      "offering",
+      "priority_score",
+      "summary",
+      "status",
+      "tags",
+    ]);
+
+    const metadata = {};
+    Object.entries(formData || {}).forEach(([key, val]) => {
+      if (val === undefined || String(val).trim() === "") return;
+      if (allowed.has(key)) {
+        if (payload[key] === undefined) payload[key] = val;
+      } else {
+        metadata[key] = val;
+      }
+    });
+    if (Object.keys(metadata).length) {
+      payload.metadata = { ...(payload.metadata || {}), ...metadata };
+    }
+
+    const cleaned = Object.fromEntries(
+      Object.entries(payload).filter(
+        ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
+      )
+    );
+    return cleaned;
   };
 
   const buildCustomerPayload = (raw = {}) => {
@@ -473,8 +561,51 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
     });
 
     if (!payload.industry && record.industry) payload.industry = record.industry;
+    if (!payload.primary_phone && raw.phone_number) {
+      payload.primary_phone = raw.phone_number;
+    }
+    if (!payload.primary_email && raw.email) {
+      payload.primary_email = raw.email;
+    }
 
-    return payload;
+    const allowed = new Set([
+      "first_name",
+      "last_name",
+      "full_name",
+      "company_name",
+      "is_business",
+      "primary_phone",
+      "secondary_phone",
+      "primary_email",
+      "secondary_email",
+      "address",
+      "city",
+      "state",
+      "zip_code",
+      "county",
+      "country",
+      "industry",
+      "notes",
+    ]);
+    const metadata = {};
+    Object.entries(formData || {}).forEach(([key, val]) => {
+      if (val === undefined || String(val).trim() === "") return;
+      if (allowed.has(key)) {
+        if (payload[key] === undefined) payload[key] = val;
+      } else {
+        metadata[key] = val;
+      }
+    });
+    if (Object.keys(metadata).length) {
+      payload.metadata = { ...(payload.metadata || {}), ...metadata };
+    }
+
+    const cleaned = Object.fromEntries(
+      Object.entries(payload).filter(
+        ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
+      )
+    );
+    return cleaned;
   };
 
   /* ---------------------------------------------------------
@@ -482,20 +613,55 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   --------------------------------------------------------- */
   const handleSaveChanges = async () => {
     try {
+      const workingData = { ...(record?.raw || {}), ...formData };
+      const hasPhone =
+        workingData.phone_number ||
+        workingData.primary_phone ||
+        workingData.secondary_phone;
+      const hasEmail =
+        workingData.email ||
+        workingData.primary_email ||
+        workingData.secondary_email;
+      if (isCreate) {
+        if (!workingData.first_name && !workingData.name) {
+          toast.error("First name is required.");
+          return;
+        }
+        if (!workingData.last_name) {
+          toast.error("Last name is required.");
+          return;
+        }
+        if (!hasPhone && !hasEmail) {
+          toast.error("Provide at least one phone or email.");
+          return;
+        }
+        if (!workingData.address) {
+          toast.error("Address is required.");
+          return;
+        }
+      }
       if (isLead) {
-        const payload = buildLeadPayload(record.raw);
+        const payload = buildLeadPayload(workingData);
+        if (!payload.name) {
+          payload.name = [payload.first_name, payload.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+        }
         if (isCreate) {
           const { data } = await api.post("/leads/crm-leads/", payload);
           setRecord(mapEntity(data));
+          setFormData(data || {});
           toast.success("Lead created.");
           return;
         }
         await api.patch(updateUrl, payload);
       } else if (isCustomer) {
-        const payload = buildCustomerPayload(record.raw);
+        const payload = buildCustomerPayload(workingData);
         if (isCreate) {
           const { data } = await api.post("/customers/", payload);
           setRecord(mapEntity(data));
+          setFormData(data || {});
           toast.success("Customer created.");
           return;
         }
@@ -505,8 +671,13 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
       }
 
       toast.success("Saved.");
-    } catch {
-      toast.error(isCreate ? "Create failed." : "Save failed.");
+    } catch (err) {
+      const detail =
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.message ||
+        null;
+      toast.error(detail || (isCreate ? "Create failed." : "Save failed."));
     }
   };
 
@@ -564,17 +735,16 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   const submitSchedule = async () => {
     const hasServiceTypes = serviceTypes.length > 0;
     const isCustomService = serviceTypeId === "custom";
-    const needsServiceType = hasServiceTypes && !isCustomService;
     const hasServiceLabel = serviceLabelInput.trim().length > 0;
-    if (needsServiceType && !serviceTypeId) {
+    if (!hasServiceTypes) {
+      toast.error("No services configured. Add offerings in Settings.");
+      return;
+    }
+    if (!serviceTypeId && !isCustomService) {
       toast.error(`Select a ${serviceLabel.toLowerCase()}.`);
       return;
     }
     if (isCustomService && !hasServiceLabel) {
-      toast.error(`Enter a ${serviceLabel.toLowerCase()}.`);
-      return;
-    }
-    if (!hasServiceTypes && !hasServiceLabel) {
       toast.error(`Enter a ${serviceLabel.toLowerCase()}.`);
       return;
     }
@@ -626,6 +796,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
             service_type_id: serviceTypeId,
             start: start.toISOString(),
             notes,
+            duration_minutes: duration,
           };
           if (locationValue?.trim()) {
             quickPayload.address = { address: locationValue.trim() };
@@ -654,8 +825,11 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
         const appointmentPayload = {
           start_time: start.toISOString(),
           end_time: end.toISOString(),
+          duration_minutes: duration,
           notes,
           lead: record.object === "lead" ? record.id : undefined,
+          customer: record.object === "customer" ? record.id : undefined,
+          service_type_id: serviceTypeId,
         };
         await createAppointment(appointmentPayload);
       }
@@ -677,12 +851,17 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
         return (
           <InfoTab
             lead={raw}
-            onChange={(e) =>
-              setRecord((prev) => ({
-                ...prev,
-                raw: { ...prev.raw, [e.target.name]: e.target.value },
-              }))
-            }
+            formData={formData}
+            preferences={preferences}
+            onChange={(e) => {
+              const { name, value } = e.target;
+              setFormData((prev) => ({ ...prev, [name]: value }));
+              setRecord((prev) =>
+                prev
+                  ? { ...prev, raw: { ...prev.raw, [name]: value } }
+                  : prev
+              );
+            }}
           />
         );
       case "revival":
@@ -849,24 +1028,12 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
                         {service.name || `Service ${service.id}`}
                       </option>
                     ))}
-                    <option value="custom">Custom service</option>
                   </select>
                 ) : (
-                  <input
-                    type="text"
-                    placeholder="Enter service name"
-                    value={serviceLabelInput}
-                    onChange={(e) => setServiceLabelInput(e.target.value)}
-                  />
-                )}
-
-                {serviceTypeId === "custom" && (
-                  <input
-                    type="text"
-                    placeholder="Enter custom service"
-                    value={serviceLabelInput}
-                    onChange={(e) => setServiceLabelInput(e.target.value)}
-                  />
+                  <div className="schedule-empty">
+                    {serviceTypesError ||
+                      "No services configured. Add offerings in Settings."}
+                  </div>
                 )}
 
                 <label>{staffLabel}</label>
@@ -927,7 +1094,7 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
                     Available Slots
                   </div>
                   <div className="schedule-slots">
-                    {!serviceTypeId || serviceTypeId === "custom" ? (
+                    {!serviceTypeId ? (
                       <div className="schedule-muted">
                         Select a service to load availability.
                       </div>

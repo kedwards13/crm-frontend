@@ -1,126 +1,98 @@
 /* src/components/Dashboards/Widgets/AiAssistantWidget.css */
 
-/* Overall container */
+/* Compact assistant widget for reuse (kept in case of future use) */
 .assistant-widget {
-    width: 400px;
-    height: 100%;
-    max-height: 600px;
-    background-color: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    box-shadow: var(--shadow-0);
-    color: var(--color-text);
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
-    box-sizing: border-box;
-  }
-  
-  /* Siri-like Orb */
-  .assistant-orb-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-  
-.assistant-orb {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: var(--accent-0);
-    position: relative;
-    box-shadow: none;
-  }
-  
-  /* Header (title + subtitle) */
-  .assistant-header {
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  .assistant-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-  
-  .assistant-header p {
-    margin: 4px 0 0;
-    font-size: 0.85rem;
-    opacity: 0.8;
-  }
-  
-  /* Chat Body */
-  .assistant-chat-body {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px 0;
-  }
-  
-  /* Example message bubbles */
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  background-color: var(--bg-1);
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  box-shadow: var(--shadow-0);
+  color: var(--text-0);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.assistant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.assistant-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.assistant-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+
+.assistant-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0;
+}
+
 .assistant-message {
-    max-width: 80%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    line-height: 1.3;
-    font-size: 0.9rem;
-  }
-  
-  .from-ai {
-    align-self: flex-start;
-    background-color: var(--bg-2);
-    border: 1px solid var(--border-0);
-  }
-  
-  .from-user {
-    align-self: flex-end;
-    background-color: var(--bg-2);
-    border: 1px solid var(--border-0);
-  }
-  
-  /* Input Row */
-  .assistant-input-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 10px;
-  }
-  
+  max-width: 82%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  line-height: 1.35;
+  font-size: 0.9rem;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border-0);
+}
+
+.from-ai {
+  align-self: flex-start;
+}
+
+.from-user {
+  align-self: flex-end;
+}
+
+.assistant-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .assistant-input {
-    flex: 1;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    color: var(--text-0);
-    padding: 8px;
-    font-size: 0.9rem;
-    outline: none;
-  }
-  
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  color: var(--text-0);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
 .assistant-input::placeholder {
-    color: var(--text-2);
-  }
-  
+  color: var(--text-2);
+}
+
 .assistant-btn {
-    background-color: var(--accent-0);
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-  }
-  
+  background-color: var(--accent-0);
+  border: 1px solid var(--accent-1);
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
 .assistant-btn:hover {
-    background-color: var(--accent-1);
-  }
-  
-  .send-btn {
-    /* Additional styling for "Send" if desired */
-  }
-  
-  .speak-btn {
-    /* Additional styling for "Speak" if desired */
-  }
+  background-color: var(--accent-1);
+}

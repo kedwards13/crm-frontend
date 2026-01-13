@@ -20,14 +20,19 @@
   background: var(--bg-1);
   border-right: 1px solid var(--border-0);
 
-  transition: width .25s ease;
+  transition: width .25s ease, background .25s ease, border-color .25s ease;
   overflow: hidden;
 }
 
-/* Light mode only */
+/* Light / Dark parity */
 body.light-mode .sidebar {
   background: var(--bg-1);
   border-right: 1px solid var(--border-0);
+}
+
+body.dark-mode .sidebar {
+  background: var(--bg-1);
+  border-right: 1px solid var(--border-1);
 }
 
 /* ============================================================
@@ -139,7 +144,7 @@ body.light-mode .sidebar {
 /* Active (your requested premium effect) */
 .sidebar-link.active {
   position: relative;
-  background: var(--bg-2);
+  background: rgba(31, 107, 255, 0.12);
   color: var(--color-accent);
   font-weight: 600;
 }

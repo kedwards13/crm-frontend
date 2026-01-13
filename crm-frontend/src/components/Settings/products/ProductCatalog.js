@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../../config/env';
 import { getIndustry } from '../../../helpers/tenantHelpers';
 import '../SettingsCommon.css';
 
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:808';
+const API = API_BASE_URL;
 
 const PRESETS = {
   pest_control: [

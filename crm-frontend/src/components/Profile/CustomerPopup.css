@@ -7,43 +7,43 @@
    ROOT COLORS (light/dark auto)
 ============================================================ */
 .customer-popup-wrapper {
-  --bg-0: #ffffff;
-  --bg-1: #f7f7f5;
-  --bg-2: #f1f3f2;
-  --bg-3: #e6eae6;
+  --bg-0: var(--bg-1);
+  --bg-1: var(--bg-1);
+  --bg-2: var(--bg-2);
+  --bg-3: var(--bg-3);
 
-  --text-0: #1f2a24;
-  --text-1: #2f3b33;
-  --text-2: #5f6b63;
+  --text-0: var(--text-0);
+  --text-1: var(--text-1);
+  --text-2: var(--text-2);
 
   --border-1: var(--border-0);
 
-  --accent-0: #5c636a;
-  --accent-1: #4f565d;
+  --accent-0: var(--accent-0);
+  --accent-1: var(--accent-1);
 
-  --input-bg: #ffffff;
-  --input-border: var(--border-0);
+  --input-bg: var(--input-bg);
+  --input-border: var(--input-border);
   --input-text: var(--text-0);
   --input-placeholder: var(--text-2);
 }
 
 body.light-mode .customer-popup-wrapper {
-  --bg-0: #ffffff;
-  --bg-1: #f7f7f5;
-  --bg-2: #f1f3f2;
-  --bg-3: #e6eae6;
+  --bg-0: var(--bg-1);
+  --bg-1: var(--bg-1);
+  --bg-2: var(--bg-2);
+  --bg-3: var(--bg-3);
 
-  --text-0: #1f2a24;
-  --text-1: #2f3b33;
-  --text-2: #5f6b63;
+  --text-0: var(--text-0);
+  --text-1: var(--text-1);
+  --text-2: var(--text-2);
 
   --border-1: var(--border-0);
 
-  --accent-0: #5c636a;
-  --accent-1: #4f565d;
+  --accent-0: var(--accent-0);
+  --accent-1: var(--accent-1);
 
-  --input-bg: #ffffff;
-  --input-border: var(--border-0);
+  --input-bg: var(--input-bg);
+  --input-border: var(--input-border);
   --input-text: var(--text-0);
   --input-placeholder: var(--text-2);
 }

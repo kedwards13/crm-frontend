@@ -1,6 +1,6 @@
 // src/components/PropertyList.js
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../apiClient';
 
 const PropertyList = () => {
   const [properties, setProperties] = useState([]);
@@ -8,12 +8,13 @@ const PropertyList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/properties/')
+    api
+      .get('/properties/')
       .then(response => {
         setProperties(response.data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch(() => {
         setError('Error fetching properties');
         setLoading(false);
       });

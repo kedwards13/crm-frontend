@@ -3,7 +3,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../App';
 import api from '../../apiClient';
-import { setActiveTenant, normalizeIndustry } from '../../helpers/tenantHelpers';
+import { normalizeIndustry } from '../../helpers/tenantHelpers';
 import { FcGoogle } from 'react-icons/fc';
 import './Auth.css';
 
@@ -22,54 +22,32 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const domain = email.split('@')[1];
-
-      const { data } = await api.post(
-        '/accounts/auth/login/',
-        { email, password },
-        { headers: { 'X-Tenant-Domain': domain } }
-      );
+      const { data } = await api.post('/accounts/auth/login/', { email, password });
 
       const access = data?.access;
       const refresh = data?.refresh;
       const expiry = new Date(Date.now() + 3600 * 1000).toISOString();
-
-      const rawTenant = data?.activeTenant || {};
       const user = data?.user || {};
+      const tenantList = Array.isArray(data?.tenants) ? data.tenants : [];
+      const normalizedTenants = tenantList
+        .map((tenant) => ({
+          id: tenant?.id || tenant?.tenant_id || null,
+          name: tenant?.name || 'Account',
+          domain: tenant?.domain,
+          industry: normalizeIndustry(tenant?.industry || tenant?.vertical || tenant?.segment),
+          setupComplete: tenant?.setupComplete ?? tenant?.setup_complete ?? true,
+          role: tenant?.role || user?.role || 'Member',
+          plan: tenant?.plan || 'base',
+          locale: tenant?.locale || 'en-US',
+        }))
+        .filter((tenant) => tenant.id);
 
-      const nameHint = (rawTenant.name || '').toLowerCase().includes('pest')
-        ? 'pest_control'
-        : 'general';
-
-      const industry = normalizeIndustry(
-        rawTenant.industry || rawTenant.vertical || rawTenant.segment || nameHint
-      );
-
-      const normalizedTenant = {
-        id: rawTenant.id ?? 'tenant',
-        name: rawTenant.name ?? 'Your Company',
-        domain: rawTenant.domain,
-        industry,
-        setupComplete: data?.tenantSetupComplete ?? rawTenant.setupComplete ?? true,
-        role: user?.role || 'Member',
-        plan: rawTenant.plan || 'base',
-        locale: rawTenant.locale || 'en-US',
-      };
-
-      // Save tokens + context
-      localStorage.setItem('token', access || '');
-      localStorage.setItem('access_token', access || '');
-      if (refresh) localStorage.setItem('refresh', refresh);
-      localStorage.setItem('token_expiry', expiry);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      setActiveTenant(normalizedTenant);
-      login(access, refresh, expiry, normalizedTenant, user); // Added user
-
-      navigate(
-        normalizedTenant.setupComplete ? '/dashboard' : '/settings/team',
-        { replace: true }
-      );
+      login(access, refresh, expiry, normalizedTenants, user);
+      if (normalizedTenants.length === 1) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/select-account', { replace: true });
+      }
     } catch (err) {
       const detail = err?.response?.data?.detail || '';
       const errorMsg =
@@ -86,7 +64,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    alert('Google sign-in is not enabled for this workspace.');
+    alert('Google sign-in is not enabled for this account.');
   };
 
   return (
@@ -98,14 +76,14 @@ const Login = () => {
               <span className="brand-lines" aria-hidden="true" />
               <span className="brand-name">CRM</span>
             </div>
-            <span className="brand-chip">Operations workspace</span>
+            <span className="brand-chip">Account access</span>
           </div>
-          <p className="hero-eyebrow">Secure workspace access</p>
+          <p className="hero-eyebrow">Secure account access</p>
         </div>
 
-        <h1 className="hero-title">Sign in to your workspace</h1>
+        <h1 className="hero-title">Sign in to your account</h1>
         <p className="hero-copy">
-          Secure access to your CRM workspace. Use your company credentials to continue.
+          Secure access to your CRM account. Use your company credentials to continue.
         </p>
 
         <div className="hero-actions">
@@ -123,7 +101,7 @@ const Login = () => {
           <div className="form-header">
             <div className="form-badge">CR</div>
             <div>
-              <p className="form-eyebrow">Secure workspace login</p>
+              <p className="form-eyebrow">Secure sign in</p>
               <h2 className="form-title">Welcome back</h2>
               <p className="form-subtitle">Use your company email to continue</p>
             </div>

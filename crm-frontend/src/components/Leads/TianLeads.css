@@ -17,11 +17,11 @@
 .lead-card {
   display: grid;
   gap: 0.5rem;
-  border: 1px solid var(--color-border, #2a2a2a);
-  background: var(--color-bg-card, #111);
-  border-radius: 14px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-1);
+  border-radius: 12px;
   padding: 0.9rem 1rem;
-  box-shadow: var(--shadow-elevation, 0 1px 2px rgba(0,0,0,.2));
+  box-shadow: var(--shadow-0);
   overflow: visible;
   min-width: 0;
   word-break: break-word;
@@ -40,27 +40,27 @@
   font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid var(--color-border, #2a2a2a);
-  color: var(--color-text-secondary, #b8b8b8);
-  background: color-mix(in srgb, var(--color-bg, #0f1115) 80%, transparent);
+  border: 1px solid var(--border-0);
+  color: var(--text-1);
+  background: var(--bg-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
 
 .lead-source.web {
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--info-0);
+  border-color: rgba(31, 107, 255, 0.36);
 }
 
 .lead-source.crm {
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.4);
+  color: var(--success-0);
+  border-color: rgba(18, 183, 106, 0.36);
 }
 
 .lead-card:hover {
-  box-shadow: 0 6px 18px rgba(0,0,0,.35);
-  border-color: color-mix(in srgb, var(--color-border, #2a2a2a) 60%, var(--color-accent, #0a84ff));
+  box-shadow: var(--shadow-1);
+  border-color: var(--color-accent);
 }
 
 .lead-card:active {
@@ -72,14 +72,14 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-primary, #eaeaea);
+  color: var(--text-0);
 }
 
 /* Content rows */
 .lead-card p {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--color-text-secondary, #b8b8b8);
+  color: var(--text-2);
 }
 
 /* Clamp long messages to 3 lines */
@@ -101,9 +101,9 @@
 /* Buttons */
 .btn {
   appearance: none;
-  border: 1px solid var(--color-border, #2a2a2a);
-  background: var(--color-bg-elevated, #1a1a1a);
-  color: var(--color-text-primary, #eaeaea);
+  border: 1px solid var(--border-0);
+  background: var(--bg-2);
+  color: var(--text-0);
   padding: 0.5rem 0.75rem;
   border-radius: 10px;
   cursor: pointer;
@@ -111,18 +111,19 @@
   transition: filter .12s ease, transform .06s ease;
 }
 
-.btn:hover { filter: brightness(1.06); }
+.btn:hover { filter: none; background: var(--bg-1); border-color: var(--border-1); }
 .btn:active { transform: translateY(1px); }
 
 .btn-save {
-  border-color: color-mix(in srgb, var(--color-accent, #0a84ff) 60%, #2a2a2a);
-  background: color-mix(in srgb, var(--color-accent, #0a84ff) 18%, var(--color-bg-elevated, #1a1a1a));
+  border-color: var(--accent-1);
+  background: var(--accent-0);
+  color: var(--accent-ink);
 }
 
 .btn-secondary {
-  border-color: color-mix(in srgb, #f59e0b 50%, #2a2a2a);
-  color: #fbbf24;
-  background: color-mix(in srgb, #f59e0b 12%, var(--color-bg-elevated, #1a1a1a));
+  border-color: rgba(245, 158, 11, 0.6);
+  color: var(--text-0);
+  background: var(--bg-2);
 }
 
 .btn-ai {

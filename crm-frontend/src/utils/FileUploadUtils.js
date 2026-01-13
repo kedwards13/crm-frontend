@@ -1,5 +1,6 @@
 // src/utils/fileUploadUtils.js
 import axios from 'axios';
+import { API_BASE_URL } from '../config/env';
 
 /**
  * Upload a file using a PATCH request.
@@ -34,7 +35,7 @@ export const uploadFile = async (endpoint, fileData, token) => {
  * @returns {Promise} - Resolves to the server response.
  */
 export const uploadProfilePicture = (userId, file, token) => {
-  const endpoint = `http://127.0.0.1:808/api/accounts/users/${userId}/`;
+  const endpoint = `${API_BASE_URL}/accounts/users/${userId}/`;
   return uploadFile(endpoint, { avatar: file }, token);
 };
 
@@ -47,6 +48,6 @@ export const uploadProfilePicture = (userId, file, token) => {
  * @returns {Promise} - Resolves to the server response.
  */
 export const uploadDocument = (userId, file, token) => {
-  const endpoint = `http://127.0.0.1:808/api/accounts/users/${userId}/`;
+  const endpoint = `${API_BASE_URL}/accounts/users/${userId}/`;
   return uploadFile(endpoint, { document: file }, token);
 };

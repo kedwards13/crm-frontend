@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/env';
 import './Auth.css'; // Uses shared auth styles
 
 const TenantSignUp = () => {
@@ -79,10 +80,7 @@ const TenantSignUp = () => {
       return;
     }
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:808'}/api/accounts/tenant-signup/`,
-        formData
-      );
+      const response = await axios.post(`${API_BASE_URL}/accounts/tenant-signup/`, formData);
       setSuccess(response.data.message);
       localStorage.setItem('token', response.data.access);
       localStorage.setItem('refresh', response.data.refresh);

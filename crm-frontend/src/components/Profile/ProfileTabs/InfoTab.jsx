@@ -16,28 +16,33 @@ import {
 } from "../../../utils/orderUtils";
 import "./info-tab.css";
 
-export default function InfoTab({ lead, onChange }) {
+export default function InfoTab({ lead, formData = {}, onChange, preferences }) {
   const [loadingEnrich, setLoadingEnrich] = useState(false);
 
-  if (!lead) return <div className="info-empty">Loading...</div>;
+  const safeLead = useMemo(
+    () => ({ ...(lead || {}), ...(formData || {}) }),
+    [lead, formData]
+  );
+  const isLoading = !lead;
 
-  const isCustomer = lead.object === "customer" || lead.customer_id != null;
-  const tenantIndustry = getIndustry("general");
-  const uiConfig = getIndustryUIConfig(tenantIndustry, lead);
+  const isCustomer = safeLead.object === "customer" || safeLead.customer_id != null;
+  const tenantIndustry =
+    preferences?.industry || safeLead.industry || getIndustry("general");
+  const uiConfig = getIndustryUIConfig(tenantIndustry, safeLead);
   const { orders, history } = useMemo(
-    () => extractOrderCollections(lead),
-    [lead]
+    () => extractOrderCollections(safeLead),
+    [safeLead]
   );
   const orderSummary = useMemo(() => {
     const source = orders.length ? orders : history;
     return summarizeOrders(source);
   }, [orders, history]);
-  const constraints = useMemo(() => extractConstraints(lead), [lead]);
+  const constraints = useMemo(() => extractConstraints(safeLead), [safeLead]);
   const rawNotes =
-    lead.notes ||
-    lead.special_instructions ||
-    lead.delivery_notes ||
-    lead.instructions ||
+    safeLead.notes ||
+    safeLead.special_instructions ||
+    safeLead.delivery_notes ||
+    safeLead.instructions ||
     "";
   const opsNotes = Array.isArray(rawNotes)
     ? rawNotes.filter(Boolean).join(", ")
@@ -72,6 +77,18 @@ export default function InfoTab({ lead, onChange }) {
     onChange({ target: { name: field, value } });
   };
 
+  const dynamicFields = useMemo(() => {
+    const overrides =
+      preferences?.ai_mapping_overrides?.lead_form ||
+      preferences?.ai_mapping_overrides?.customer_form ||
+      preferences?.ai_mapping_overrides?.customer_import ||
+      {};
+    return Object.entries(overrides).map(([label, name]) => ({
+      label,
+      name,
+    }));
+  }, [preferences]);
+
   const Field = ({
     label,
     name,
@@ -81,7 +98,7 @@ export default function InfoTab({ lead, onChange }) {
     options,
     fallback,
   }) => {
-    const value = lead[name] ?? fallback ?? "";
+    const value = safeLead[name] ?? fallback ?? "";
 
     return (
       <div className={`info-field ${className}`}>
@@ -121,7 +138,11 @@ export default function InfoTab({ lead, onChange }) {
     );
   };
 
-  if (lead.object === "lead") {
+  if (isLoading) {
+    return <div className="info-empty">Loading...</div>;
+  }
+
+  if (safeLead.object === "lead") {
     const statusOptions = [
       { value: "new", label: "New" },
       { value: "contacted", label: "Contacted" },
@@ -146,17 +167,28 @@ export default function InfoTab({ lead, onChange }) {
                   label="Primary Email"
                   name="primary_email"
                   type="email"
-                  fallback={lead.email}
+                  fallback={safeLead.email}
                 />
                 <Field
                   label="Primary Phone"
                   name="primary_phone"
                   type="tel"
-                  fallback={lead.phone_number}
+                  fallback={safeLead.phone_number}
                 />
                 <Field label="Industry" name="industry" />
                 <Field label="Address" name="address" className="field-wide" />
               </div>
+              {dynamicFields.length > 0 && (
+                <div className="info-grid-2">
+                  {dynamicFields.map((field) => (
+                    <Field
+                      key={field.name}
+                      label={field.label}
+                      name={field.name}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -175,7 +207,7 @@ export default function InfoTab({ lead, onChange }) {
   }
 
   const IndustryFields = () => {
-    switch (lead.industry) {
+    switch (safeLead.industry) {
       case "landscaping":
         return (
           <>
@@ -227,7 +259,7 @@ export default function InfoTab({ lead, onChange }) {
 
     try {
       setLoadingEnrich(true);
-      const res = await enrichCustomer(lead.customer_id || lead.id);
+      const res = await enrichCustomer(safeLead.customer_id || safeLead.id);
       const data = res?.data || {};
       setLoadingEnrich(false);
 
@@ -247,10 +279,10 @@ export default function InfoTab({ lead, onChange }) {
             <div>
               <div className="info-section-title">Operations Summary</div>
               <div className="ops-title">
-                {lead.full_name || lead.name || "Customer"}
+                {safeLead.full_name || safeLead.name || "Customer"}
               </div>
               <div className="ops-subtitle">
-                Account {lead.customer_id || lead.id || "N/A"}
+                Account {safeLead.customer_id || safeLead.id || "N/A"}
               </div>
             </div>
             {upcomingDates.length > 0 && (
@@ -431,7 +463,7 @@ export default function InfoTab({ lead, onChange }) {
 
           {/* MAP */}
           <div className="info-map">
-            <StreetViewEmbed address={lead.address} />
+            <StreetViewEmbed address={safeLead.address} />
           </div>
         </div>
       </div>
@@ -442,13 +474,22 @@ export default function InfoTab({ lead, onChange }) {
           <div className="info-section-title">Industry Details</div>
           <div className="info-grid-3 industry-grid">
             <IndustryFields />
+            {dynamicFields.length > 0 &&
+              dynamicFields.map((field) => (
+                <Field
+                  key={field.name}
+                  label={field.label}
+                  name={field.name}
+                  className="field-wide"
+                />
+              ))}
           </div>
         </div>
 
         <div className="info-group info-ai-group">
           <div className="info-section-title">AI Enrichment</div>
           <div className="ai-layout">
-            <div className="ai-summary">{lead.ai?.summary || "No AI summary yet."}</div>
+            <div className="ai-summary">{safeLead.ai?.summary || "No AI summary yet."}</div>
             {isCustomer ? (
               <button className="ai-btn" onClick={runEnrichment} disabled={loadingEnrich}>
                 {loadingEnrich ? "Enriching..." : "Run Enrichment"}

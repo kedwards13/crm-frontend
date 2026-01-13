@@ -1,6 +1,7 @@
 // src/components/PhoneDialer.js
 import React, { useState, useEffect } from 'react';
 import './PhoneDialer.css';
+import { API_BASE_URL } from '../../../config/env';
 
 const PhoneDialer = () => {
   // Input & status
@@ -25,7 +26,7 @@ const PhoneDialer = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://127.0.0.1:808/api/comm/inbound-call/', {
+      const response = await fetch(`${API_BASE_URL}/comm/inbound-call/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

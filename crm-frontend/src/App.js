@@ -1,10 +1,11 @@
 // src/App.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 // Components
 import Layout from './components/Layout/Layout';
 import Login from './components/Auth/Login';
+import TenantSelector from './components/Auth/TenantSelector';
 import TenantSignUp from './components/Auth/TenantSignUp';
 import Dashboard from './components/Dashboards/Dashboard';
 import LeadsPage from './components/Leads/LeadsPage';
@@ -26,9 +27,16 @@ import MarketingPage from './components/Marketing/MarketingPage';
 import CustomersPage from './components/Customers/CustomersPage';
 import TeamManagement from './components/Settings/TeamManagement';
 import OperationsRouter from './components/Operations/OperationsRouter';
+import api from './apiClient';
 
 // Helpers
-import { setActiveTenant, getActiveTenant } from './helpers/tenantHelpers';
+import {
+  clearActiveTenant,
+  getActiveTenant,
+  getStoredTenants,
+  persistTenants,
+  setActiveTenant,
+} from './helpers/tenantHelpers';
 
 // Styles
 import './App.css';
@@ -46,33 +54,42 @@ function safeParse(json, fallback = null) {
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isTenantSetupComplete, setTenantSetupComplete] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [isTenantSetupComplete, setTenantSetupComplete] = useState(true);
+  const [token, setToken] = useState(
+    localStorage.getItem('token') || localStorage.getItem('access_token') || null
+  );
   const [user, setUser] = useState(() => safeParse(localStorage.getItem('user'), null));
   const [tenant, setTenant] = useState(() => getActiveTenant() || null);
+  const [tenants, setTenants] = useState(() => getStoredTenants());
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.clear();
     setIsAuthenticated(false);
     setTenantSetupComplete(false);
     setToken(null);
     setUser(null);
     setTenant(null);
-  };
+    setTenants([]);
+  }, []);
 
   useEffect(() => {
     try {
       const storedToken = localStorage.getItem('token');
+      const fallbackToken = localStorage.getItem('access_token');
       const tokenExpiry = localStorage.getItem('token_expiry');
       const userData = safeParse(localStorage.getItem('user'), null);
       const tenantData = getActiveTenant();
+      const storedTenants = getStoredTenants();
+      setTenants(storedTenants);
 
-      if (storedToken && tokenExpiry) {
+      const accessToken = storedToken || fallbackToken;
+
+      if (accessToken && tokenExpiry) {
         const expiryTime = new Date(tokenExpiry);
         if (expiryTime > new Date()) {
           setIsAuthenticated(true);
-          setTenantSetupComplete(tenantData?.setupComplete || false);
-          setToken(storedToken);
+          setTenantSetupComplete(tenantData?.setupComplete ?? true);
+          setToken(accessToken);
           setUser(userData);
           setTenant(tenantData);
         } else {
@@ -82,22 +99,67 @@ export const useAuth = () => {
     } catch {
       logout();
     }
+  }, [logout]);
+
+  useEffect(() => {
+    const syncTenant = () => setTenant(getActiveTenant());
+    const syncTenants = () => setTenants(getStoredTenants());
+    const onStorage = (e) => {
+      if (e.key === 'activeTenant') syncTenant();
+      if (e.key === 'tenants') syncTenants();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('activeTenant:changed', syncTenant);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('activeTenant:changed', syncTenant);
+    };
   }, []);
 
-  const login = (accessToken, refreshToken, expiry, tenantData, userData) => {
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('refresh', refreshToken);
+  const login = (accessToken, refreshToken, expiry, tenantList, userData) => {
+    const normalizedTenants = persistTenants(tenantList);
+    clearActiveTenant();
+
+    localStorage.setItem('token', accessToken || '');
+    localStorage.setItem('access_token', accessToken || '');
+    if (refreshToken) localStorage.setItem('refresh', refreshToken);
+    else localStorage.removeItem('refresh');
     localStorage.setItem('token_expiry', expiry);
     localStorage.setItem('user', JSON.stringify(userData));
-    setActiveTenant(tenantData);
 
-    const normalizedTenant = getActiveTenant();
+    const autoSelect =
+      Array.isArray(normalizedTenants) && normalizedTenants.length === 1
+        ? normalizedTenants[0]
+        : null;
+    if (autoSelect?.id) {
+      const saved = setActiveTenant(autoSelect);
+      setTenant(saved);
+      setTenantSetupComplete(saved?.setupComplete ?? true);
+    } else {
+      clearActiveTenant();
+      setTenant(null);
+      setTenantSetupComplete(false);
+    }
 
     setIsAuthenticated(true);
-    setTenantSetupComplete(normalizedTenant?.setupComplete || false);
-    setToken(accessToken);
+    setToken(accessToken || null);
     setUser(userData);
-    setTenant(normalizedTenant);
+    setTenants(normalizedTenants);
+  };
+
+  const selectTenant = async (tenantId) => {
+    const tenantList = getStoredTenants();
+    const selected = tenantList.find((t) => String(t.id) === String(tenantId));
+    if (!selected) throw new Error('Please choose a tenant to continue.');
+
+    const { data } = await api.post('/accounts/auth/switch-tenant/', {
+      tenant_id: tenantId,
+    });
+
+    const mergedTenant = setActiveTenant({ ...data?.activeTenant, ...selected });
+    setTenant(mergedTenant);
+    setTenantSetupComplete(mergedTenant?.setupComplete ?? true);
+    return mergedTenant;
   };
 
   return {
@@ -108,6 +170,11 @@ export const useAuth = () => {
     token,
     user,
     tenant,
+    tenants,
+    selectTenant,
+    requiresTenantSelection:
+      isAuthenticated &&
+      (!tenant?.id || (tenants.length > 0 && !tenants.find((t) => String(t.id) === String(tenant.id)))),
   };
 };
 
@@ -120,55 +187,94 @@ const UnauthenticatedRoutes = () => (
 );
 
 const AuthenticatedApp = () => {
-  const { isTenantSetupComplete } = useContext(AuthContext);
-
   return (
     <Layout>
       <Routes>
-        {isTenantSetupComplete ? (
-          <>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/customers/*" element={<CustomersPage />} />
-            <Route path="/leads/*" element={<LeadsPage />} />
-            <Route path="/leads/pipeline" element={<PipelineView />} />
-            <Route path="/leads/under-contract" element={<MarketplaceView />} />
-            <Route path="/schedule/*" element={<SchedulingDashboard />} />
-            <Route path="/communication/*" element={<CommunicationsPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/customers/*" element={<CustomersPage />} />
+        <Route path="/leads/*" element={<LeadsPage />} />
+        <Route path="/leads/pipeline" element={<PipelineView />} />
+        <Route path="/leads/under-contract" element={<MarketplaceView />} />
+        <Route path="/schedule/*" element={<SchedulingDashboard />} />
+        <Route path="/communication/*" element={<CommunicationsPage />} />
 
-            {/* Revival */}
-            <Route path="/revival/overview" element={<Overview />} />
-            <Route path="/revival/scanner" element={<RevivalScanner />} />
-            <Route path="/revival/campaigns" element={<Campaigns />} />
-            <Route path="/revival/planner" element={<Planner />} />
-            <Route path="/revival/history" element={<History />} />
-            <Route path="/revival/ai" element={<AiInsights />} />
-            <Route path="/revival/*" element={<Navigate to="/revival/overview" replace />} />
+        {/* Revival */}
+        <Route path="/revival/overview" element={<Overview />} />
+        <Route path="/revival/scanner" element={<RevivalScanner />} />
+        <Route path="/revival/campaigns" element={<Campaigns />} />
+        <Route path="/revival/planner" element={<Planner />} />
+        <Route path="/revival/history" element={<History />} />
+        <Route path="/revival/ai" element={<AiInsights />} />
+        <Route path="/revival/*" element={<Navigate to="/revival/overview" replace />} />
 
-            {/* Finance & Marketing */}
-            <Route path="/finance/*" element={<FinancePage />} />
-            <Route path="/marketing/*" element={<MarketingPage />} />
+        {/* Finance & Marketing */}
+        <Route path="/finance/*" element={<FinancePage />} />
+        <Route path="/marketing/*" element={<MarketingPage />} />
 
-            <Route path="/analytics/*" element={<AnalyticsPage />} />
-            <Route path="/operations/*" element={<OperationsRouter />} />
-            <Route path="/settings/team" element={<TeamManagement />} />
-            <Route path="/settings/*" element={<Settings />} />
-            <Route path="/assistant" element={<Assistant />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/settings/team" element={<TeamManagement />} />
-            <Route path="*" element={<Navigate to="/settings/team" replace />} />
-          </>
-        )}
+        <Route path="/analytics/*" element={<AnalyticsPage />} />
+        <Route path="/operations/*" element={<OperationsRouter />} />
+        <Route path="/settings/team" element={<TeamManagement />} />
+        <Route path="/settings/*" element={<Settings />} />
+        <Route path="/assistant" element={<Assistant />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Layout>
   );
 };
 
+const TenantSelectionRoutes = () => {
+  const navigate = useNavigate();
+  const { tenants, selectTenant, logout } = useContext(AuthContext);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSelect = async (tenantId) => {
+    if (!tenantId) {
+      setError('Select a tenant to continue.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const active = await selectTenant(tenantId);
+      const target = active?.setupComplete === false ? '/settings/team' : '/dashboard';
+      navigate(target, { replace: true });
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Unable to activate tenant. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Routes>
+      <Route
+        path="/select-account"
+        element={
+          <TenantSelector
+            tenants={tenants}
+            onSelect={handleSelect}
+            onLogout={logout}
+            loading={loading}
+            error={error}
+          />
+        }
+      />
+      <Route path="*" element={<Navigate to="/select-account" replace />} />
+    </Routes>
+  );
+};
+
 const AppRoutes = () => {
-  const { isAuthenticated } = useContext(AuthContext);
-  return isAuthenticated ? <AuthenticatedApp /> : <UnauthenticatedRoutes />;
+  const { isAuthenticated, requiresTenantSelection } = useContext(AuthContext);
+  if (!isAuthenticated) return <UnauthenticatedRoutes />;
+  if (requiresTenantSelection) return <TenantSelectionRoutes />;
+  return <AuthenticatedApp />;
 };
 
 const App = () => {

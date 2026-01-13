@@ -23,6 +23,7 @@ import { Brain, Eye, Zap } from "lucide-react";
 import { mapEntity } from "../../utils/contactMapper";
 import { getIndustry } from "../../helpers/tenantHelpers";
 import { getIndustryCopy } from "../../constants/industryCopy";
+import { normalizeArray } from "../../apiClient";
 
 import "./CustomerList.css";
 
@@ -127,6 +128,7 @@ export default function CustomerList() {
   const [error, setError] = useState("");
 
   const debounceRef = useRef(null);
+  const safeCustomers = normalizeArray(customers);
 
   // ---------------------- Load customers ----------------------
   const fetchCustomers = async () => {
@@ -135,7 +137,7 @@ export default function CustomerList() {
 
     try {
       const { data } = await getCustomers(search ? { q: search } : {});
-      setCustomers(data.results || data);
+      setCustomers(normalizeArray(data));
     } catch (err) {
       console.error(err);
       setError("Failed to load customers.");
@@ -187,9 +189,9 @@ export default function CustomerList() {
 
   const toggleSelectAll = () =>
     setChecked(
-      checked.length === customers.length
+      checked.length === safeCustomers.length
         ? []
-        : customers.map((c) => c.customer_id)
+        : safeCustomers.map((c) => c.customer_id)
     );
 
   const bulkEnrich = async () => {
@@ -288,7 +290,7 @@ export default function CustomerList() {
 
       {loading ? (
         <div className="gt-loading">Loading {customersLower}...</div>
-      ) : !customers.length ? (
+      ) : !safeCustomers.length ? (
         <div className="gt-empty">No {customersLower} found.</div>
       ) : (
         <div className="gt-table-wrapper">
@@ -299,7 +301,7 @@ export default function CustomerList() {
                   <input
                     type="checkbox"
                     className="gt-checkbox"
-                    checked={checked.length === customers.length}
+                    checked={checked.length === safeCustomers.length}
                     onChange={toggleSelectAll}
                   />
                 </th>
@@ -312,7 +314,7 @@ export default function CustomerList() {
             </thead>
 
             <tbody>
-              {customers.map((c) => (
+              {safeCustomers.map((c) => (
                 <CustomerRow
                   key={c.customer_id}
                   c={c}

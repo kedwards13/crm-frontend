@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ImportDashboard.css';
+import { API_BASE_URL } from '../config/env';
 
 function ImportDashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -21,7 +22,7 @@ function ImportDashboard() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/lead-gen/upload-file/', {
+      const response = await fetch(`${API_BASE_URL}/lead-gen/upload-file/`, {
         method: 'POST',
         body: formData,
       });
@@ -43,7 +44,7 @@ function ImportDashboard() {
   useEffect(() => {
     const fetchStagingLeads = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/lead-gen/staging-leads/');
+        const response = await fetch(`${API_BASE_URL}/lead-gen/staging-leads/`);
         const data = await response.json();
         setStagingLeads(data);
       } catch (error) {

@@ -51,7 +51,7 @@ export default function Navigation({
 
   useEffect(() => {
     const items = getNavForIndustry(industryKey, userRole);
-    setNavItems(items);
+    setNavItems(Array.isArray(items) ? items : []);
   }, [industryKey, userRole, location]);
 
   useEffect(() => {
@@ -89,6 +89,8 @@ export default function Navigation({
     isMobile && autoCollapseMobile && drawerOpen ? 'open' : '',
   ].filter(Boolean).join(' ');
 
+  const safeNavItems = Array.isArray(navItems) ? navItems : [];
+
   return (
     <>
       {isMobile && autoCollapseMobile && (
@@ -121,7 +123,7 @@ export default function Navigation({
           </div>
 
           <ul className="sidebar-nav" role="list">
-            {navItems.map(({ path, label, icon }) => {
+            {safeNavItems.map(({ path, label, icon }) => {
               const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
               return (
                 <li key={path} className="sidebar-item">

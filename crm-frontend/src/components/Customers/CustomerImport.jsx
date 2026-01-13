@@ -1,9 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/env";
 import { AuthContext } from "../../App";
 import "./CustomerImport.css";
 
-const API_BASE = "http://localhost:808/api/imports";
+const API_BASE = `${API_BASE_URL}/imports`;
 
 const CRM_FIELDS = [
   "",

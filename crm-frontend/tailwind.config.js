@@ -7,13 +7,13 @@ module.exports = {
     theme: {
       extend: {
         colors: {
-          primary: "#1f78ff",
-          accent: "#10b981",
-          background: "#f8f9fb",
+          primary: "#1f6bff",
+          accent: "#1f6bff",
+          background: "#f6f7f9",
           surface: "#ffffff",
-          muted: "#6b7280",
+          muted: "#0d1220",
           danger: "#ef4444",
-          success: "#22c55e",
+          success: "#12b76a",
         },
         borderRadius: {
           xl: "1rem",

@@ -7,8 +7,8 @@
   --topbar-height: 64px;
 
   --tb-blur: 0px;
-  --tb-bg-dark: var(--bg-1);
-  --tb-bg-light: var(--bg-1);
+  --tb-bg-dark: #0f1620;
+  --tb-bg-light: #ffffff;
 
   --tb-border-dark: var(--border-0);
   --tb-border-light: var(--border-0);
@@ -47,6 +47,8 @@
   background: var(--tb-bg-dark);
 
   border-bottom: 1px solid var(--tb-border-dark);
+  box-shadow: 0 10px 28px rgba(0, 12, 32, 0.08);
+  backdrop-filter: blur(0px);
   z-index: 1100;
 
   transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
@@ -212,10 +214,11 @@ body.light-mode .tabs-arrow {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
   border: 1px solid var(--border-0);
   background: var(--bg-1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .top-bar-search-icon {
@@ -233,6 +236,12 @@ body.light-mode .tabs-arrow {
 
 .top-bar-search input::placeholder {
   color: var(--text-2);
+}
+
+body.dark-mode .top-bar-search {
+  background: var(--bg-2);
+  border-color: var(--border-1);
+  box-shadow: none;
 }
 
 /* ------------------------------------------------------------
@@ -269,6 +278,20 @@ body.light-mode .tabs-arrow {
 body.light-mode .top-bar-btn {
   background: var(--bg-1);
   border-color: var(--border-0);
+}
+
+.top-bar-btn.theme-toggle {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-1);
+  border-color: var(--border-0);
+  color: var(--tb-primary);
+}
+
+.top-bar-btn.theme-toggle:hover {
+  color: var(--tb-primary-ink);
+  background: var(--tb-primary);
+  box-shadow: 0 10px 24px rgba(47, 99, 255, 0.28);
 }
 
 /* Inbox wrapper (for badge) */
