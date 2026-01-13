@@ -1,5 +1,5 @@
 // src/api/contractsApi.js
-const BASE = process.env.REACT_APP_API_BASE || 'http://localhost:808/api/sellers';
+const BASE = process.env.REACT_APP_API_BASE || process.env.REACT_APP_API_URL || 'https://os.abon.ai/api/sellers';
 
 async function checkStatus(res) {
   if (!res.ok) {

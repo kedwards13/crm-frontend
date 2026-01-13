@@ -8,6 +8,8 @@ import {
   FiChevronRight,
   FiPlus,
   FiSearch,
+  FiMoon,
+  FiSun,
 } from "react-icons/fi";
 import { getIndustry } from "../../helpers/tenantHelpers";
 import { getIndustryCopy } from "../../constants/industryCopy";
@@ -20,6 +22,8 @@ export default function TopBar({
   tabs = [],
   activeTab,
   onTabChange,
+  theme = "light",
+  onToggleTheme,
 }) {
   const navigate = useNavigate();
   const scrollerRef = useRef(null);
@@ -80,6 +84,10 @@ export default function TopBar({
     if (!q) return;
     // You can later replace this with real global search routing
     onSearchSelect?.({ query: q });
+  };
+
+  const handleThemeToggle = () => {
+    onToggleTheme?.();
   };
 
   const handleSearchKeyDown = (e) => {
@@ -178,6 +186,15 @@ export default function TopBar({
               onKeyDown={handleSearchKeyDown}
             />
           </div>
+
+          {/* Theme toggle */}
+          <button
+            className="top-bar-btn theme-toggle"
+            onClick={handleThemeToggle}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
+          </button>
 
           {/* Inbox */}
           <div className="inbox-wrapper">

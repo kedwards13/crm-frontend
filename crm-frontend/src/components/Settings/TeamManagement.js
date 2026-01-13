@@ -3,6 +3,7 @@ import axios from 'axios';
 import './TeamManagement.css';
 import EmployeePopup from '../Profile/EmployeePopup';
 import { AuthContext } from '../../App';
+import { normalizeArray } from '../../apiClient';
 
 const UserCard = ({ member, onClick }) => {
   const defaultAvatar = '/default-avatar.png';
@@ -55,7 +56,7 @@ const TeamManagement = () => {
       const response = await axios.get(`${API_BASE_URL}/api/accounts/team/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTeamMembers(response.data);
+      setTeamMembers(normalizeArray(response.data));
     } catch (err) {
       console.error("Error fetching team:", err);
       setError('Unable to load team members. Please try again.');
@@ -158,13 +159,16 @@ const TeamManagement = () => {
         <p>Loading team members...</p>
       ) : error ? (
         <p className="error-message">{error}</p>
-      ) : teamMembers.length === 0 ? (
-        <p>You are the only member in this team. Invite your first teammate!</p>
+      ) : normalizeArray(teamMembers).length === 0 ? (
+        <div className="team-empty">
+          <p>You are the only member in this team. Invite your first teammate!</p>
+          <button onClick={fetchTeamMembers} type="button" className="ghost-btn">Refresh</button>
+        </div>
       ) : (
         <div className="team-list-container">
           <div className="team-list">
-            {teamMembers.map((member) => (
-              <div key={member.id} onClick={() => handleViewEmployee(member)} style={{ cursor: 'pointer' }}>
+            {normalizeArray(teamMembers).map((member) => (
+              <div key={member.id || member.email} onClick={() => handleViewEmployee(member)} style={{ cursor: 'pointer' }}>
                 <UserCard member={member} />
               </div>
             ))}

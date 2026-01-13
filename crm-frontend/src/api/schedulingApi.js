@@ -52,7 +52,7 @@ export const deleteBlackout = (id) =>
   api.delete(`/scheduling/blackouts/${id}/`);
 
 export const listAvailability = (params = {}) =>
-  api.get("/scheduling/schedules/availability/", { params });
+  api.get("/scheduling/availability/", { params });
 
 export const listSchedules = (params = {}) =>
   api.get("/scheduling/schedules/", { params });

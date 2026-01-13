@@ -1,9 +1,9 @@
 // src/components/Customers/CustomersDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import NeonStatsCard from '../Stats/NeonStatsCard'; // The new generic card
 import './CustomersDashboard.css'; // For additional layout styling
 import { useNavigate } from 'react-router-dom';
+import api from '../../apiClient';
 
 const CustomersDashboard = ({ token }) => {
   const [metrics, setMetrics] = useState(null);
@@ -13,9 +13,7 @@ const CustomersDashboard = ({ token }) => {
     const fetchMetrics = async () => {
       try {
         // Example endpoint: /api/customers/metrics
-        const response = await axios.get('http://os.abon.ai/api/customers/metrics', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
+        const response = await api.get('/customers/metrics');
         setMetrics(response.data);
       } catch (err) {
         console.error('Error fetching customer metrics:', err);

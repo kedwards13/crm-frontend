@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { GoogleMap, InfoWindow, Marker, useLoadScript } from "@react-google-maps/api";
 import "./SchedulePlaceholders.css";
 import "./MapView.css";
-import api from "../../apiClient";
+import api, { normalizeArray } from "../../apiClient";
 import { listCrmLeads } from "../../api/leadsApi";
 import { getCustomers } from "../../api/customersApi";
 
@@ -100,13 +100,11 @@ export default function MapView() {
     const fetchPaged = async (request) => {
       const first = await request();
       const initial = first.data;
-      if (Array.isArray(initial)) return initial;
-
-      let rows = initial?.results ? [...initial.results] : [];
+      let rows = normalizeArray(initial);
       let next = initial?.next;
       while (next) {
         const { data } = await api.get(next);
-        rows = rows.concat(data?.results || []);
+        rows = rows.concat(normalizeArray(data));
         next = data?.next;
       }
       return rows;

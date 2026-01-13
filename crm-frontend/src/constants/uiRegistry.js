@@ -560,7 +560,26 @@ const base = {
     return cfg.scheduling || industries.general.scheduling || {};
   }
 
-  export function getFeatures(industryKey) {
-    const cfg = getIndustryConfig(industryKey);
-    return cfg.features || industries.general.features || {};
-  }
+export function getFeatures(industryKey) {
+  const cfg = getIndustryConfig(industryKey);
+  return cfg.features || industries.general.features || {};
+}
+
+/* ───────── Lightweight UI registry for industry labels/panels ───────── */
+export const uiRegistry = {
+  landscaping: {
+    primaryEntity: 'Job',
+    pipelineStages: ['Scheduled', 'In Progress', 'Completed', 'Invoiced'],
+    customerPanels: ['Active Jobs', 'Service Schedule', 'Outstanding Balance'],
+  },
+  general: {
+    primaryEntity: 'Job',
+    pipelineStages: ['New', 'In Progress', 'Completed', 'Invoiced'],
+    customerPanels: ['Active Jobs', 'Upcoming Work', 'Billing'],
+  },
+};
+
+export function getUiRegistry(industryKey = 'general') {
+  const key = industryKey?.toLowerCase();
+  return uiRegistry[key] || uiRegistry.landscaping;
+}

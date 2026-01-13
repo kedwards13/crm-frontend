@@ -1,5 +1,11 @@
 // src/api/revivalApi.js
 import axios from 'axios';
+import {
+  clearActiveTenant,
+  getActiveTenant,
+  isTenantRequiredRequest,
+  tenantSelectionRequiredError,
+} from '../helpers/tenantHelpers';
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 
@@ -10,16 +16,31 @@ const apiClient = axios.create({
 
 // Attach JWT and tenant headers
 apiClient.interceptors.request.use((config) => {
+  const tenant = getActiveTenant();
   const token = localStorage.getItem('token');
-  const tenant = JSON.parse(localStorage.getItem('activeTenant') || '{}');
+  const needsTenant = isTenantRequiredRequest(config.url);
 
+  config.headers = config.headers || {};
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (needsTenant && !tenant?.id) {
+    return Promise.reject(tenantSelectionRequiredError());
+  }
   if (tenant?.id) config.headers['X-Tenant-ID'] = tenant.id;
   if (tenant?.domain) config.headers['X-Tenant-Domain'] = tenant.domain;
   if (tenant?.industry) config.headers['X-Tenant-Industry'] = tenant.industry;
 
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 403) {
+      clearActiveTenant();
+    }
+    return Promise.reject(error);
+  }
+);
 
 // 🔁 Revival API
 const revivalApi = {

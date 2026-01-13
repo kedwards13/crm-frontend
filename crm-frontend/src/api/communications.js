@@ -1,10 +1,10 @@
 // src/api/communications.js
-import api from "../apiClient";
+import api, { normalizeArray } from "../apiClient";
 
 // Unified Inbox
 export const fetchInboxMessages = async (filters = {}) => {
   const res = await api.get("/comms/inbox/", { params: filters });
-  return res.data || [];
+  return normalizeArray(res.data || []);
 };
 
 // Thread (universal)
@@ -12,7 +12,7 @@ export const fetchThreadByTarget = async (partyUID) => {
   const res = await api.get("/comms/thread/", {
     params: { party_universal_id: partyUID }
   });
-  return res.data?.messages || [];
+  return normalizeArray(res.data?.messages || res.data || []);
 };
 
 // Smart AI Reply
@@ -50,5 +50,5 @@ export const sendCommunication = async (payload) => {
 // Voice call logs (by party, lead, customer, or phone)
 export const fetchCallLogs = async (params = {}) => {
   const res = await api.get("/comms/calls/", { params });
-  return res.data || {};
+  return normalizeArray(res.data || []);
 };

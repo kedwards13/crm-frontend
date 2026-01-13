@@ -1,55 +1,51 @@
-/* ============================================================
-   ABON OS — ENTERPRISE THEME (FINAL CLEAN VERSION)
-   Palantir × Stripe Hybrid • Premium • Neutral • Unbreakable
-   -----------------------------------------------------------
-   IMPORTANT: 
-   - app.css handles GLOBAL theme + components only.
-   - layout.css handles shell (sidebar/topbar/subnav/content area).
-   - popup.css handles modals.
-============================================================ */
+/* ABON OS — Operational shell theme
+   Fast, high-contrast, industry-grade (no gradients) */
 
-/* ------------------------------------------------------------
-   ROOT THEME TOKENS — DARK MODE DEFAULT
------------------------------------------------------------- */
 :root {
-  /* BACKGROUNDS */
-  --bg-0: #f7f7f5;   /* app shell */
+  /* Surfaces */
+  --bg-0: #f6f7f9;   /* shell */
   --bg-1: #ffffff;   /* cards / panels */
-  --bg-2: #f1f3f2;   /* hover / deep surfaces */
-  --bg-3: #e6eae6;   /* borders / outlines */
+  --bg-2: #eef1f6;   /* hovers / raised */
+  --bg-3: #e1e5ed;   /* outlines */
 
-  /* TEXT */
-  --text-0: #1f2a24;
-  --text-1: #2f3b33;
-  --text-2: #5f6b63;
+  /* Text — pure black for light */
+  --text-0: #000000;
+  --text-1: #0d1220;
+  --text-2: #111827;
 
-  /* ACCENT (neutral gray only) */
-  --accent-0: #5c636a;
-  --accent-1: #4f565d;
-  --accent-2: #5c636a;
-  --accent-gradient: var(--accent-0);
+  /* Brand / Primary — single confident blue */
+  --accent-0: #1f6bff;
+  --accent-1: #1553cc;
+  --accent-2: #b5d2ff;
+  --accent-ink: #ffffff;
 
-  /* BUTTONS */
-  --btn-bg: #f4f6f4;
-  --btn-bg-hover: #eef1ee;
+  /* Semantic */
+  --success-0: #12b76a;
+  --warning-0: #f59e0b;
+  --danger-0: #ef4444;
+  --info-0: #1f6bff;
 
-  /* BORDERS */
-  --border-0: #d9ddd7;
-  --border-1: #cfd5ce;
+  /* Buttons */
+  --btn-bg: #f4f6fa;
+  --btn-bg-hover: #e9edf5;
 
-  /* RADII & SHADOWS */
-  --radius: 8px;
-  --radius-sm: 6px;
-  --shadow-0: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-1: 0 2px 6px rgba(15, 23, 42, 0.08);
+  /* Borders */
+  --border-0: #d5dbe6;
+  --border-1: #c7d0df;
 
-  /* INPUTS */
+  /* Radii & Shadows */
+  --radius: 10px;
+  --radius-sm: 8px;
+  --shadow-0: 0 8px 24px rgba(0, 12, 32, 0.08);
+  --shadow-1: 0 14px 38px rgba(0, 12, 32, 0.12);
+
+  /* Inputs */
   --input-bg: #ffffff;
-  --input-border: #d9ddd7;
-  --input-focus: 0 0 0 3px rgba(92, 99, 106, 0.18);
+  --input-border: #cfd6e2;
+  --input-focus: 0 0 0 2px rgba(31, 107, 255, 0.22);
 
-  /* SHARED */
-  --transition: 0.18s ease;
+  /* Shared */
+  --transition: 0.16s ease;
 
   --color-bg: var(--bg-0);
   --color-bg-card: var(--bg-1);
@@ -67,37 +63,35 @@
   --popup-shadow: var(--shadow-0);
 }
 
-/* ------------------------------------------------------------
-   LIGHT MODE OVERRIDE
------------------------------------------------------------- */
-body.light-mode {
-  --bg-0: var(--bg-0);
-  --bg-1: var(--bg-1);
-  --bg-2: var(--bg-2);
-  --bg-3: var(--bg-3);
+body.dark-mode {
+  --bg-0: #0c1116;
+  --bg-1: #0f1620;
+  --bg-2: #161f2c;
+  --bg-3: #1f2a39;
 
-  --text-0: var(--text-0);
-  --text-1: var(--text-1);
-  --text-2: var(--text-2);
+  --text-0: #ffffff;
+  --text-1: #f5f7fb;
+  --text-2: #d8deea;
 
-  --accent-0: var(--accent-0);
-  --accent-1: var(--accent-1);
-  --accent-2: var(--accent-2);
+  --accent-0: #6ea8ff;
+  --accent-1: #5086e0;
+  --accent-2: #9ec5ff;
+  --accent-ink: #0b1526;
 
-  --btn-bg: var(--btn-bg);
-  --btn-bg-hover: var(--btn-bg-hover);
+  --btn-bg: #121b29;
+  --btn-bg-hover: #182335;
 
-  --border-0: var(--border-0);
-  --border-1: var(--border-1);
+  --border-0: #1f2a3a;
+  --border-1: #253246;
 
-  --input-bg: var(--input-bg);
-  --input-border: var(--input-border);
-  --input-focus: var(--input-focus);
+  --input-bg: #0f1724;
+  --input-border: #263248;
+  --input-focus: 0 0 0 2px rgba(110, 168, 255, 0.28);
+
+  --shadow-0: 0 10px 28px rgba(0, 0, 0, 0.4);
+  --shadow-1: 0 18px 48px rgba(0, 0, 0, 0.52);
 }
 
-/* ------------------------------------------------------------
-   GLOBAL RESET — SAFE FOR TAILWIND + POPUPS
------------------------------------------------------------- */
 html, body {
   margin: 0;
   padding: 0;
@@ -109,58 +103,53 @@ html, body {
 }
 
 body.modal-open {
-  overflow: hidden !important; /* full popup freeze */
+  overflow: hidden !important;
 }
 
-/* ------------------------------------------------------------
-   CARDS / PANELS (global reusable UI blocks)
------------------------------------------------------------- */
 .card,
 .panel,
 .gt-panel {
   background: var(--bg-1);
   border: 1px solid var(--border-1);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.1rem;
   box-shadow: var(--shadow-0);
-  transition: background var(--transition), box-shadow var(--transition);
+  transition: background var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
 
 .card:hover {
   background: var(--bg-2);
+  border-color: var(--border-0);
 }
 
-/* ------------------------------------------------------------
-   BUTTONS (GLOBAL)
------------------------------------------------------------- */
 button,
 .btn {
   cursor: pointer;
   border: 1px solid var(--border-0);
   background: var(--btn-bg);
-  padding: 9px 15px;
+  padding: 9px 14px;
   border-radius: var(--radius-sm);
   color: var(--text-0);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   transition: var(--transition);
 }
 
 button:hover {
   background: var(--btn-bg-hover);
+  border-color: var(--border-1);
 }
 
 button:active {
   transform: translateY(1px);
 }
 
-/* Accent */
 .btn-primary,
 .action-btn.primary {
   background: var(--accent-0) !important;
-  border: none !important;
-  color: #fff !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--accent-1) !important;
+  color: var(--accent-ink) !important;
+  box-shadow: 0 10px 24px rgba(31, 107, 255, 0.28);
 }
 
 .btn-primary:hover,
@@ -168,7 +157,6 @@ button:active {
   background: var(--accent-1) !important;
 }
 
-/* Ghost button */
 .btn-ghost {
   background: transparent;
   border: 1px solid var(--border-1);
@@ -180,16 +168,13 @@ button:active {
   color: var(--accent-0);
 }
 
-/* ------------------------------------------------------------
-   INPUTS
------------------------------------------------------------- */
 input,
 textarea,
 select {
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 10px 12px;
   font-size: 14px;
   color: var(--text-0);
   transition: var(--transition);
@@ -203,9 +188,22 @@ select:focus {
   outline: none;
 }
 
-/* ------------------------------------------------------------
-   TABLES — Customers / Leads / Campaigns
------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid var(--border-0);
+}
+
+.chip.success { color: #0f5132; background: rgba(18, 183, 106, 0.12); border-color: rgba(18, 183, 106, 0.32); }
+.chip.warning { color: #6b4000; background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.36); }
+.chip.danger  { color: #7f1d1d; background: rgba(239, 68, 68, 0.16); border-color: rgba(239, 68, 68, 0.36); }
+.chip.info    { color: #0f2f7a; background: rgba(31, 107, 255, 0.14); border-color: rgba(31, 107, 255, 0.32); }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -220,12 +218,12 @@ th {
   padding: 12px;
   border-bottom: 1px solid var(--border-1);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 td {
-  padding: 16px;
+  padding: 14px;
   border-bottom: 1px solid var(--border-0);
   color: var(--text-0);
 }
@@ -234,9 +232,6 @@ tr:hover td {
   background: var(--bg-2);
 }
 
-/* ------------------------------------------------------------
-   CHAT BUBBLES — AI tab
------------------------------------------------------------- */
 .gt-ai-bubble {
   max-width: 74%;
   padding: 10px 14px;
@@ -247,9 +242,6 @@ tr:hover td {
   line-height: 1.45;
 }
 
-/* ------------------------------------------------------------
-   RESPONSIVE
------------------------------------------------------------- */
 @media (max-width: 768px) {
   table {
     font-size: 13px;
