@@ -1,50 +1,85 @@
 /* container */
 .container {
-    max-width: var(--content-max);
-    margin-inline: auto;
-    padding-inline: clamp(12px, 3vw, 24px);
-  }
-  
-  /* card */
-  .ui-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--r-2);
-    box-shadow: var(--sh-1);
-    color: var(--text-1);
-  }
-  .ui-card.padded { padding: var(--s-6); }
-  
-  /* buttons */
-  .ui-btn {
-    appearance: none;
-    border: 1px solid var(--border);
-    background: var(--bg-elev);
-    color: var(--text-1);
-    border-radius: var(--r-1);
-    padding: 10px 14px;
-    font: 500 var(--fs-3)/1 var(--font-sans);
-    cursor: pointer;
-  }
-  .ui-btn.primary {
-    border-color: transparent;
-    background: var(--accent);
-    color: #fff;
-  }
-  .ui-btn.ghost { background: transparent; }
-  
-  /* chip */
-  .ui-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border: 1px solid var(--border);
-    background: var(--bg-elev);
-    border-radius: 999px;
-    font-size: var(--fs-2);
-  }
-  
-  /* stacks */
-  .stack-v { display: grid; gap: var(--s-3); }
-  .stack-h { display: inline-flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: clamp(12px, 3vw, 24px);
+}
+
+/* cards */
+.ui-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--sh-1);
+  color: var(--text-1);
+}
+
+.ui-card.padded {
+  padding: var(--s-6);
+}
+
+.ui-card.elevated {
+  box-shadow: var(--sh-2);
+}
+
+/* buttons */
+.ui-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text-1);
+  border-radius: var(--r-1);
+  padding: 10px 14px;
+  font: 500 var(--fs-3)/1 var(--font-sans);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .05s ease;
+}
+
+.ui-btn:hover {
+  background: var(--bg-card);
+}
+
+.ui-btn:active {
+  transform: translateY(1px);
+}
+
+.ui-btn.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+.ui-btn.primary:hover {
+  filter: brightness(1.05);
+}
+
+.ui-btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-2);
+}
+
+/* chips */
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--fs-2);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* stacks */
+.stack-v {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.stack-h {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
