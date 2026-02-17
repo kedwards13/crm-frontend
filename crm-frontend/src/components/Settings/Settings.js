@@ -13,11 +13,13 @@ import ServicesPricing from './services/ServicesPricing';
 import RoutingSettings from './routing/RoutingSettings';
 import InventorySettings from './inventory/InventorySettings';
 import CommsSettings from './comms/CommsSettings';
+import SettingsLayout from '../../pages/settings/SettingsLayout.tsx';
 
 const Settings = () => {
   return (
     <Routes>
-      <Route path="/" element={<SettingsHome />} />
+      <Route path="/" element={<SettingsLayout />} />
+      <Route path="/legacy" element={<SettingsHome />} />
       <Route path="/team" element={<TeamManagement />} />
       <Route path="/company" element={<CompanyProfile />} />
       <Route path="/preferences" element={<Preferences />} />

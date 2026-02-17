@@ -13,10 +13,10 @@
     --border: #e3e7eb;
     --primary: #259ceb;           /* blue-600 */
     --primary-ink: #ffffff;
-    --accent: #10b981;            /* emerald-500 */
+    --accent: #ff5500;            /* accent */
     --danger: #ef4444;            /* red-500 */
     --warn: #f59e0b;              /* amber-500 */
-    --good: #22c55e;              /* green-500 */
+    --good: var(--accent);              /* unified accent */
     --focus: 0 0 0 3px rgba(37, 99, 235, .25);
     --shadow-1: 0 1px 2px rgba(0,0,0,.06), 0 1px 1px rgba(0,0,0,.04);
     --shadow-2: 0 8px 24px rgba(15, 23, 42, .08);
@@ -415,4 +415,3 @@
     .filters { gap: 10px; }
     .kpi-value { font-size: 22px; }
   }
-

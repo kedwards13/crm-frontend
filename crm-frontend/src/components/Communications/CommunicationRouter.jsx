@@ -5,6 +5,7 @@ import CommsSubnav from "./CommsSubnav"; // ⬅️ Top tab bar
 import InboxPage from "./Inbox/InboxPage";
 import SMSPage from "./SMS/SMSPage";
 import CallsPage from "./Calls/CallsPage";
+import DialerPage from "./Dialer/DialerPage";
 import EmailPage from "./Email/EmailPage";
 import TemplatesPage from "./Templates/TemplatesPage";
 import SequencesPage from "./Sequences/SequencesPage";
@@ -19,6 +20,7 @@ export default function CommunicationRouter() {
           { key: "inbox", label: "Inbox", to: "inbox" },
           { key: "sms", label: "SMS", to: "sms" },
           { key: "calls", label: "Calls", to: "calls" },
+          { key: "dialer", label: "Dialer", to: "dialer" },
           { key: "email", label: "Email", to: "email" },
           { key: "templates", label: "Templates", to: "templates" },
           { key: "sequences", label: "Sequences", to: "sequences" },
@@ -29,6 +31,7 @@ export default function CommunicationRouter() {
         <Route path="inbox" element={<InboxPage />} />
         <Route path="sms" element={<SMSPage />} />
         <Route path="calls" element={<CallsPage />} />
+        <Route path="dialer" element={<DialerPage />} />
         <Route path="email" element={<EmailPage />} />
         <Route path="templates" element={<TemplatesPage />} />
         <Route path="sequences" element={<SequencesPage />} />

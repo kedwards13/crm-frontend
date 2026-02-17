@@ -1,164 +1,124 @@
-/* Container for the dialer */
-.phone-dialer {
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
-}
-
-/* Title styling */
-.dialer-title {
-  font-size: 1.75rem;
-  color: #333;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* Input area for dialer */
-.dialer-input {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.phone-input {
-  flex: 1;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* Action button */
-.action-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #28a745;
-  border: none;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.action-button:hover:not(:disabled) {
-  background-color: #218838;
-}
-
-.action-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
-}
-
-/* Status and error messages */
-.status-message {
-  color: #155724;
-  background-color: #d4edda;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.error-message {
-  color: #721c24;
-  background-color: #f8d7da;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* Call Log styling */
-.call-log {
-  margin-top: 1.5rem;
-}
-
-.call-log-title {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
-}
-
-.call-log-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.call-record {
+.calls-page {
   display: flex;
   flex-direction: column;
-  background-color: #f9f9ff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  transition: background-color 0.3s;
-  cursor: pointer;
+  gap: 14px;
 }
 
-.call-record:hover {
-  background-color: #e9f4ff;
+.calls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 14px;
 }
 
-.record-details {
+.call-card {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 14px;
+  color: #e2e8f0;
+}
+
+.call-card__header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-.record-number {
-  font-weight: bold;
-  color: #007bff;
+.call-filter {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.record-time {
-  font-style: italic;
-  color: #555;
+.call-filter select,
+.call-filter input {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  color: #f8fafc;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-.record-status {
-  font-size: 0.9rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+.call-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
 }
 
-/* Call back button inside each record */
-.call-back-btn {
-  align-self: flex-end;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
 }
 
-.call-back-btn:hover {
-  background-color: #0056b3;
+.stat-label {
+  color: #cbd5e1;
+  font-size: 12px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .phone-dialer {
-    padding: 1rem;
+.call-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.call-row {
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 12px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.call-row__title {
+  font-weight: 700;
+}
+
+.call-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #e0f2fe;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge--error {
+  background: rgba(248, 113, 113, 0.14);
+  border-color: rgba(248, 113, 113, 0.6);
+  color: #fecdd3;
+}
+
+.tiny {
+  font-size: 12px;
+}
+
+.muted {
+  color: #cbd5e1;
+}
+
+@media (max-width: 720px) {
+  .call-filter {
+    grid-template-columns: 1fr;
   }
-  .dialer-title {
-    font-size: 1.5rem;
-  }
-  .record-details {
+  .call-row {
     flex-direction: column;
     align-items: flex-start;
   }
-  .call-back-btn {
+  .call-row__meta {
     width: 100%;
-    margin-top: 0.5rem;
+    justify-content: space-between;
   }
 }

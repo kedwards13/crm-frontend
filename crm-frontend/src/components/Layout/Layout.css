@@ -7,15 +7,16 @@
    LAYOUT TOKENS ONLY
 ========================================================= */
 :root {
-  --sidebar-width: 240px;
-  --sidebar-width-collapsed: 64px;
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 88px;
   --sidebar-current-width: var(--sidebar-width);
 
-  --topbar-height: 64px;
-  --subnav-height: 48px;
+  --topbar-height: 72px;
+  --subnav-height: 0px;
 
-  --content-gutter: 20px;
+  --content-gutter: 24px;
   --content-max: 1420px;
+  --shell-gap: 22px;
 
   --color-bg: var(--bg-0);
   --color-bg-sidebar: var(--bg-1);
@@ -43,8 +44,8 @@
 
   /* ❌ removed z-index: 0 */
   /* no stacking context */
-  
-  background: var(--color-bg);
+
+  background: var(--bg);
   display: flex;
 }
 
@@ -53,19 +54,22 @@
 ========================================================= */
 .sidebar {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: var(--shell-gap);
+  left: var(--shell-gap);
 
   width: var(--sidebar-current-width);
-  height: 100vh;
+  height: calc(100vh - (var(--shell-gap) * 2));
 
-  background: var(--color-bg-sidebar);
-  border-right: 1px solid var(--color-border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: var(--r-3);
+  box-shadow: var(--sh-2);
 
-  overflow: hidden;
-  transition: width .25s ease;
+  overflow: visible;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  z-index: 800;
+  z-index: 50;
 }
 
 /* =========================================================
@@ -73,9 +77,9 @@
 ========================================================= */
 .topbar {
   position: fixed;
-  top: 0;
-  left: var(--sidebar-current-width);
-  right: 0;
+  top: var(--shell-gap);
+  left: calc(var(--sidebar-current-width) + (var(--shell-gap) * 2));
+  right: var(--shell-gap);
 
   height: var(--topbar-height);
 
@@ -83,9 +87,11 @@
   align-items: center;
   padding: 0 24px;
 
-  background: var(--bg-1);
+  background: var(--glass-bg);
 
-  border-bottom: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-3);
+  backdrop-filter: blur(var(--glass-blur));
   transition: left .25s ease;
 
   z-index: 900; /* correct */
@@ -93,7 +99,7 @@
 
 /* Ensure topbar ALWAYS clears sidebar */
 .layout-shell.collapsed .topbar {
-  left: var(--sidebar-width-collapsed);
+  left: calc(var(--sidebar-width-collapsed) + (var(--shell-gap) * 2));
 }
 
 /* =========================================================
@@ -101,9 +107,9 @@
 ========================================================= */
 .subnav {
   position: fixed;
-  top: var(--topbar-height);
-  left: var(--sidebar-current-width);
-  right: 0;
+  top: calc(var(--topbar-height) + (var(--shell-gap) * 1.5));
+  left: calc(var(--sidebar-current-width) + (var(--shell-gap) * 2));
+  right: var(--shell-gap);
 
   height: var(--subnav-height);
 
@@ -111,16 +117,18 @@
   align-items: center;
   padding: 0 24px;
 
-  background: var(--bg-1);
+  background: var(--glass-bg);
 
-  border-bottom: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-2);
+  backdrop-filter: blur(var(--glass-blur));
   transition: left .25s ease;
 
   z-index: 850;
 }
 
 .layout-shell.collapsed .subnav {
-  left: var(--sidebar-width-collapsed);
+  left: calc(var(--sidebar-width-collapsed) + (var(--shell-gap) * 2));
 }
 
 /* =========================================================
@@ -129,19 +137,20 @@
 ========================================================= */
 .content-area {
   position: relative;
-  margin-left: var(--sidebar-current-width);
+  margin-left: calc(var(--sidebar-current-width) + (var(--shell-gap) * 2));
+  margin-right: var(--shell-gap);
 
-  padding-top: calc(var(--topbar-height) + var(--subnav-height) + 24px);
+  padding-top: calc(var(--topbar-height) + (var(--shell-gap) * 2.2));
   padding-left: var(--content-gutter);
   padding-right: var(--content-gutter);
 
-  width: calc(100% - var(--sidebar-current-width));
+  width: calc(100% - var(--sidebar-current-width) - (var(--shell-gap) * 3));
   min-height: 100vh;
 
-  overflow-y: auto;
+  overflow-y: visible;
   overflow-x: hidden;
 
-  transition: margin-left .25s ease;
+  transition: margin-left .25s ease, width .25s ease;
 
   /* ❌ REMOVE z-index: 0 
      if this exists, popups can NEVER appear above */
@@ -149,8 +158,8 @@
 
 /* Collapsed mode */
 .layout-shell.collapsed .content-area {
-  margin-left: var(--sidebar-width-collapsed);
-  width: calc(100% - var(--sidebar-width-collapsed));
+  margin-left: calc(var(--sidebar-width-collapsed) + (var(--shell-gap) * 2));
+  width: calc(100% - var(--sidebar-width-collapsed) - (var(--shell-gap) * 3));
 }
 
 /* =========================================================
@@ -174,6 +183,6 @@
   .content-area {
     margin-left: 0 !important;
     width: 100% !important;
-    padding-top: calc(var(--topbar-height) + var(--subnav-height) + 20px);
+    padding-top: calc(var(--topbar-height) + var(--shell-gap));
   }
 }

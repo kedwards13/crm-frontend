@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { X, GripHorizontal } from "lucide-react";
 import { toast } from "react-toastify";
 import "./CustomerPopup.css";
 
@@ -11,17 +12,11 @@ import AiTab from "./ProfileTabs/AiTab";
 import CommunicationsTab from "./ProfileTabs/CommunicationsTab";
 import RevivalTab from "./ProfileTabs/RevivalTab";
 import BillingTab from "./ProfileTabs/BillingTab";
+import ScheduleModal from "../Customers/Modals/ScheduleModal";
+import StatusModal from "../Customers/Modals/StatusModal";
 
 import { mapEntity } from "../../utils/contactMapper";
 import api from "../../apiClient";
-import { createAppointment } from "../../api/appointmentsApi";
-import {
-  listServiceTypes,
-  listTechnicians,
-  createSchedule,
-  quickBook,
-  listAvailability,
-} from "../../api/schedulingApi";
 import { getIndustryKey, getSchedulingConfig } from "../../constants/uiRegistry";
 
 /* ============================================================
@@ -36,23 +31,53 @@ function AppointmentTab() {
   );
 }
 
-const formatDateInput = (value) => value.toISOString().slice(0, 10);
-const formatTimeInput = (value) => value.toTimeString().slice(0, 5);
-const getRoundedTime = () => {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const rounded = Math.ceil(minutes / 15) * 15;
-  now.setMinutes(rounded % 60);
-  if (rounded >= 60) now.setHours(now.getHours() + 1);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
-  return now;
+/* ============================================================
+   DRAGGABLE HOOK (header grip only)
+============================================================ */
+const useDraggable = () => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragState = useRef({ active: false, offsetX: 0, offsetY: 0 });
+
+  const handleMouseDown = (e) => {
+    const isHandle = e.target.closest(".popup-drag-handle");
+    const isBlocked = e.target.closest("[data-no-drag]");
+    if (!isHandle || isBlocked) return;
+
+    dragState.current = {
+      active: true,
+      offsetX: e.clientX - position.x,
+      offsetY: e.clientY - position.y,
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!dragState.current.active) return;
+      setPosition({
+        x: e.clientX - dragState.current.offsetX,
+        y: e.clientY - dragState.current.offsetY,
+      });
+    };
+
+    const handleMouseUp = () => {
+      dragState.current = { ...dragState.current, active: false };
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  return { position, handleMouseDown };
 };
 
 /* ============================================================
    MAIN POPUP
 ============================================================ */
-function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
+function CustomerPopupInternal({ lead, onClose }) {
   const [record, setRecord] = useState(null);
   const [formData, setFormData] = useState({});
   const [preferences, setPreferences] = useState(null);
@@ -63,35 +88,13 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
 
   const industryKey = getIndustryKey("general");
   const schedulingConfig = getSchedulingConfig(industryKey);
-  const [serviceTypeId, setServiceTypeId] = useState("");
-  const [serviceLabelInput, setServiceLabelInput] = useState("");
-  const [locationValue, setLocationValue] = useState("");
-  const [dateValue, setDateValue] = useState("");
-  const [timeValue, setTimeValue] = useState("");
-  const [durationMins, setDurationMins] = useState(
-    schedulingConfig.defaultDurationMins || 60
-  );
-  const [scheduleNotes, setScheduleNotes] = useState("");
-  const [serviceTypes, setServiceTypes] = useState([]);
-  const [loadingServiceTypes, setLoadingServiceTypes] = useState(false);
-  const [serviceTypesError, setServiceTypesError] = useState("");
-  const [technicians, setTechnicians] = useState([]);
-  const [loadingTechnicians, setLoadingTechnicians] = useState(false);
-  const [assignedTechId, setAssignedTechId] = useState("");
-  const [availabilitySlots, setAvailabilitySlots] = useState([]);
-  const [loadingAvailability, setLoadingAvailability] = useState(false);
-  const [availabilityError, setAvailabilityError] = useState("");
-  const [selectedSlot, setSelectedSlot] = useState(null);
 
   const [aiMessages, setAiMessages] = useState([
     { sender: "ai", text: "Analyzing this record..." }
   ]);
   const [aiInput, setAiInput] = useState("");
   const chatRef = useRef(null);
-
-  const serviceLabel = schedulingConfig.serviceLabel || "Service Type";
-  const staffLabel = schedulingConfig.staffLabel || "Technician";
-  const locationLabel = schedulingConfig.locationLabel || "Location";
+  const { position, handleMouseDown } = useDraggable();
 
   /* ---------------------------------------------------------
      LOCK BODY SCROLL
@@ -120,205 +123,6 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
       mounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoadingServiceTypes(true);
-      setServiceTypesError("");
-      try {
-        const { data } = await listServiceTypes();
-        const rows = Array.isArray(data) ? data : data?.results || [];
-        if (mounted) {
-          setServiceTypes(rows);
-          if (!rows.length) {
-            setServiceTypesError("No services configured. Add offerings in Settings.");
-          }
-        }
-      } catch (err) {
-        if (mounted) {
-          setServiceTypes([]);
-          setServiceTypesError(
-            err?.response?.data?.detail ||
-              err?.message ||
-              "Unable to load services."
-          );
-        }
-      } finally {
-        if (mounted) setLoadingServiceTypes(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoadingTechnicians(true);
-      try {
-        const { data } = await listTechnicians();
-        const rows = Array.isArray(data) ? data : data?.results || [];
-        if (mounted) setTechnicians(rows);
-      } catch {
-        if (mounted) setTechnicians([]);
-      } finally {
-        if (mounted) setLoadingTechnicians(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const selectedService = serviceTypes.find(
-      (service) => String(service.id) === String(serviceTypeId)
-    );
-    if (selectedService?.default_duration_minutes) {
-      setDurationMins(selectedService.default_duration_minutes);
-    }
-    if (serviceTypeId && serviceTypeId !== "custom") {
-      setServiceLabelInput("");
-    }
-    setSelectedSlot(null);
-  }, [serviceTypeId, serviceTypes]);
-
-  useEffect(() => {
-    if (!showScheduleModal || !record) return;
-    const fallbackAddress = record.address || record.raw?.address || "";
-    setLocationValue(fallbackAddress);
-    setAvailabilityError("");
-    setSelectedSlot(null);
-
-    if (!dateValue) {
-      setDateValue(formatDateInput(new Date()));
-    }
-    if (!timeValue) {
-      setTimeValue(formatTimeInput(getRoundedTime()));
-    }
-  }, [showScheduleModal, record, dateValue, timeValue]);
-
-  /* ---------------------------------------------------------
-     SCHEDULING
-  --------------------------------------------------------- */
-  const normalizeAvailability = (payload) => {
-    if (!payload) return [];
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload.results)) return payload.results;
-    if (Array.isArray(payload.slots)) return payload.slots;
-    if (Array.isArray(payload.availability)) return payload.availability;
-    return [];
-  };
-
-  const formatSlotLabel = (start, end) => {
-    const startDate = new Date(start);
-    if (Number.isNaN(startDate.getTime())) return "Unknown";
-    const timeFormatter = new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    });
-    const dateFormatter = new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-    const startTime = timeFormatter.format(startDate);
-    const dateLabel = dateFormatter.format(startDate);
-    if (!end) return `${dateLabel} - ${startTime}`;
-
-    const endDate = new Date(end);
-    if (Number.isNaN(endDate.getTime())) return `${dateLabel} - ${startTime}`;
-    const endTime = timeFormatter.format(endDate);
-    return `${dateLabel} ${startTime} - ${endTime}`;
-  };
-
-  const fetchAvailability = useCallback(async () => {
-    if (!showScheduleModal) return;
-    if (!serviceTypeId || serviceTypeId === "custom" || !dateValue) {
-      setAvailabilitySlots([]);
-      setAvailabilityError("");
-      return;
-    }
-
-    setLoadingAvailability(true);
-    setAvailabilityError("");
-    try {
-      const params = {
-        service_type_id: serviceTypeId,
-        date: dateValue,
-        start_date: dateValue,
-        end_date: dateValue,
-        duration_minutes:
-          Number(durationMins) || schedulingConfig.defaultDurationMins || 60,
-      };
-      if (assignedTechId) params.assigned_to = assignedTechId;
-      const { data } = await listAvailability(params);
-      const slots = normalizeAvailability(data)
-        .map((slot, index) => {
-          const start =
-            slot.start ||
-            slot.start_time ||
-            slot.available_start ||
-            slot.scheduled_start ||
-            slot.begin ||
-            slot.datetime;
-          const end =
-            slot.end ||
-            slot.end_time ||
-            slot.available_end ||
-            slot.scheduled_end ||
-            slot.finish;
-          if (!start) return null;
-          return { id: slot.id || `${start}-${index}`, start, end, raw: slot };
-        })
-        .filter(Boolean);
-      setAvailabilitySlots(slots);
-      if (slots.length === 0) {
-        setAvailabilityError("No available slots for this date.");
-      }
-    } catch (err) {
-      setAvailabilityError(
-        err?.response?.data?.detail ||
-          err?.response?.data?.error ||
-          err?.message ||
-          "Unable to load availability."
-      );
-      setAvailabilitySlots([]);
-    } finally {
-      setLoadingAvailability(false);
-    }
-  }, [
-    assignedTechId,
-    dateValue,
-    durationMins,
-    schedulingConfig.defaultDurationMins,
-    serviceTypeId,
-    showScheduleModal,
-  ]);
-
-  useEffect(() => {
-    fetchAvailability();
-  }, [fetchAvailability]);
-
-  const resetScheduleForm = useCallback(() => {
-    setServiceTypeId("");
-    setServiceLabelInput("");
-    setAssignedTechId("");
-    setLocationValue("");
-    setDateValue("");
-    setTimeValue("");
-    setDurationMins(schedulingConfig.defaultDurationMins || 60);
-    setScheduleNotes("");
-    setAvailabilitySlots([]);
-    setAvailabilityError("");
-    setSelectedSlot(null);
-  }, [schedulingConfig.defaultDurationMins]);
-
-  const closeScheduleModal = useCallback(() => {
-    setShowScheduleModal(false);
-    resetScheduleForm();
-  }, [resetScheduleForm]);
 
   /* ---------------------------------------------------------
      UNIVERSAL CUSTOMER RESOLUTION (THE FIX)
@@ -732,114 +536,6 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
     }
   };
 
-  const submitSchedule = async () => {
-    const hasServiceTypes = serviceTypes.length > 0;
-    const isCustomService = serviceTypeId === "custom";
-    const hasServiceLabel = serviceLabelInput.trim().length > 0;
-    if (!hasServiceTypes) {
-      toast.error("No services configured. Add offerings in Settings.");
-      return;
-    }
-    if (!serviceTypeId && !isCustomService) {
-      toast.error(`Select a ${serviceLabel.toLowerCase()}.`);
-      return;
-    }
-    if (isCustomService && !hasServiceLabel) {
-      toast.error(`Enter a ${serviceLabel.toLowerCase()}.`);
-      return;
-    }
-
-    if (!selectedSlot && (!dateValue || !timeValue)) {
-      toast.error("Select a date and time.");
-      return;
-    }
-
-    const slotStart = selectedSlot?.start ? new Date(selectedSlot.start) : null;
-    const slotEnd = selectedSlot?.end ? new Date(selectedSlot.end) : null;
-    const start = slotStart || new Date(`${dateValue}T${timeValue}`);
-    if (Number.isNaN(start.getTime())) {
-      toast.error("Invalid date/time.");
-      return;
-    }
-
-    const duration = Number(durationMins) || schedulingConfig.defaultDurationMins || 60;
-    const end =
-      slotEnd && !Number.isNaN(slotEnd.getTime())
-        ? slotEnd
-        : new Date(start.getTime() + duration * 60000);
-
-    const customerId =
-      record.object === "customer"
-        ? record.id
-        : record.object === "revival"
-        ? record.customer_id
-        : null;
-
-    const selectedService = serviceTypes.find(
-      (service) => String(service.id) === String(serviceTypeId)
-    );
-    const serviceLabelText =
-      selectedService?.name || serviceLabelInput || "";
-    const notes = [
-      scheduleNotes,
-      serviceLabelText ? `Service: ${serviceLabelText}` : "",
-      locationValue ? `Location: ${locationValue}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    try {
-      if (customerId) {
-        if (serviceTypeId && serviceTypeId !== "custom") {
-          const quickPayload = {
-            customer_id: customerId,
-            service_type_id: serviceTypeId,
-            start: start.toISOString(),
-            notes,
-            duration_minutes: duration,
-          };
-          if (locationValue?.trim()) {
-            quickPayload.address = { address: locationValue.trim() };
-          }
-          if (assignedTechId) quickPayload.assigned_to = assignedTechId;
-          await quickBook(quickPayload);
-        } else {
-          const schedulePayload = {
-            customer: customerId,
-            scheduled_start: start.toISOString(),
-            scheduled_end: end.toISOString(),
-            status: "pending",
-            notes,
-          };
-          if (assignedTechId) {
-            schedulePayload.assigned_technician = assignedTechId;
-          }
-          if (locationValue?.trim()) {
-            schedulePayload.metadata = {
-              address: locationValue.trim(),
-            };
-          }
-          await createSchedule(schedulePayload);
-        }
-      } else {
-        const appointmentPayload = {
-          start_time: start.toISOString(),
-          end_time: end.toISOString(),
-          duration_minutes: duration,
-          notes,
-          lead: record.object === "lead" ? record.id : undefined,
-          customer: record.object === "customer" ? record.id : undefined,
-          service_type_id: serviceTypeId,
-        };
-        await createAppointment(appointmentPayload);
-      }
-      toast.success("Scheduled!");
-      closeScheduleModal();
-    } catch {
-      toast.error("Error scheduling");
-    }
-  };
-
   /* ---------------------------------------------------------
      TABS
   --------------------------------------------------------- */
@@ -898,50 +594,73 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
   /* ---------------------------------------------------------
      JSX
   --------------------------------------------------------- */
+  const tabs = [
+    { id: "info", label: "INFO" },
+    { id: "revival", label: "REVIVAL" },
+    { id: "contracts", label: "CONTRACTS" },
+    { id: "documents", label: "DOCUMENTS" },
+    { id: "tasks", label: "TASKS" },
+    { id: "ai", label: "AI" },
+    { id: "billing", label: "BILLING" },
+    { id: "comms", label: "COMMS" },
+    { id: "appointments", label: "APPOINTMENTS" },
+  ];
+  const nameLabel =
+    record.full_name ||
+    record.raw?.name ||
+    (isLead ? "New Lead" : isRevival ? "Revival" : "New Customer");
+  const typeLabel = isLead ? "Lead" : isRevival ? "Revival" : "Customer";
+  const statusLabel = record.raw?.status || record.status || "";
+
   return (
-    <div className="customer-popup-wrapper no-blur">
-      <div className="popup">
+    <div className="popup-overlay customer-popup-wrapper">
+      <div
+        className="popup-container"
+        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+        onMouseDown={handleMouseDown}
+      >
         {/* HEADER */}
-        <div className="popup-header">
-          <div>
-            <div className="popup-title">
-              {record.full_name ||
-                record.raw?.name ||
-                (isLead ? "New Lead" : isRevival ? "Revival" : "New Customer")}
-            </div>
-            <div className="popup-subtitle">
-              {record.object === "lead"
-                ? "Lead"
-                : record.object === "revival"
-                ? "Revival"
-                : "Customer"}{" "}
-              - {displayIndustry}
+        <div className="popup-header popup-drag-handle">
+          <div className="header-info">
+            <span className="drag-hint" aria-hidden="true">
+              <GripHorizontal size={16} />
+            </span>
+            <div>
+              <div className="customer-name">{nameLabel}</div>
+              <div className="customer-meta">
+                {typeLabel} • {displayIndustry}
+                {statusLabel ? ` • ${String(statusLabel).toUpperCase()}` : ""}
+              </div>
             </div>
           </div>
-          <button className="close-btn" onClick={onClose}>
-            X
-          </button>
+          <div className="header-actions">
+            {statusLabel && (
+              <span className="status-pill">
+                {String(statusLabel).toUpperCase()}
+              </span>
+            )}
+            <button
+              className="btn-icon"
+              onClick={onClose}
+              aria-label="Close"
+              data-no-drag
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* NAV TABS */}
-        <div className="popup-navbar">
-          {[
-            "info",
-            "revival",
-            "contracts",
-            "documents",
-            "tasks",
-            "ai",
-            "billing",
-            "comms",
-            "appointments"
-          ].map((tab) => (
+        <div className="popup-tabs">
+          {tabs.map((tab) => (
             <button
-              key={tab}
-              className={activeTab === tab ? "nav-pill active" : "nav-pill"}
-              onClick={() => setActiveTab(tab)}
+              key={tab.id}
+              type="button"
+              className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+              data-no-drag
             >
-              {tab.toUpperCase()}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -950,227 +669,60 @@ function CustomerPopupInternal({ lead, leadType = "customer", onClose }) {
         <div className="popup-content">{renderTab()}</div>
 
         {/* FOOTER */}
-        <div className="popup-actions">
-          {isLead && convertUrl && !isCreate && (
-            <button className="action-btn" onClick={handleConvertToCustomer}>
-              Convert
+        <div className="popup-footer">
+          <div className="footer-actions">
+            {isLead && convertUrl && !isCreate && (
+              <button
+                className="btn-ghost"
+                onClick={handleConvertToCustomer}
+                data-no-drag
+              >
+                Convert
+              </button>
+            )}
+
+            <button
+              className="btn-ghost"
+              onClick={() => setShowScheduleModal(true)}
+              disabled={!canSchedule}
+              title={!canSchedule ? "Save first to schedule" : undefined}
+              data-no-drag
+            >
+              Schedule
             </button>
-          )}
 
-          <button
-            className="action-btn"
-            onClick={() => setShowScheduleModal(true)}
-            disabled={!canSchedule}
-            title={!canSchedule ? "Save first to schedule" : undefined}
-          >
-            Schedule
-          </button>
+            {canUpdateStatus && (
+              <button
+                className="btn-ghost"
+                onClick={() => setShowStatusModal(true)}
+                data-no-drag
+              >
+                Status
+              </button>
+            )}
 
-          {canUpdateStatus && (
-            <button className="action-btn" onClick={() => setShowStatusModal(true)}>
-              Status
+            <button className="btn-save" onClick={handleSaveChanges} data-no-drag>
+              {isCreate ? "Create" : "Save"}
             </button>
-          )}
-
-          <button className="action-btn primary" onClick={handleSaveChanges}>
-            {isCreate ? "Create" : "Save"}
-          </button>
+          </div>
         </div>
       </div>
 
       {/* STATUS MODAL */}
       {showStatusModal && canUpdateStatus && (
-        <div className="status-popup">
-          <div className="status-popup-inner">
-            <h3 className="status-title">Update Status</h3>
-
-            <div className="status-options">
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  className="status-option"
-                  onClick={() => updateStatus(s)}
-                >
-                  {s.toUpperCase()}
-                </button>
-              ))}
-            </div>
-
-            <button className="status-cancel" onClick={() => setShowStatusModal(false)}>
-              Cancel
-            </button>
-          </div>
-        </div>
+        <StatusModal
+          options={STATUS_OPTIONS}
+          onSelect={updateStatus}
+          onClose={() => setShowStatusModal(false)}
+        />
       )}
 
-      {/* SCHEDULE MODAL */}
-      {showScheduleModal && (
-        <div className="status-popup">
-          <div className="status-popup-inner schedule-popup-inner">
-            <h3 className="status-title">Schedule Appointment</h3>
-
-            <div className="schedule-modal-grid">
-              <div className="schedule-modal-column">
-                <label>{serviceLabel}</label>
-                {serviceTypes.length > 0 ? (
-                  <select
-                    value={serviceTypeId}
-                    onChange={(e) => setServiceTypeId(e.target.value)}
-                    disabled={loadingServiceTypes}
-                  >
-                    <option value="">
-                      {loadingServiceTypes
-                        ? "Loading services..."
-                        : "Select a service"}
-                    </option>
-                    {serviceTypes.map((service) => (
-                      <option key={service.id} value={service.id}>
-                        {service.name || `Service ${service.id}`}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="schedule-empty">
-                    {serviceTypesError ||
-                      "No services configured. Add offerings in Settings."}
-                  </div>
-                )}
-
-                <label>{staffLabel}</label>
-                <select
-                  value={assignedTechId}
-                  onChange={(e) => {
-                    setAssignedTechId(e.target.value);
-                    setSelectedSlot(null);
-                  }}
-                  disabled={loadingTechnicians}
-                >
-                  <option value="">
-                    {loadingTechnicians ? "Loading techs..." : "Auto-assign"}
-                  </option>
-                  {technicians.map((tech) => (
-                    <option key={tech.id} value={tech.id}>
-                      {tech.user_name ||
-                        tech.user?.full_name ||
-                        tech.user?.name ||
-                        [tech.user?.first_name, tech.user?.last_name]
-                          .filter(Boolean)
-                          .join(" ") ||
-                        tech.user?.email ||
-                        `Tech ${tech.id}`}
-                    </option>
-                  ))}
-                </select>
-
-                <label>{locationLabel}</label>
-                <input
-                  type="text"
-                  placeholder="Service location"
-                  value={locationValue}
-                  onChange={(e) => setLocationValue(e.target.value)}
-                />
-
-                <label>Notes</label>
-                <textarea
-                  rows="4"
-                  value={scheduleNotes}
-                  onChange={(e) => setScheduleNotes(e.target.value)}
-                />
-              </div>
-
-              <div className="schedule-modal-column">
-                <label>Date</label>
-                <input
-                  type="date"
-                  value={dateValue}
-                  onChange={(e) => {
-                    setDateValue(e.target.value);
-                    setSelectedSlot(null);
-                  }}
-                />
-
-                <div className="schedule-availability">
-                  <div className="schedule-availability-title">
-                    Available Slots
-                  </div>
-                  <div className="schedule-slots">
-                    {!serviceTypeId ? (
-                      <div className="schedule-muted">
-                        Select a service to load availability.
-                      </div>
-                    ) : loadingAvailability ? (
-                      <div className="schedule-muted">
-                        Loading availability...
-                      </div>
-                    ) : availabilityError ? (
-                      <div className="schedule-error">{availabilityError}</div>
-                    ) : availabilitySlots.length === 0 ? (
-                      <div className="schedule-muted">
-                        No available slots for this date.
-                      </div>
-                    ) : (
-                      availabilitySlots.map((slot) => (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          className={`schedule-slot ${
-                            selectedSlot?.id === slot.id ? "active" : ""
-                          }`}
-                          onClick={() => {
-                            const start = new Date(slot.start);
-                            if (Number.isNaN(start.getTime())) return;
-                            setSelectedSlot(slot);
-                            setDateValue(formatDateInput(start));
-                            setTimeValue(formatTimeInput(start));
-                          }}
-                        >
-                          {formatSlotLabel(slot.start, slot.end)}
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div className="schedule-time-row">
-                  <div>
-                    <label>Time</label>
-                    <input
-                      type="time"
-                      value={timeValue}
-                      onChange={(e) => {
-                        setTimeValue(e.target.value);
-                        setSelectedSlot(null);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label>Duration (mins)</label>
-                    <input
-                      type="number"
-                      min="15"
-                      step="15"
-                      value={durationMins}
-                      onChange={(e) => setDurationMins(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="status-options schedule-actions">
-              <button
-                className="status-cancel"
-                onClick={closeScheduleModal}
-              >
-                Cancel
-              </button>
-
-              <button className="action-btn primary" onClick={submitSchedule}>
-                Schedule
-              </button>
-            </div>
-          </div>
-        </div>
+      {showScheduleModal && record && (
+        <ScheduleModal
+          record={record}
+          schedulingConfig={schedulingConfig}
+          onClose={() => setShowScheduleModal(false)}
+        />
       )}
     </div>
   );

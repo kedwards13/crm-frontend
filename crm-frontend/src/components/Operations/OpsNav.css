@@ -89,7 +89,7 @@
   /* ---- Section accents (override --ops-accent per section) ---- */
   .ops-subnav--fleet      { --ops-accent: #2563eb; } /* blue */
   .ops-subnav--inventory  { --ops-accent: #0ea5e9; } /* sky */
-  .ops-subnav--techs      { --ops-accent: #10b981; } /* emerald */
+.ops-subnav--techs      { --ops-accent: #ff5500; } /* accent */
   .ops-subnav--training   { --ops-accent: #a855f7; } /* violet */
   .ops-subnav--compliance { --ops-accent: #f59e0b; } /* amber */
   

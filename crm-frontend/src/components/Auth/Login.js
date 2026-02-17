@@ -1,25 +1,37 @@
-// src/components/Auth/Login.js
-import React, { useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../App';
-import api from '../../apiClient';
-import { normalizeIndustry } from '../../helpers/tenantHelpers';
 import { FcGoogle } from 'react-icons/fc';
-import './Auth.css';
+
+import api from '../../apiClient';
+import { AuthContext } from '../../App';
+import { normalizeIndustry } from '../../helpers/tenantHelpers';
+import AbonMark from '../../assets/brand/abon-mark.svg';
+
+import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleTheme = (e) => {
+      document.body.dataset.theme = e.matches ? 'dark' : 'light';
+    };
+    handleTheme(mediaQuery);
+    mediaQuery.addEventListener('change', handleTheme);
+    return () => mediaQuery.removeEventListener('change', handleTheme);
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError('');
 
     try {
       const { data } = await api.post('/accounts/auth/login/', { email, password });
@@ -43,21 +55,9 @@ const Login = () => {
         .filter((tenant) => tenant.id);
 
       login(access, refresh, expiry, normalizedTenants, user);
-      if (normalizedTenants.length === 1) {
-        navigate('/dashboard', { replace: true });
-      } else {
-        navigate('/select-account', { replace: true });
-      }
+      navigate(normalizedTenants.length === 1 ? '/dashboard' : '/select-account', { replace: true });
     } catch (err) {
-      const detail = err?.response?.data?.detail || '';
-      const errorMsg =
-        detail.includes('No active account')
-          ? 'User not found or incorrect password.'
-          : detail ||
-            err?.response?.data?.error ||
-            err?.message ||
-            'Login failed. Please try again.';
-      setError(errorMsg);
+      setError('Invalid credentials.');
     } finally {
       setLoading(false);
     }
@@ -68,91 +68,60 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-hero">
-        <div className="hero-top">
-          <div className="brand-lockup">
-            <div className="brand-mark">
-              <span className="brand-lines" aria-hidden="true" />
-              <span className="brand-name">CRM</span>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-brand">
+            <div className="login-mark">
+              <img src={AbonMark} alt="Abon logo" />
             </div>
-            <span className="brand-chip">Account access</span>
-          </div>
-          <p className="hero-eyebrow">Secure account access</p>
-        </div>
-
-        <h1 className="hero-title">Sign in to your account</h1>
-        <p className="hero-copy">
-          Secure access to your CRM account. Use your company credentials to continue.
-        </p>
-
-        <div className="hero-actions">
-          <a href="/forgot-password" className="ghost-link">
-            Forgot password?
-          </a>
-          <a href="/signup" className="primary-link">
-            Request access
-          </a>
-        </div>
-      </div>
-
-      <div className="auth-panel">
-        <div className="auth-container">
-          <div className="form-header">
-            <div className="form-badge">CR</div>
             <div>
-              <p className="form-eyebrow">Secure sign in</p>
-              <h2 className="form-title">Welcome back</h2>
-              <p className="form-subtitle">Use your company email to continue</p>
+              <p className="login-eyebrow">Abon Command</p>
+              <h2 className="login-title">Secure Access</h2>
             </div>
           </div>
-
-          {error && <p className="error-message">{error}</p>}
-
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <button type="submit" className="login-btn" disabled={loading}>
-              {loading ? 'Logging in...' : 'Continue to dashboard'}
-            </button>
-
-            <div className="alt-login">
-              <button
-                type="button"
-                className="google-login-btn"
-                onClick={handleGoogleLogin}
-              >
-                <FcGoogle /> Sign in with Google
-              </button>
-            </div>
-
-            <div className="auth-links">
-              <a href="/forgot-password">Forgot password?</a>
-              <a href="/signup">Request access</a>
-            </div>
-          </form>
         </div>
+        <p className="login-subtitle">Enter your credentials to access the command center.</p>
+
+        {error && <div className="error-flash">{error}</div>}
+
+        <form onSubmit={handleLogin}>
+          <div className="input-stack">
+            <input
+              type="email"
+              className="login-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Work email"
+              required
+              autoFocus
+            />
+            <input
+              type="password"
+              className="login-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
+          </div>
+
+          <div className="action-row">
+            <button type="submit" className="btn-solid" disabled={loading}>
+              {loading ? 'Verifying...' : 'Continue'}
+            </button>
+            <button type="button" className="btn-ghost" onClick={handleGoogleLogin} aria-label="Sign in with Google">
+              <FcGoogle size={18} />
+              Continue with Google
+            </button>
+          </div>
+
+          <div className="help-row">
+            <a href="/forgot-password">Recover Account</a>
+          </div>
+        </form>
+
+        <div className="login-footnote">Single sign-on available for managed tenants.</div>
       </div>
     </div>
   );

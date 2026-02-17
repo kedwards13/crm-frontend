@@ -1,0 +1,170 @@
+.dialer-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dialer-header h2 {
+  margin: 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.dialer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 14px;
+}
+
+.dialer-card {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 14px;
+  color: #e2e8f0;
+}
+
+.dialer-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dialer-pill {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #e0f2fe;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dialer-pill.ghost {
+  background: transparent;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.dialer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialer-form label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.dialer-form input,
+.dialer-form textarea {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.dialer-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dialer-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dialer-row {
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.dialer-row.active {
+  border-color: rgba(34, 211, 238, 0.8);
+  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.18);
+}
+
+.dialer-row__title {
+  font-weight: 700;
+}
+
+.dialer-queue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.dialer-chip {
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.dialer-chip.ghost {
+  background: transparent;
+  border-color: #334155;
+}
+
+.dialer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.dialer-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dialer-history__row {
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tiny {
+  font-size: 12px;
+}
+
+.muted {
+  color: #cbd5e1;
+}
+
+@media (max-width: 720px) {
+  .dialer-row,
+  .dialer-history__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

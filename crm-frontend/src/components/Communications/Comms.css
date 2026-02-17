@@ -1,0 +1,21 @@
+.comms-subnav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.comms-subnav__item {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.comms-subnav__item.active {
+  border-color: rgba(34, 211, 238, 0.8);
+  box-shadow: 0 8px 20px rgba(34, 211, 238, 0.2);
+}

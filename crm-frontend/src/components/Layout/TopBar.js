@@ -29,9 +29,11 @@ export default function TopBar({
   const scrollerRef = useRef(null);
   const leftBtnRef = useRef(null);
   const rightBtnRef = useRef(null);
+  const __topbarInstanceId = useRef(Math.random().toString(16).slice(2));
 
   const [showNewMenu, setShowNewMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [tabOverflow, setTabOverflow] = useState({ left: false, right: false });
   const industry = getIndustry("general");
   const copy = getIndustryCopy(industry);
 
@@ -44,8 +46,7 @@ export default function TopBar({
     const canLeft = el.scrollLeft > 2;
     const canRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
 
-    leftBtnRef.current?.classList.toggle("hidden", !canLeft);
-    rightBtnRef.current?.classList.toggle("hidden", !canRight);
+    setTabOverflow({ left: canLeft, right: canRight });
   };
 
   useEffect(() => {
@@ -64,6 +65,13 @@ export default function TopBar({
       el.removeEventListener("scroll", onScroll);
     };
   }, [tabs, activeTab]);
+
+  useEffect(() => {
+    const count = document.querySelectorAll(".top-bar-search").length;
+    if (count !== 1) {
+      console.error("🚨 INVALID STATE: Expected 1 top-bar-search, found", count);
+    }
+  }, []);
 
   const scrollTabs = (dir) => {
     const el = scrollerRef.current;
@@ -125,8 +133,10 @@ export default function TopBar({
             <>
               <button
                 ref={leftBtnRef}
-                className="tabs-arrow left hidden"
+                className={`tabs-arrow left ${tabOverflow.left ? "" : "disabled"}`}
+                type="button"
                 onClick={() => scrollTabs("left")}
+                disabled={!tabOverflow.left}
               >
                 <FiChevronLeft size={18} />
               </button>
@@ -148,6 +158,7 @@ export default function TopBar({
                       className={`top-bar-subnav-button ${
                         activeTab === t.key ? "active" : ""
                       }`}
+                      type="button"
                       onClick={() => onTabChange(t.key)}
                     >
                       {t.label}
@@ -158,8 +169,10 @@ export default function TopBar({
 
               <button
                 ref={rightBtnRef}
-                className="tabs-arrow right hidden"
+                className={`tabs-arrow right ${tabOverflow.right ? "" : "disabled"}`}
+                type="button"
                 onClick={() => scrollTabs("right")}
+                disabled={!tabOverflow.right}
               >
                 <FiChevronRight size={18} />
               </button>
@@ -189,19 +202,21 @@ export default function TopBar({
 
           {/* Theme toggle */}
           <button
-            className="top-bar-btn theme-toggle"
+            className="top-bar-btn theme-toggle icon-pill"
             onClick={handleThemeToggle}
             aria-label="Toggle theme"
+            type="button"
           >
-            {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
+            {theme === "dark" ? <FiSun size={20} /> : <FiMoon size={20} />}
           </button>
 
           {/* Inbox */}
           <div className="inbox-wrapper">
             <button
-              className="top-bar-btn"
+              className="top-bar-btn icon-pill"
               onClick={() => navigate("/inbox")}
               aria-label="Inbox"
+              type="button"
             >
               <FiInbox size={20} />
             </button>
@@ -215,6 +230,9 @@ export default function TopBar({
             <button
               className="top-bar-new-btn"
               onClick={() => setShowNewMenu((v) => !v)}
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={showNewMenu}
             >
               <FiPlus size={18} />
               <span>New</span>
@@ -222,19 +240,19 @@ export default function TopBar({
 
             {showNewMenu && (
               <div className="top-bar-new-menu">
-                <button onClick={() => handleNewAction("/customers/new")}>
+                <button type="button" onClick={() => handleNewAction("/customers/new")}>
                   Add {copy.customer}
                 </button>
-                <button onClick={() => handleNewAction("/leads/new")}>
+                <button type="button" onClick={() => handleNewAction("/leads/new")}>
                   Add {copy.lead}
                 </button>
-                <button onClick={() => handleNewAction("/revival/scan")}>
+                <button type="button" onClick={() => handleNewAction("/revival/scan")}>
                   Scan Quote
                 </button>
-                <button onClick={() => handleNewAction("/tasks/new")}>
+                <button type="button" onClick={() => handleNewAction("/tasks/new")}>
                   New Task
                 </button>
-                <button onClick={() => handleNewAction("/schedule/new")}>
+                <button type="button" onClick={() => handleNewAction("/schedule/new")}>
                   Add Appointment
                 </button>
               </div>

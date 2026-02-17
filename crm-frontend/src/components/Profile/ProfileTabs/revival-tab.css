@@ -106,7 +106,7 @@
 }
 
 .qh-btn.blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-.qh-btn.green { background: linear-gradient(90deg, #059669, #10b981); }
+.qh-btn.green { background: linear-gradient(90deg, var(--accent), var(--accent)); }
 .qh-btn.amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
 
 /* --------------------------------------------------------

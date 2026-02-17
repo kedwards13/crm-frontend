@@ -40,7 +40,7 @@
   }
   
   .upload-status.success {
-    color: green;
+    color: var(--accent);
   }
   
   .upload-status.error {

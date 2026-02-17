@@ -1,8 +1,144 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../apiClient';
+import TagInput from '../../../pages/settings/components/TagInput.tsx';
+import { getActiveTenant, setActiveTenant } from '../../../helpers/tenantHelpers';
 import '../SettingsCommon.css';
 
-const API = process.env.REACT_APP_API_URL;
+const TIMEZONE_OPTIONS = [
+  { value: 'America/Los_Angeles', label: 'Pacific (LA)' },
+  { value: 'America/Chicago', label: 'Central (Chicago)' },
+  { value: 'America/New_York', label: 'Eastern (NY)' },
+  { value: 'UTC', label: 'UTC' },
+];
+
+const US_STATES = [
+  { code: 'AL', name: 'Alabama' },
+  { code: 'AK', name: 'Alaska' },
+  { code: 'AZ', name: 'Arizona' },
+  { code: 'AR', name: 'Arkansas' },
+  { code: 'CA', name: 'California' },
+  { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' },
+  { code: 'DE', name: 'Delaware' },
+  { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' },
+  { code: 'HI', name: 'Hawaii' },
+  { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' },
+  { code: 'IN', name: 'Indiana' },
+  { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' },
+  { code: 'KY', name: 'Kentucky' },
+  { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' },
+  { code: 'MD', name: 'Maryland' },
+  { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' },
+  { code: 'MN', name: 'Minnesota' },
+  { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' },
+  { code: 'MT', name: 'Montana' },
+  { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' },
+  { code: 'NH', name: 'New Hampshire' },
+  { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' },
+  { code: 'NY', name: 'New York' },
+  { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' },
+  { code: 'OH', name: 'Ohio' },
+  { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' },
+  { code: 'PA', name: 'Pennsylvania' },
+  { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' },
+  { code: 'SD', name: 'South Dakota' },
+  { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' },
+  { code: 'UT', name: 'Utah' },
+  { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' },
+  { code: 'WA', name: 'Washington' },
+  { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' },
+  { code: 'WY', name: 'Wyoming' },
+];
+
+const STATE_CODE_SET = new Set(US_STATES.map((state) => state.code));
+const STATE_NAME_TO_CODE = US_STATES.reduce((acc, state) => {
+  acc[state.name.toLowerCase()] = state.code;
+  return acc;
+}, {});
+
+const ZIP_REGEX = /^\d{5}(?:-\d{4})?$/;
+const CITY_REGEX = /^[a-zA-Z][a-zA-Z .'-]{1,58}$/;
+const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}){1,2}$/;
+const HEX_COLOR_NO_HASH_REGEX = /^(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
+const normalizeStateCode = (value = '') => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const upper = raw.toUpperCase();
+  if (STATE_CODE_SET.has(upper)) return upper;
+  return STATE_NAME_TO_CODE[raw.toLowerCase()] || '';
+};
+
+const normalizeColor = (value = '') => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (HEX_COLOR_REGEX.test(raw)) return raw.toUpperCase();
+  if (HEX_COLOR_NO_HASH_REGEX.test(raw)) return `#${raw}`.toUpperCase();
+  return raw;
+};
+
+const normalizeServiceAreas = (value) => {
+  if (Array.isArray(value)) {
+    return Array.from(
+      new Set(
+        value
+          .map((item) => String(item || '').trim())
+          .filter(Boolean)
+      )
+    );
+  }
+
+  if (typeof value === 'string') {
+    return Array.from(
+      new Set(
+        value
+          .split(/[\n,;]+/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+      )
+    );
+  }
+
+  return [];
+};
+
+const normalizeServiceAreaInput = (value) => {
+  const clean = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!clean) return '';
+  if (ZIP_REGEX.test(clean)) return clean;
+  return clean
+    .split(' ')
+    .map((part) => part.slice(0, 1).toUpperCase() + part.slice(1))
+    .join(' ');
+};
+
+const validateServiceAreaInput = (value) => {
+  if (ZIP_REGEX.test(value) || CITY_REGEX.test(value)) return true;
+  return 'Enter a ZIP code (12345) or a city name.';
+};
+
+const extractTenantPayload = (payload) => {
+  if (!payload) return {};
+  if (payload?.tenant && typeof payload.tenant === 'object') return payload.tenant;
+  if (Array.isArray(payload?.results)) return payload.results[0] || {};
+  if (payload?.results && typeof payload.results === 'object') return payload.results;
+  return payload;
+};
 
 export default function CompanyProfile() {
   const [form, setForm] = useState({
@@ -14,24 +150,51 @@ export default function CompanyProfile() {
     city: '',
     state: '',
     zip: '',
-    logo: '', // logo URL
+    logo: '',
+    primaryColor: '',
+    serviceAreas: [],
   });
+  const [tenantSnapshot, setTenantSnapshot] = useState({});
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/api/accounts/tenant/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await api.get('/accounts/tenant/');
         if (!mounted) return;
-        setForm((f) => ({ ...f, ...data }));
+
+        const tenantData = extractTenantPayload(data);
+        const preferences = tenantData?.preferences || {};
+        const branding = preferences?.branding || {};
+
+        setTenantSnapshot(tenantData);
+        setForm((prev) => ({
+          ...prev,
+          name: tenantData?.name || '',
+          domain: tenantData?.domain || '',
+          timezone: tenantData?.timezone || 'America/New_York',
+          address1: tenantData?.address1 || tenantData?.address_1 || '',
+          address2: tenantData?.address2 || tenantData?.address_2 || '',
+          city: tenantData?.city || '',
+          state: normalizeStateCode(tenantData?.state || tenantData?.province || ''),
+          zip: tenantData?.zip || tenantData?.zip_code || '',
+          logo: branding?.logo_url || branding?.logo || tenantData?.logo || '',
+          primaryColor:
+            normalizeColor(
+              branding?.primary_color ||
+              branding?.primaryColor ||
+              tenantData?.primary_color ||
+              ''
+            ) || '',
+          serviceAreas: normalizeServiceAreas(
+            preferences?.service_areas || preferences?.serviceAreas || tenantData?.service_areas
+          ),
+        }));
       } catch (e) {
-        console.warn("Could not load company profile:", e);
+        console.warn('Could not load company profile:', e);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -39,7 +202,7 @@ export default function CompanyProfile() {
     return () => {
       mounted = false;
     };
-  }, [token]);
+  }, []);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -47,21 +210,63 @@ export default function CompanyProfile() {
 
   const onSave = async () => {
     setMsg('');
+
+    const normalizedColor = normalizeColor(form.primaryColor);
+    const nextPreferences = {
+      ...(tenantSnapshot?.preferences || {}),
+      branding: {
+        ...(tenantSnapshot?.preferences?.branding || {}),
+        logo_url: form.logo.trim(),
+        primary_color: normalizedColor,
+      },
+      service_areas: form.serviceAreas,
+    };
+
+    const payload = {
+      name: form.name.trim(),
+      domain: form.domain.trim(),
+      timezone: form.timezone,
+      address1: form.address1.trim(),
+      address2: form.address2.trim(),
+      city: form.city.trim(),
+      state: form.state,
+      zip: form.zip.trim(),
+      preferences: nextPreferences,
+    };
+
     try {
-      await axios.put(`${API}/api/accounts/tenant/`, form, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMsg('✅ Saved!');
-      const raw = localStorage.getItem('activeTenant');
-      if (raw) {
-        const t = JSON.parse(raw);
-        t.name = form.name;
-        t.domain = form.domain;
-        localStorage.setItem('activeTenant', JSON.stringify(t));
-        window.dispatchEvent(new Event('activeTenant:changed'));
+      let response = null;
+      try {
+        response = await api.patch('/accounts/tenant/', payload);
+      } catch (error) {
+        if (error?.response?.status === 404 || error?.response?.status === 405) {
+          response = await api.put('/accounts/tenant/', payload);
+        } else {
+          throw error;
+        }
       }
+
+      const updatedTenant = {
+        ...tenantSnapshot,
+        ...payload,
+        ...(extractTenantPayload(response?.data) || {}),
+        preferences: nextPreferences,
+        logo: form.logo.trim(),
+        primary_color: normalizedColor,
+      };
+
+      setTenantSnapshot(updatedTenant);
+      setMsg('✅ Saved!');
+      setActiveTenant({
+        ...(getActiveTenant() || {}),
+        ...updatedTenant,
+      });
     } catch (e) {
-      setMsg('❌ Save failed. Check fields or try again.');
+      const detail =
+        e?.response?.data?.detail ||
+        e?.response?.data?.error ||
+        'Save failed. Check fields or try again.';
+      setMsg(`❌ ${detail}`);
     }
   };
 
@@ -90,15 +295,33 @@ export default function CompanyProfile() {
 
           <label>Timezone
             <select name="timezone" value={form.timezone} onChange={onChange}>
-              <option value="America/Los_Angeles">Pacific (LA)</option>
-              <option value="America/Chicago">Central (Chicago)</option>
-              <option value="America/New_York">Eastern (NY)</option>
-              <option value="UTC">UTC</option>
+              {TIMEZONE_OPTIONS.map((timezone) => (
+                <option key={timezone.value} value={timezone.value}>{timezone.label}</option>
+              ))}
             </select>
           </label>
 
           <label>Logo URL
             <input name="logo" value={form.logo} onChange={onChange} placeholder="https://…" />
+          </label>
+
+          <label>Primary Color
+            <div className="settings-inline-inputs">
+              <input
+                type="color"
+                name="primaryColorPicker"
+                value={HEX_COLOR_REGEX.test(normalizeColor(form.primaryColor)) ? normalizeColor(form.primaryColor) : '#0EA5E9'}
+                onChange={(e) => setForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                aria-label="Primary color picker"
+              />
+              <input
+                type="text"
+                name="primaryColor"
+                value={form.primaryColor}
+                onChange={onChange}
+                placeholder="#0EA5E9"
+              />
+            </div>
           </label>
 
           {form.logo && (
@@ -122,12 +345,34 @@ export default function CompanyProfile() {
             <input name="city" value={form.city || ''} onChange={onChange} />
           </label>
           <label>State
-            <input name="state" value={form.state || ''} onChange={onChange} />
+            <select name="state" value={form.state || ''} onChange={onChange}>
+              <option value="">Select a state</option>
+              {US_STATES.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.name} ({state.code})
+                </option>
+              ))}
+            </select>
           </label>
           <label>ZIP
             <input name="zip" value={form.zip || ''} onChange={onChange} />
           </label>
         </div>
+      </div>
+
+      <h3>Service Areas</h3>
+      <div className="settings-card">
+        <TagInput
+          label="Zip Codes or Cities"
+          values={form.serviceAreas}
+          onChange={(serviceAreas) => setForm((prev) => ({ ...prev, serviceAreas }))}
+          placeholder="Add ZIP code or city and press Enter"
+          helperText="Examples: 33602, Tampa, St. Petersburg"
+          validate={validateServiceAreaInput}
+          normalize={normalizeServiceAreaInput}
+          addButtonText="Add Area"
+          emptyLabel="No service areas added yet."
+        />
       </div>
 
       <div className="settings-actions">

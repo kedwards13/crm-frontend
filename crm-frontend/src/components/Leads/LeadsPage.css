@@ -3,21 +3,24 @@
   padding: 0 1rem 2rem;
   background-color: var(--bg-0);
   color: var(--text-0);
+  position: relative;
 }
 
 /* Two-pane desktop layout */
 .leads-layout {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 1.25rem;
-  max-width: 1400px;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
+  max-width: 1420px;
   margin: 0 auto;
+  padding-top: 0.25rem;
 }
 
 .lead-section-title {
   margin: 0.25rem 0 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
 /* Columns */
@@ -37,25 +40,33 @@
 }
 
 .inbox-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 0.5rem;
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--border-0);
+  border-radius: 12px;
+  background: var(--bg-1);
+  margin: 0 0 0.65rem;
+  box-shadow: var(--sh-1);
 }
 
 .inbox-tab {
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border-0);
-  background: var(--bg-1);
-  color: var(--text-0);
-  padding: 6px 12px;
+  background: var(--bg-2);
+  color: var(--text-1);
+  padding: 6px 14px;
   font-size: 12px;
   cursor: pointer;
+  min-width: 88px;
+  transition: background 0.18s ease, color 0.18s ease, border 0.18s ease;
 }
 
 .inbox-tab.active {
   background: var(--accent-0);
   border-color: transparent;
   color: #fff;
+  box-shadow: 0 8px 18px rgba(var(--accent-rgb, 10,132,255), 0.25);
 }
 
 .inbox-tab:disabled {
@@ -69,7 +80,7 @@
   background: var(--bg-1);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: var(--shadow-0);
+  box-shadow: var(--sh-1);
   transition: background 0.2s ease, border 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -85,7 +96,7 @@
   width: 100%;
 }
 .lead-grid.grid {
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 .lead-grid.list {
   grid-template-columns: 1fr;
@@ -94,16 +105,17 @@
 /* Card selection and checkbox */
 .selectable {
   position: relative;
-  padding-left: 36px;
+  padding-left: 40px;
 }
 .selectable .checkbox {
   position: absolute;
-  left: 8px;
-  top: 12px;
+  left: 10px;
+  top: 14px;
 }
 .selectable.selected {
   outline: 2px solid var(--color-accent, #0a84ff);
   border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(10, 132, 255, 0.2);
 }
 
 /* State indicators */

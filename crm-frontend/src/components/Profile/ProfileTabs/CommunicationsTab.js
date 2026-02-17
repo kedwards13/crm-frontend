@@ -25,9 +25,9 @@ function DirectionBadge({ msg }) {
   return (
     <div className="gt-dir-badge">
       {msg.direction === "inbound" ? (
-        <ArrowDownLeft size={13} color="#22c55e" />
+        <ArrowDownLeft size={13} color="#ff5500" />
       ) : (
-        <ArrowUpRight size={13} color="#3b82f6" />
+        <ArrowUpRight size={13} color="#0066ff" />
       )}
 
       {msg.channel === "email" ? (
@@ -380,7 +380,7 @@ function MessageCard({ msg }) {
 
   const statusIcon =
     msg.status === "delivered" ? (
-      <CheckCircle size={14} className="text-green-400" />
+      <CheckCircle size={14} className="text-orange-400" />
     ) : msg.status === "failed" ? (
       <AlertTriangle size={14} className="text-red-500" />
     ) : (

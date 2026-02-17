@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { fetchCallLogs } from "../../../api/communications";
-import "./PhoneDialer.css";
+import WebPhone from "./WebPhone";
+import WrapUpModal from "./WrapUpModal";
+import "./CallsPage.css";
 
 const FILTER_OPTIONS = [
   { value: "party_universal_id", label: "Party ID" },
@@ -11,11 +13,33 @@ const FILTER_OPTIONS = [
 ];
 
 const STATUS_LABELS = {
+  initiated: "Initiated",
+  ringing: "Ringing",
+  in_progress: "In progress",
+  answered: "Answered",
   completed: "Completed",
   "no-answer": "No Answer",
   failed: "Failed",
   busy: "Busy",
-  ringing: "Ringing",
+  idle: "Idle",
+};
+
+const normalizeCallId = (call = {}) =>
+  call.call_sid || call.sid || call.id || `${call.from_number}-${call.to_number}-${call.created_at}`;
+
+const mergeCallLists = (current = [], incoming = []) => {
+  const map = new Map();
+  incoming.forEach((call) => {
+    const key = normalizeCallId(call);
+    map.set(key, call);
+  });
+  current.forEach((call) => {
+    const key = normalizeCallId(call);
+    if (!map.has(key)) map.set(key, call);
+  });
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.created_at || b.timestamp || 0) - new Date(a.created_at || a.timestamp || 0)
+  );
 };
 
 function getInitialLookup(search) {
@@ -41,9 +65,10 @@ export default function CallsPage() {
   const [callLog, setCallLog] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [wrapupTarget, setWrapupTarget] = useState(null);
 
-  const loadCalls = async (params) => {
-    setLoading(true);
+  const loadCalls = useCallback(async (params, isInitial = false) => {
+    if (isInitial) setLoading(true);
     setError("");
     try {
       const data = await fetchCallLogs(params);
@@ -52,20 +77,33 @@ export default function CallsPage() {
         : Array.isArray(data?.calls)
         ? data.calls
         : [];
-      setCallLog(rows);
+      setCallLog((prev) => mergeCallLists(prev, rows));
     } catch (err) {
       setError(err?.message || "Unable to load calls.");
-      setCallLog([]);
+      if (isInitial) setCallLog([]);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const next = getInitialLookup(location.search);
     setLookup(next);
-    if (next.value) loadCalls({ [next.type]: next.value });
   }, [location.search]);
+
+  useEffect(() => {
+    const params = lookup.value ? { [lookup.type]: lookup.value.trim() } : {};
+    let cancelled = false;
+
+    loadCalls(params, true);
+    const timer = setInterval(() => {
+      if (!cancelled) loadCalls(params, false);
+    }, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [loadCalls, lookup.type, lookup.value]);
 
   const stats = useMemo(() => {
     const total = callLog.length;
@@ -85,106 +123,122 @@ export default function CallsPage() {
       setCallLog([]);
       return;
     }
-    loadCalls({ [lookup.type]: lookup.value.trim() });
+    loadCalls({ [lookup.type]: lookup.value.trim() }, true);
+  };
+
+  const handleWrapSaved = () => {
+    setWrapupTarget(null);
   };
 
   return (
-    <div className="phone-dialer-container">
-      <div className="dialer-card">
-        <h2 className="dialer-title">Calls</h2>
-        <p className="dialer-subtitle">
-          Look up call logs by party ID, customer, lead, or phone number.
-        </p>
+    <div className="calls-page">
+      <WebPhone />
 
-        <form className="dialer-input" onSubmit={handleLookupSubmit}>
-          <select
-            className="phone-input call-filter"
-            value={lookup.type}
-            onChange={(e) => setLookup((prev) => ({ ...prev, type: e.target.value }))}
-          >
-            {FILTER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+      <div className="calls-grid">
+        <div className="call-card">
+          <div className="call-card__header">
+            <div>
+              <h3>Call lookup</h3>
+            </div>
+            {error && <div className="badge badge--error">{error}</div>}
+          </div>
+          <form className="call-filter" onSubmit={handleLookupSubmit}>
+            <select
+              value={lookup.type}
+              onChange={(e) => setLookup((prev) => ({ ...prev, type: e.target.value }))}
+            >
+              {FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Enter lookup value"
+              value={lookup.value}
+              onChange={(e) => setLookup((prev) => ({ ...prev, value: e.target.value }))}
+            />
+            <button type="submit" className="webphone-btn primary" disabled={loading}>
+              {loading ? "Loading…" : "Apply"}
+            </button>
+          </form>
 
-          <input
-            type="text"
-            placeholder="Enter lookup value"
-            value={lookup.value}
-            onChange={(e) => setLookup((prev) => ({ ...prev, value: e.target.value }))}
-            className="phone-input"
-          />
+          <div className="call-stats">
+            <div>
+              <div className="stat-value">{stats.total}</div>
+              <div className="stat-label">Total</div>
+            </div>
+            <div>
+              <div className="stat-value">{stats.inbound}</div>
+              <div className="stat-label">Inbound</div>
+            </div>
+            <div>
+              <div className="stat-value">{stats.outbound}</div>
+              <div className="stat-label">Outbound</div>
+            </div>
+            <div>
+              <div className="stat-value">{stats.missed}</div>
+              <div className="stat-label">Missed/Failed</div>
+            </div>
+            <div>
+              <div className="stat-value">{stats.avgSeconds}s</div>
+              <div className="stat-label">Avg duration</div>
+            </div>
+          </div>
+        </div>
 
-          <button className="action-button" type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Load"}
-          </button>
-        </form>
+        <div className="call-card">
+          <div className="call-card__header">
+            <div>
+              <h3>Live call feed</h3>
+            </div>
+          </div>
 
-        {error && <div className="error-message">{error}</div>}
+          {loading ? (
+            <p className="muted">Loading calls…</p>
+          ) : callLog.length === 0 ? (
+            <p className="muted">
+              {lookup.value ? "No calls for this lookup yet." : "Waiting for call activity."}
+            </p>
+          ) : (
+            <div className="call-list">
+              {callLog.map((record) => {
+                const status = STATUS_LABELS[record.status] || record.status || "Unknown";
+                return (
+                  <div key={normalizeCallId(record)} className="call-row">
+                    <div>
+                      <div className="call-row__title">
+                        {record.from_number || "Unknown"} → {record.to_number || "Unknown"}
+                      </div>
+                      <div className="muted tiny">
+                        {record.direction?.toUpperCase() || "CALL"} • {status} •{" "}
+                        {record.created_at
+                          ? new Date(record.created_at).toLocaleString()
+                          : "Unknown time"}
+                      </div>
+                    </div>
+                    <div className="call-row__meta">
+                      <span className="badge">{record.duration_seconds || 0}s</span>
+                      <button
+                        type="button"
+                        className="webphone-btn ghost"
+                        onClick={() => setWrapupTarget(record)}
+                      >
+                        Wrap up
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="phone-stats-row">
-        <div className="phone-stat-block">
-          <div className="stat-count count-new">{stats.total}</div>
-          <div className="stat-label">Total Calls</div>
-        </div>
-        <div className="phone-stat-block">
-          <div className="stat-count count-qualified">{stats.inbound}</div>
-          <div className="stat-label">Inbound</div>
-        </div>
-        <div className="phone-stat-block">
-          <div className="stat-count count-proposed">{stats.outbound}</div>
-          <div className="stat-label">Outbound</div>
-        </div>
-        <div className="phone-stat-block">
-          <div className="stat-count count-proposed">{stats.missed}</div>
-          <div className="stat-label">Missed/Failed</div>
-        </div>
-        <div className="phone-stat-block">
-          <div className="stat-count count-qualified">{stats.avgSeconds}s</div>
-          <div className="stat-label">Avg Duration</div>
-        </div>
-      </div>
-
-      <div className="call-log">
-        <h3 className="call-log-title">Call Log</h3>
-        {loading ? (
-          <p className="no-records">Loading calls…</p>
-        ) : callLog.length === 0 ? (
-          <p className="no-records">
-            {lookup.value ? "No calls found for this lookup." : "Enter a lookup to pull call logs."}
-          </p>
-        ) : (
-          <ul className="call-log-list">
-            {callLog.map((record, idx) => (
-              <li key={record.id || record.created_at || `${record.from_number}-${idx}`} className="call-record">
-                <div className="record-details">
-                  <span className="record-number">
-                    {record.from_number || "Unknown"} → {record.to_number || "Unknown"}
-                  </span>
-                  <span className="record-time">
-                    {record.created_at
-                      ? new Date(record.created_at).toLocaleString()
-                      : "Unknown time"}
-                  </span>
-                </div>
-                <div className="record-status">
-                  {record.direction?.toUpperCase() || "CALL"} •{" "}
-                  {STATUS_LABELS[record.status] || record.status || "Unknown"} •{" "}
-                  {record.duration_seconds || 0}s
-                </div>
-                <div className="record-actions">
-                  <button className="call-back-btn" type="button">
-                    Call Back
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {wrapupTarget && (
+        <WrapUpModal call={wrapupTarget} onClose={() => setWrapupTarget(null)} onSaved={handleWrapSaved} />
+      )}
     </div>
   );
 }

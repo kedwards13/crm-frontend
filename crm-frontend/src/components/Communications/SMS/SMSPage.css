@@ -1,264 +1,269 @@
-/* ============================================================
-   SMS Messaging Hub — Unified Communications Console
-   ============================================================ */
+.sms-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-   :root {
-    --sms-bg-dark: #0f141b;
-    --sms-bg-light: #ffffff;
-    --sms-border-dark: #263241;
-    --sms-border-light: #e0e6ed;
-    --sms-surface-dark: #161c25;
-    --sms-surface-light: #f8f9fb;
-    --sms-text-dark: #e5ecf3;
-    --sms-text-light: #1c1f23;
-    --sms-primary: #1badf1;
-    --sms-accent: #38c1ff;
-    --sms-radius: 10px;
+.sms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sms-header h2 {
+  margin: 4px 0 0;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+.icon-btn {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-soft, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.dark-mode .icon-btn {
+  border-color: var(--border-strong, #1f2937);
+  background: var(--surface-soft, #0f172a);
+  color: var(--text-primary, #f8fafc);
+}
+
+.ai-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.secondary-button {
+  align-self: flex-start;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #0b1220;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.secondary-button.loading {
+  opacity: 0.7;
+}
+
+.ai-suggestion-box {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-soft, #f8fafc);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.dark-mode .ai-suggestion-box {
+  border-color: var(--border-strong, #1f2937);
+  background: var(--surface-soft, #0f172a);
+}
+
+.ai-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.accept-btn,
+.deny-btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.accept-btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #0b1220;
+}
+
+.deny-btn {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #1f2937;
+}
+
+.conversation-container {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-strong, #ffffff);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.dark-mode .conversation-container {
+  border-color: var(--border-strong, #1f2937);
+  background: var(--surface-strong, #0b1220);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.sms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-strong, #ffffff);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+}
+
+.dark-mode .card {
+  border-color: var(--border-strong, #1f2937);
+  background: var(--surface-strong, #0b1220);
+}
+
+.composer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.composer textarea,
+.mass-card textarea {
+  width: 100%;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-soft, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.dark-mode .composer textarea,
+.dark-mode .mass-card textarea {
+  border-color: var(--border-strong, #1f2937);
+  background: var(--surface-soft, #0f172a);
+  color: var(--text-primary, #f8fafc);
+}
+
+.composer-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-button,
+.group-button {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+.action-button {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #0b1220;
+}
+
+.group-button {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #0b1220;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
+}
+
+.mass-card label {
+  font-weight: 700;
+  margin-top: 4px;
+  display: block;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.pill {
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.template-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.dark-mode .template-row {
+  border-color: var(--border-strong, #1f2937);
+}
+
+.template-row:last-child {
+  border-bottom: none;
+}
+
+.template-title {
+  font-weight: 700;
+}
+
+.pill-btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #0b1220;
+}
+
+.pill-btn.ghost {
+  background: var(--surface-soft, #f8fafc);
+  color: var(--text-primary, #0f172a);
+  border-color: var(--border-subtle, #e2e8f0);
+}
+
+.dark-mode .pill-btn.ghost {
+  background: var(--surface-soft, #0f172a);
+  color: var(--text-primary, #f8fafc);
+  border-color: var(--border-strong, #1f2937);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .sms-page {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 1.5rem;
-    background: var(--sms-bg-dark);
-    color: var(--sms-text-dark);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
-    overflow-y: auto;
-    transition: background 0.3s, color 0.3s;
-  }
-  body.light-mode .sms-page {
-    background: var(--sms-bg-light);
-    color: var(--sms-text-light);
-  }
-  
-  /* ------------------------------------------------------------
-     Header
-  ------------------------------------------------------------ */
-  .sms-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .sms-header h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--sms-primary);
-  }
-  
-  .icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: 1px solid var(--sms-border-dark);
-    background: rgba(255, 255, 255, 0.05);
-    color: inherit;
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  .icon-btn:hover {
-    border-color: var(--sms-primary);
-    color: var(--sms-primary);
-  }
-  
-  /* ------------------------------------------------------------
-     AI Tools Section
-  ------------------------------------------------------------ */
-  .ai-tools {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-  
-  .secondary-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--sms-primary);
-    color: #fff;
-    font-weight: 500;
-    border: none;
-    border-radius: var(--sms-radius);
-    padding: 0.6rem 1rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  .secondary-button:hover {
-    background: var(--sms-accent);
-  }
-  .secondary-button.loading {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .ai-suggestion-box {
-    background: var(--sms-surface-dark);
-    border: 1px solid var(--sms-border-dark);
-    padding: 1rem;
-    border-radius: var(--sms-radius);
-    animation: fadeIn 0.3s ease;
-  }
-  body.light-mode .ai-suggestion-box {
-    background: var(--sms-surface-light);
-    border: 1px solid var(--sms-border-light);
-  }
-  .ai-suggestion-box p {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.95rem;
-    line-height: 1.4;
-  }
-  .ai-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
-  .accept-btn,
-  .deny-btn {
-    flex: 1;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
-    border: none;
-    border-radius: var(--sms-radius);
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  .accept-btn {
-    background: var(--sms-primary);
-    color: #fff;
-  }
-  .accept-btn:hover {
-    background: var(--sms-accent);
-  }
-  .deny-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: inherit;
-  }
-  .deny-btn:hover {
-    background: rgba(255, 255, 255, 0.18);
-  }
-  
-  /* ------------------------------------------------------------
-     Conversation
-  ------------------------------------------------------------ */
-  .conversation-container {
-    flex: 1;
-    overflow-y: auto;
-    background: var(--sms-surface-dark);
-    border: 1px solid var(--sms-border-dark);
-    border-radius: var(--sms-radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    scroll-behavior: smooth;
-  }
-  body.light-mode .conversation-container {
-    background: var(--sms-surface-light);
-    border-color: var(--sms-border-light);
-  }
-  
-  .loading {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    opacity: 0.8;
-  }
-  
-  /* ------------------------------------------------------------
-     Composer
-  ------------------------------------------------------------ */
-  .composer {
-    display: flex;
-    flex-direction: column;
-    background: var(--sms-surface-dark);
-    border: 1px solid var(--sms-border-dark);
-    border-radius: var(--sms-radius);
-    padding: 0.75rem;
-  }
-  body.light-mode .composer {
-    background: var(--sms-surface-light);
-    border-color: var(--sms-border-light);
-  }
-  .composer textarea {
-    width: 100%;
-    resize: none;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: inherit;
-    font-size: 0.95rem;
-    padding: 0.25rem 0.5rem;
-  }
-  .composer textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-  body.light-mode .composer textarea::placeholder {
-    color: rgba(0, 0, 0, 0.4);
-  }
-  
-  .composer-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-  
-  .action-button,
-  .group-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border: none;
-    font-weight: 500;
-    border-radius: var(--sms-radius);
-    padding: 0.55rem 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  
-  .action-button {
-    background: var(--sms-primary);
-    color: #fff;
-  }
-  .action-button:hover {
-    background: var(--sms-accent);
-  }
-  
-  .group-button {
-    background: rgba(255, 255, 255, 0.1);
-    color: inherit;
-    border: 1px solid var(--sms-border-dark);
-  }
-  .group-button:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: var(--sms-primary);
-    color: var(--sms-primary);
-  }
-  
-  /* ------------------------------------------------------------
-     Animations
-  ------------------------------------------------------------ */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  /* ------------------------------------------------------------
-     Mobile Responsiveness
-  ------------------------------------------------------------ */
-  @media (max-width: 900px) {
-    .sms-page {
-      padding: 1rem;
-    }
-    .sms-header h2 {
-      font-size: 1.2rem;
-    }
-    .composer textarea {
-      font-size: 0.9rem;
-    }
-  }
+}

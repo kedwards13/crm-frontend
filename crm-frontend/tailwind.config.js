@@ -1,28 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    purge: [
-      "./src/**/*.{js,jsx,ts,tsx}",
-      "./public/index.html",
-    ],
-    theme: {
-      extend: {
-        colors: {
-          primary: "#1f6bff",
-          accent: "#1f6bff",
-          background: "#f6f7f9",
-          surface: "#ffffff",
-          muted: "#0d1220",
-          danger: "#ef4444",
-          success: "#12b76a",
-        },
-        borderRadius: {
-          xl: "1rem",
-          '2xl': "1.5rem",
-        },
-        fontFamily: {
-          sans: ["Inter", "ui-sans-serif", "system-ui"],
-        },
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: ['class', '[data-theme="dark"]'],
+  theme: {
+    extend: {
+      colors: {
+        primary: 'var(--accent)',
+        'primary-dim': 'var(--accent-dim)',
+        background: 'var(--bg-app)',
+        surface: 'var(--bg-surface)',
+        border: 'var(--border)',
+        text: 'var(--text-main)',
+        muted: 'var(--text-muted)',
+      },
+      boxShadow: {
+        glow: '0 0 20px var(--accent-dim)',
+        'glow-strong': '0 0 30px var(--accent)',
       },
     },
-    plugins: [],
-  };
+  },
+  plugins: [],
+};

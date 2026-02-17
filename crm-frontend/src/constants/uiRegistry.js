@@ -80,6 +80,7 @@ const base = {
         { key: 'inbox',      label: 'Inbox',        path: '/communication/inbox' },
         { key: 'sms',        label: 'SMS',          path: '/communication/sms' },
         { key: 'calls',      label: 'Calls',        path: '/communication/calls' },
+        { key: 'dialer',     label: 'Dialer',       path: '/communication/dialer' },
         { key: 'email',      label: 'Email',        path: '/communication/email' },
         { key: 'templates',  label: 'Templates',    path: '/communication/templates' },
         { key: 'sequences',  label: 'Sequences',    path: '/communication/sequences' },

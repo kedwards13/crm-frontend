@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@twilio/voice-sdk": "^2.18.0",
     "axios": "^1.7.9",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.548.0",
@@ -23,6 +24,7 @@
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.1",
     "slick-carousel": "^1.8.1",
+    "twilio-client": "^1.15.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

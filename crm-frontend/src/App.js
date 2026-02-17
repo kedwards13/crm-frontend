@@ -8,6 +8,8 @@ import Login from './components/Auth/Login';
 import TenantSelector from './components/Auth/TenantSelector';
 import TenantSignUp from './components/Auth/TenantSignUp';
 import Dashboard from './components/Dashboards/Dashboard';
+import DashboardTasks from './components/Dashboards/DashboardTasks';
+import DashboardAlerts from './components/Dashboards/DashboardAlerts';
 import LeadsPage from './components/Leads/LeadsPage';
 import SchedulingDashboard from './components/Schedule/SchedulingDashboard';
 import CommunicationsPage from './components/Communications/CommunicationsPage';
@@ -191,6 +193,8 @@ const AuthenticatedApp = () => {
     <Layout>
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/tasks" element={<DashboardTasks />} />
+        <Route path="/dashboard/alerts" element={<DashboardAlerts />} />
         <Route path="/customers/*" element={<CustomersPage />} />
         <Route path="/leads/*" element={<LeadsPage />} />
         <Route path="/leads/pipeline" element={<PipelineView />} />

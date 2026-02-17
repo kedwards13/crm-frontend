@@ -9,9 +9,20 @@ const PIPELINE_STATUSES = [
   { key: 'terminated', label: 'Terminated' },
 ];
 
+const normalizeUserRole = (value = '') => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'admin') return 'Admin';
+  if (normalized === 'manager') return 'Manager';
+  if (normalized === 'member' || normalized === 'tech' || normalized === 'technician') return 'Tech';
+  return 'Tech';
+};
+
 const EmployeePopup = ({ employee, onClose, onSave }) => {
   // Create a local editable copy of the employee data
-  const [updatedEmployee, setUpdatedEmployee] = useState({ ...employee });
+  const [updatedEmployee, setUpdatedEmployee] = useState({
+    ...employee,
+    role: normalizeUserRole(employee?.role),
+  });
   // Track which tab is active: 'info', 'pay', 'commission', or 'docs'
   const [activeTab, setActiveTab] = useState('info');
   // Control display of the status update sub-popup
@@ -63,7 +74,7 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
       formData.append('email', updatedEmployee.email || '');
       formData.append('phone_number', updatedEmployee.phone_number || '');
       formData.append('address', updatedEmployee.address || '');
-      formData.append('role', updatedEmployee.role || 'Member');
+      formData.append('role', normalizeUserRole(updatedEmployee.role));
       formData.append('twilio_phone', updatedEmployee.twilio_phone || '');
       formData.append('call_forwarding', updatedEmployee.call_forwarding || '');
       if (updatedEmployee.status) {
@@ -209,8 +220,8 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
               </div>
               <div className="popup-form-group">
                 <label>Role</label>
-                <select name="role" value={updatedEmployee.role || 'Member'} onChange={handleChange}>
-                  <option value="Member">Member</option>
+                <select name="role" value={updatedEmployee.role || 'Tech'} onChange={handleChange}>
+                  <option value="Tech">Member (Tech)</option>
                   <option value="Manager">Manager</option>
                   <option value="Admin">Admin</option>
                 </select>

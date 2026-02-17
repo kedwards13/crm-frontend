@@ -1,14 +1,85 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import axios from 'axios';
 import './TeamManagement.css';
 import EmployeePopup from '../Profile/EmployeePopup';
 import { AuthContext } from '../../App';
-import { normalizeArray } from '../../apiClient';
+import api, { normalizeArray } from '../../apiClient';
+
+const TEAM_LIST_ENDPOINTS = ['/accounts/team/', '/accounts/users/', '/tenant/users/'];
+const TEAM_CREATE_ENDPOINTS = ['/accounts/add-team-member/', '/accounts/users/', '/tenant/users/'];
+
+const ROLE_OPTIONS = [
+  { value: 'Tech', label: 'Member (Tech)' },
+  { value: 'Manager', label: 'Manager' },
+  { value: 'Admin', label: 'Admin' },
+];
+
+const isEndpointFallbackStatus = (status) => status === 404 || status === 405;
+
+const parseApiList = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload?.users)) return payload.users;
+  if (Array.isArray(payload?.members)) return payload.members;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.results)) return payload.data.results;
+  if (Array.isArray(payload?.data?.users)) return payload.data.users;
+  return normalizeArray(payload);
+};
+
+const normalizeRole = (value = '') => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'admin') return 'Admin';
+  if (normalized === 'manager') return 'Manager';
+  if (normalized === 'tech' || normalized === 'member' || normalized === 'technician') return 'Tech';
+  return '';
+};
+
+const resolveRoleFromGroups = (groups = []) => {
+  if (!Array.isArray(groups)) return '';
+  for (const item of groups) {
+    const roleValue = typeof item === 'string' ? item : item?.name || item?.title || item?.role;
+    const normalized = normalizeRole(roleValue);
+    if (normalized) return normalized;
+  }
+  return '';
+};
+
+const resolveMemberRole = (member = {}) => {
+  const directCandidates = [
+    member?.role,
+    member?.role_name,
+    member?.role_type,
+    member?.group,
+    member?.group_name,
+    member?.user_type,
+  ];
+
+  for (const candidate of directCandidates) {
+    const normalized = normalizeRole(candidate);
+    if (normalized) return normalized;
+  }
+
+  return resolveRoleFromGroups(member?.groups || member?.group_names || member?.user_groups) || 'Tech';
+};
+
+const normalizeMember = (member = {}) => ({
+  ...member,
+  id: member?.id || member?.user_id || member?.pk || member?.email,
+  first_name: member?.first_name || member?.firstName || '',
+  last_name: member?.last_name || member?.lastName || '',
+  email: member?.email || '',
+  role: resolveMemberRole(member),
+});
+
+const readApiError = (error, fallbackMessage) =>
+  error?.response?.data?.detail ||
+  error?.response?.data?.error ||
+  fallbackMessage;
 
 const UserCard = ({ member, onClick }) => {
   const defaultAvatar = '/default-avatar.png';
   return (
-    <div className="user-card" onClick={onClick}>
+    <div className="user-card" onClick={onClick} style={{ cursor: 'pointer' }}>
       <img
         src={member.avatar || defaultAvatar}
         alt={`${member.first_name} ${member.last_name}`}
@@ -34,7 +105,7 @@ const TeamManagement = () => {
     email: '',
     phoneNumber: '',
     password: '',
-    role: 'Member',
+    role: 'Tech',
   });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -43,27 +114,35 @@ const TeamManagement = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const { logout } = useContext(AuthContext);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL;
-  const token = localStorage.getItem('token');
-
   const fetchTeamMembers = useCallback(async () => {
     setFetching(true);
     setError(null);
+
     try {
-      if (!token) {
-        throw new Error("User is not authenticated");
+      let lastError = null;
+
+      for (const endpoint of TEAM_LIST_ENDPOINTS) {
+        try {
+          const response = await api.get(endpoint);
+          const members = parseApiList(response.data).map((member) => normalizeMember(member));
+          setTeamMembers(members);
+          return;
+        } catch (err) {
+          lastError = err;
+          if (isEndpointFallbackStatus(err?.response?.status)) continue;
+          break;
+        }
       }
-      const response = await axios.get(`${API_BASE_URL}/api/accounts/team/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTeamMembers(normalizeArray(response.data));
+
+      setTeamMembers([]);
+      setError(readApiError(lastError, 'Unable to load team members. Please try again.'));
     } catch (err) {
-      console.error("Error fetching team:", err);
-      setError('Unable to load team members. Please try again.');
+      setTeamMembers([]);
+      setError(readApiError(err, 'Unable to load team members. Please try again.'));
     } finally {
       setFetching(false);
     }
-  }, [API_BASE_URL, token]);
+  }, []);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -90,11 +169,24 @@ const TeamManagement = () => {
     };
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/accounts/add-team-member/`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of TEAM_CREATE_ENDPOINTS) {
+        try {
+          response = await api.post(endpoint, payload);
+          break;
+        } catch (err) {
+          lastError = err;
+          if (isEndpointFallbackStatus(err?.response?.status)) continue;
+          break;
+        }
+      }
+
+      if (!response) {
+        throw lastError || new Error('Unable to create team member.');
+      }
+
       setSuccess(response.data.message || 'User added successfully.');
       setNewMember({
         firstName: '',
@@ -102,14 +194,16 @@ const TeamManagement = () => {
         email: '',
         phoneNumber: '',
         password: '',
-        role: 'Member',
+        role: 'Tech',
       });
-      fetchTeamMembers();
+      await fetchTeamMembers();
     } catch (err) {
-      console.error("Error adding team member:", err);
       const backendError =
         err.response?.data?.error ||
+        err.response?.data?.detail ||
         err.response?.data?.phone_number?.[0] ||
+        err.response?.data?.email?.[0] ||
+        err.response?.data?.role?.[0] ||
         'Failed to add member. Please try again.';
       setError(backendError);
     } finally {
@@ -125,8 +219,7 @@ const TeamManagement = () => {
     setSelectedEmployee(null);
   };
 
-  const handleSaveEmployee = (updatedEmployee) => {
-    console.log("Saved employee from popup:", updatedEmployee);
+  const handleSaveEmployee = () => {
     fetchTeamMembers();
   };
 
@@ -147,9 +240,9 @@ const TeamManagement = () => {
         <input type="text" name="phoneNumber" placeholder="Phone Number" value={newMember.phoneNumber} onChange={handleChange} />
         <input type="password" name="password" placeholder="Password" value={newMember.password} onChange={handleChange} required />
         <select name="role" value={newMember.role} onChange={handleChange} required>
-          <option value="Member">Member</option>
-          <option value="Manager">Manager</option>
-          <option value="Admin">Admin</option>
+          {ROLE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </select>
         <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Member'}</button>
       </form>
@@ -168,9 +261,11 @@ const TeamManagement = () => {
         <div className="team-list-container">
           <div className="team-list">
             {normalizeArray(teamMembers).map((member) => (
-              <div key={member.id || member.email} onClick={() => handleViewEmployee(member)} style={{ cursor: 'pointer' }}>
-                <UserCard member={member} />
-              </div>
+              <UserCard
+                key={member.id || member.email}
+                member={member}
+                onClick={() => handleViewEmployee(member)}
+              />
             ))}
           </div>
         </div>

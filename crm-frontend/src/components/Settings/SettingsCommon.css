@@ -146,6 +146,10 @@ button.mini,
   font-weight: 500;
 }
 
+.settings-msg-error {
+  color: #dc2626;
+}
+
 .settings-actions {
   display: flex;
   justify-content: flex-start;
@@ -182,4 +186,143 @@ button.mini,
 
 .table-like .row input {
   width: 100%;
+}
+
+.settings-inline-inputs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.settings-inline-inputs input[type="color"] {
+  width: 46px;
+  min-width: 46px;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 6px;
+  background: var(--color-bg, #fff);
+}
+
+.time-range-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.time-range-picker-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.time-range-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.time-range-picker-grid label {
+  margin-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .time-range-picker-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-page .tenant-settings-field {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-page .tenant-settings-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-page .tenant-settings-helper {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2, #6b6f75);
+}
+
+.settings-page .tenant-settings-error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.settings-page .tenant-tag-input-shell {
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--color-bg, #fff);
+  display: grid;
+  gap: 10px;
+}
+
+.settings-page .tenant-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 34px;
+}
+
+.settings-page .tenant-tag-empty {
+  color: var(--text-2, #6b6f75);
+  font-size: 12px;
+}
+
+.settings-page .tenant-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent, #2563eb) 40%, #d1d5db);
+  background: color-mix(in srgb, var(--color-accent, #2563eb) 12%, #ffffff);
+  color: var(--color-text, #1f2937);
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.settings-page .tenant-tag-chip-remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0;
+  line-height: 1;
+}
+
+.settings-page .tenant-tag-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.settings-page .tenant-tag-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.95rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 6px;
+  background: var(--color-bg, #fff);
+  color: var(--color-text, #222);
+}
+
+.settings-page .tenant-btn {
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #ccc);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.settings-page .tenant-btn-secondary {
+  background: var(--color-bg, #e0e0e0);
+  color: var(--color-text, #333);
 }

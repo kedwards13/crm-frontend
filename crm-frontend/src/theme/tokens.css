@@ -1,107 +1,140 @@
 :root {
-  /* ==============================
-     Layout
-     ============================== */
-  --sidebar-width: 240px;
-  --sidebar-width-collapsed: 64px;
-  --topbar-height: 64px;
-  --subnav-height: 56px;
-  --content-max: 1280px;
-
-  /* ==============================
-     Spacing (8pt system)
-     ============================== */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 20px;
-  --s-6: 24px;
-  --s-7: 32px;
-  --s-8: 40px;
-
-  /* ==============================
-     Radius
-     ============================== */
-  --r-1: 8px;
-  --r-2: 12px;
-  --r-3: 16px;
-
-  /* ==============================
-     Typography
-     ============================== */
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont,
-    "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
+  /* TYPOGRAPHY & MOTION */
+  --font-sans: 'Inter', 'SF Pro Text', -apple-system, system-ui, sans-serif;
   --fs-1: 12px;
-  --fs-2: 14px;
-  --fs-3: 16px;
-  --fs-4: 18px;
-  --fs-5: 22px;
+  --fs-2: 13px;
+  --fs-3: 14px;
+  --fs-4: 16px;
+  --fs-5: 18px;
+  --fs-6: 20px;
+  --transition-fast: 140ms ease;
 
-  /* ==============================
-     Shadows (neutral, not muddy)
-     ============================== */
-  --sh-1: 0 1px 2px rgba(15, 23, 42, 0.12);
-  --sh-2: 0 8px 24px rgba(15, 23, 42, 0.18);
-  --sh-3: 0 16px 48px rgba(15, 23, 42, 0.24);
+  /* SPACING */
+  --s-1: 4px;
+  --s-2: 6px;
+  --s-3: 8px;
+  --s-4: 12px;
+  --s-5: 16px;
+  --s-6: 20px;
+  --s-7: 28px;
+  --s-8: 36px;
 
-  /* ==============================
-     DARK THEME (default)
-     ============================== */
-  --bg: #0b0d12;
-  --bg-card: #14161c;
-  --bg-elev: #1b1e26;
+  /* RADII */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --r-1: var(--radius-sm);
+  --r-2: var(--radius-md);
+  --r-3: var(--radius-lg);
 
-  --text-1: #eef1f6;     /* primary */
-  --text-2: #a6adbb;     /* secondary */
-  --text-3: #6b7280;     /* muted */
+  /* --- DARK MODE (MAGMA) --- */
+  --bg-app: #050505;       /* Void Black */
+  --bg-surface: #0f0f10;   /* Monolith Card */
+  --bg-hover: #1a1a1c;     /* Interactive Hover */
+  --bg: var(--bg-app);
+  --bg-0: var(--bg-app);
+  --bg-1: var(--bg-hover);
+  --bg-2: var(--bg-surface);
+  --bg-card: var(--bg-surface);
+  --bg-panel: #131316;
+  --bg-elev: #16161a;
 
-  --border: #262a36;
+  /* ACCENT: TITAN ORANGE */
+  --accent: #FF5500;
+  --accent-rgb: 255, 85, 0;
+  --accent-dim: rgba(255, 85, 0, 0.12);
+  --accent-glow: rgba(255, 85, 0, 0.4);
+  --accent-soft: var(--accent-dim);
+  --accent-0: var(--accent);
+  --accent-1: var(--accent);
 
-  --accent: #6aa0ff;
-  --accent-soft: rgba(106, 160, 255, 0.12);
+  /* TEXT HIERARCHY */
+  --text-main: #FFFFFF;
+  --text-muted: #888888;
+  --text-sub: #555555;
+  --text-1: var(--text-main);
+  --text-2: var(--text-muted);
+  --text-3: var(--text-sub);
+  --text-0: var(--text-main);
 
-  --success: #22c55e;
+  /* BORDERS & STRUCTURE */
+  --border: #222224;       /* Sharp 1px Borders */
+  --border-0: var(--border);
+  --border-1: var(--border);
+  --border-strong: #2e2e31;
+
+  /* STATUS */
+  --danger: #ff3333;
   --warning: #f59e0b;
-  --danger: #ef4444;
+  --success: #10b981;
+  --success-dim: rgba(16, 185, 129, 0.12);
+
+  /* SHADOWS */
+  --sh-1: 0 22px 60px -26px rgba(0, 0, 0, 0.55);
+  --sh-2: 0 28px 86px -30px rgba(0, 0, 0, 0.6);
+  --sh-glow: 0 0 0 1px rgba(var(--accent-rgb), 0.2), 0 0 18px rgba(var(--accent-rgb), 0.32);
+
+  /* GLASS / PANELS */
+  --bg-glass: var(--bg-surface);
+  --glass-bg: var(--bg-surface);
+  --glass-border: rgba(255, 255, 255, 0.04);
+  --glass-blur: 0px;
+
+  /* FOCUS */
+  --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.32);
+
+  /* BUTTON */
+  --btn-radius: var(--radius-md);
 }
 
-/* ==============================
-   LIGHT THEME
-   ============================== */
-:root[data-theme="light"] {
-  --bg: #f4f6fb;
-  --bg-card: #ffffff;
-  --bg-elev: #ffffff;
+body[data-theme="light"] {
+  /* --- LIGHT MODE (ELECTRIC) --- */
+  --bg-app: #F5F7FA;       /* Tech Grey */
+  --bg-surface: #FFFFFF;   /* Pure White */
+  --bg-hover: #F0F2F5;
+  --bg: var(--bg-app);
+  --bg-0: var(--bg-app);
+  --bg-1: var(--bg-hover);
+  --bg-2: var(--bg-surface);
+  --bg-card: var(--bg-surface);
+  --bg-panel: #EEF1F5;
+  --bg-elev: #E7EBF2;
 
-  --text-1: #0f172a;
-  --text-2: #475569;
-  --text-3: #94a3b8;
+  /* ACCENT: ELECTRIC BLUE */
+  --accent: #0066FF;
+  --accent-rgb: 0, 102, 255;
+  --accent-dim: rgba(0, 102, 255, 0.08);
+  --accent-glow: rgba(0, 102, 255, 0.3);
+  --accent-soft: var(--accent-dim);
+  --accent-0: var(--accent);
+  --accent-1: var(--accent);
 
-  --border: #e2e8f0;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --text-sub: #94A3B8;
+  --text-1: var(--text-main);
+  --text-2: var(--text-muted);
+  --text-3: var(--text-sub);
+  --text-0: var(--text-main);
 
-  --accent: #2563eb;
-  --accent-soft: rgba(37, 99, 235, 0.08);
-}
+  --border: #E1E4E8;
+  --border-0: var(--border);
+  --border-1: var(--border);
+  --border-strong: #c9ced7;
 
-/* ==============================
-   Industry accents (accent ONLY)
-   ============================== */
-:root[data-industry="pest_control"] { --accent: #22c55e; }
-:root[data-industry="fitness"]      { --accent: #ef4444; }
-:root[data-industry="real_estate"]  { --accent: #8b5cf6; }
-:root[data-industry="auto"]         { --accent: #f59e0b; }
+  --danger: #ff3333;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --success-dim: rgba(16, 185, 129, 0.12);
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text-1);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
+  --glass-bg: var(--bg-surface);
+  --glass-border: rgba(0, 0, 0, 0.04);
+  --glass-blur: 0px;
 
-* {
-  box-sizing: border-box;
+  --sh-1: 0 18px 48px -26px rgba(15, 23, 42, 0.12);
+  --sh-2: 0 28px 86px -36px rgba(15, 23, 42, 0.12);
+  --sh-glow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 0 18px rgba(var(--accent-rgb), 0.22);
+  --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.25);
+
+  --btn-radius: var(--radius-md);
 }

@@ -115,7 +115,7 @@ export default function RevivalOverview() {
     {
       label: "Total Collected",
       value: formatCurrency(summary.total_collected || 0),
-      tone: "green",
+      tone: "accent",
       delta: "+$8.4k this month",
     },
     {
@@ -134,7 +134,7 @@ export default function RevivalOverview() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'accepted': return 'green';
+      case 'accepted': return 'accent';
       case 'rejected': return 'red';
       case 'converted': return 'blue';
       case 'sent': return 'purple';
@@ -343,7 +343,7 @@ export default function RevivalOverview() {
 function KPI({ label, value, delta, tone = "blue" }) {
   const toneStyles = {
     blue: "border-blue-500/40 from-blue-500/20 text-blue-300",
-    green: "border-emerald-500/40 from-emerald-500/20 text-emerald-300",
+    accent: "border-orange-500/40 from-orange-500/20 text-orange-300",
     amber: "border-amber-500/40 from-amber-500/20 text-amber-300",
     red: "border-rose-500/40 from-rose-500/20 text-rose-300",
     gray: "border-gray-500/40 from-gray-500/20 text-gray-300",

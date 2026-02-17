@@ -11,6 +11,11 @@ import { getNavForIndustry, getIndustryKey } from '../../constants/uiRegistry';
 import { getUserRole } from '../../helpers/tenantHelpers';
 import './Navigation.css';
 
+const PRODUCT_NAME = 'Abon';
+const PRODUCT_SUFFIX = 'Command';
+const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}){1,2}$/;
+const HEX_COLOR_NO_HASH_REGEX = /^(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
 const ICON_MAP = {
   FiHome: <FiHome />,
   FiFileText: <FiFileText />,
@@ -21,6 +26,14 @@ const ICON_MAP = {
   FiBarChart2: <FiBarChart2 />,
   FiTag: <FiTag />,
   FiSettings: <FiSettings />,
+};
+
+const normalizeBrandColor = (value = '') => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (HEX_COLOR_REGEX.test(raw)) return raw.toUpperCase();
+  if (HEX_COLOR_NO_HASH_REGEX.test(raw)) return `#${raw}`.toUpperCase();
+  return '';
 };
 
 export default function Navigation({
@@ -35,6 +48,15 @@ export default function Navigation({
 
   const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 720px)').matches);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [logoLoadFailed, setLogoLoadFailed] = useState(false);
+
+  const tenantBranding = tenant?.preferences?.branding || {};
+  const tenantLogo = tenantBranding?.logo_url || tenantBranding?.logo || tenant?.logo || '';
+  const tenantPrimaryColor = normalizeBrandColor(
+    tenantBranding?.primary_color || tenantBranding?.primaryColor || tenant?.primary_color || ''
+  );
+  const productName = tenant?.name || PRODUCT_NAME;
+  const productMeta = tenant?.domain || PRODUCT_SUFFIX;
 
   useEffect(() => {
     const mm = window.matchMedia('(max-width: 720px)');
@@ -43,8 +65,24 @@ export default function Navigation({
     return () => mm.removeEventListener('change', handle);
   }, []);
 
+  useEffect(() => {
+    setLogoLoadFailed(false);
+  }, [tenantLogo]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (tenantPrimaryColor) {
+      root.style.setProperty('--color-accent', tenantPrimaryColor);
+      return;
+    }
+    root.style.removeProperty('--color-accent');
+  }, [tenantPrimaryColor]);
+
   // Get actual industryKey and userRole from context
-  const industryKey = useMemo(() => getIndustryKey('general'), [tenant]);
+  const industryKey = useMemo(
+    () => getIndustryKey((tenant?.industry || 'general').toLowerCase()),
+    [tenant?.industry]
+  );
   const userRole = getUserRole(user?.role || 'Member');
 
   const [navItems, setNavItems] = useState([]);
@@ -77,6 +115,11 @@ export default function Navigation({
     navigate('/login');
   };
 
+  const handleHome = () => {
+    navigate('/dashboard');
+    if (isMobile && autoCollapseMobile) setDrawerOpen(false);
+  };
+
   const handleLinkClick = () => {
     if (isMobile && autoCollapseMobile) setDrawerOpen(false);
   };
@@ -103,26 +146,43 @@ export default function Navigation({
 
       <nav className={sidebarClasses} aria-label="Primary">
         <div className="sidebar-inner">
-          <button
-            className="sidebar-hamburger"
-            type="button"
-            onClick={handleHamburger}
-            aria-label={isMobile ? (drawerOpen ? 'Close menu' : 'Open menu') : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')}
-            title={isMobile ? (drawerOpen ? 'Close' : 'Menu') : (collapsed ? 'Expand' : 'Collapse')}
-          >
-            <FiMenu size={22} />
-          </button>
+          <div className="sidebar-header">
+            <button
+              className="sidebar-brand"
+              type="button"
+              onClick={handleHome}
+              aria-label="Go to home"
+            >
+              <span className="sidebar-logo" aria-hidden="true">
+                {tenantLogo && !logoLoadFailed ? (
+                  <img
+                    src={tenantLogo}
+                    alt=""
+                    className="sidebar-logo-img"
+                    onError={() => setLogoLoadFailed(true)}
+                  />
+                ) : (
+                  <span className="sidebar-logo-glyph">{productName?.[0] || 'A'}</span>
+                )}
+              </span>
+              <span className="sidebar-brand-text">
+                <span className="sidebar-brand-name">{productName}</span>
+                <span className="sidebar-brand-meta">{productMeta}</span>
+              </span>
+            </button>
 
-          <div className="sidebar-profile" aria-label="Account">
-            <img
-              src={user?.avatar || '/assets/profile.jpg'}
-              alt=""
-              className="sidebar-profile-avatar"
-            />
-            <span className="sidebar-profile-name">{user?.name || 'Your Profile'}</span>
+            <button
+              className="sidebar-hamburger nav-toggle"
+              type="button"
+              onClick={handleHamburger}
+              aria-label={isMobile ? (drawerOpen ? 'Close menu' : 'Open menu') : (collapsed ? 'Expand sidebar' : 'Collapse sidebar')}
+              title={isMobile ? (drawerOpen ? 'Close' : 'Menu') : (collapsed ? 'Expand' : 'Collapse')}
+            >
+              <FiMenu size={20} />
+            </button>
           </div>
 
-          <ul className="sidebar-nav" role="list">
+          <ul className="sidebar-nav">
             {safeNavItems.map(({ path, label, icon }) => {
               const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
               return (
@@ -133,27 +193,38 @@ export default function Navigation({
                     title={label}
                     onClick={handleLinkClick}
                   >
+                    {isActive && <span className="sidebar-active-indicator" aria-hidden="true" />}
                     <span className="sidebar-icon">{ICON_MAP[icon] || <FiHome />}</span>
                     <span className="sidebar-text">{label}</span>
                   </NavLink>
                 </li>
               );
             })}
-
-            <li className="sidebar-spacer" aria-hidden="true" />
-
-            <li className="sidebar-item">
-              <button
-                className="sidebar-link sidebar-logout"
-                onClick={handleLogout}
-                title="Logout"
-                type="button"
-              >
-                <span className="sidebar-icon"><FiLogOut /></span>
-                <span className="sidebar-text">Logout</span>
-              </button>
-            </li>
           </ul>
+
+          <div className="sidebar-footer">
+            <div className="sidebar-profile" aria-label="Account">
+              <img
+                src={user?.avatar || '/assets/profile.jpg'}
+                alt=""
+                className="sidebar-profile-avatar"
+              />
+              <div className="sidebar-profile-meta">
+                <span className="sidebar-profile-name">{user?.name || 'Your Profile'}</span>
+                <span className="sidebar-profile-role">{userRole || 'Member'}</span>
+              </div>
+            </div>
+
+            <button
+              className="sidebar-link sidebar-logout"
+              onClick={handleLogout}
+              title="Logout"
+              type="button"
+            >
+              <span className="sidebar-icon"><FiLogOut /></span>
+              <span className="sidebar-text">Logout</span>
+            </button>
+          </div>
         </div>
       </nav>
     </>

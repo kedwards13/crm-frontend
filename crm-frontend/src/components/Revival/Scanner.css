@@ -12,7 +12,7 @@
     --muted-btn-bg: #e0e0e0;
     --primary: #007aff;
     --code-bg: #f1f2f4;
-    --accent-green: #28a745;
+    --accent-green: var(--accent);
     --shadow-light: 0 2px 12px rgba(0,0,0,0.06);
   }
   
@@ -28,7 +28,7 @@
       --muted-btn-bg: #2c2f35;
       --primary: #58a6ff;
       --code-bg: #1b1f27;
-      --accent-green: #3ddc84;
+      --accent-green: var(--accent);
       --shadow-light: 0 2px 12px rgba(255,255,255,0.04);
     }
   }
@@ -190,7 +190,7 @@
   
   /* Save state */
   .save-button.saved {
-    background-color: var(--accent-green) !important;
+    background-color: var(--accent) !important;
     color: #fff;
   }
   

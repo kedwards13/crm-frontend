@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../../apiClient';
 import { getIndustry } from '../../../helpers/tenantHelpers';
+import TimeRangePicker from '../../ui/TimeRangePicker.tsx';
 import '../SettingsCommon.css';
 
 const DEFAULTS = {
@@ -62,7 +63,7 @@ export default function Preferences() {
       }
     })();
     return () => { mounted = false; };
-  }, [industryKey]); // re-seed if industry changes
+  }, [seed]); // re-seed if industry changes
 
   useEffect(() => {
     let mounted = true;
@@ -88,6 +89,11 @@ export default function Preferences() {
   const onChange = (k, v) => setPrefs(p => ({ ...p, [k]: v }));
 
   const pipelineCSV = useMemo(() => (prefs.pipeline || []).join(','), [prefs.pipeline]);
+  const workingHours = useMemo(() => {
+    if (prefs?.workingHours?.start && prefs?.workingHours?.end) return prefs.workingHours;
+    if (seed?.workingHours?.start && seed?.workingHours?.end) return seed.workingHours;
+    return DEFAULTS.general.workingHours;
+  }, [prefs?.workingHours, seed?.workingHours]);
 
   const save = async () => {
     setMsg('');
@@ -160,15 +166,11 @@ export default function Preferences() {
 
           <div className="settings-card two-col">
             <div>
-              <h3>Working Hours</h3>
-              <label>Start
-                <input type="time" value={prefs.workingHours?.start || '07:00'}
-                       onChange={(e)=>onChange('workingHours', { ...prefs.workingHours, start: e.target.value })}/>
-              </label>
-              <label>End
-                <input type="time" value={prefs.workingHours?.end || '17:00'}
-                       onChange={(e)=>onChange('workingHours', { ...prefs.workingHours, end: e.target.value })}/>
-              </label>
+              <TimeRangePicker
+                label="Working Hours"
+                value={workingHours}
+                onChange={(nextRange) => onChange('workingHours', nextRange)}
+              />
             </div>
             <div>
               <h3>Assignment</h3>
@@ -179,6 +181,16 @@ export default function Preferences() {
             </div>
           </div>
         </>
+      )}
+
+      {industryKey !== 'pest_control' && (
+        <div className="settings-card">
+          <TimeRangePicker
+            label="Working Hours"
+            value={workingHours}
+            onChange={(nextRange) => onChange('workingHours', nextRange)}
+          />
+        </div>
       )}
 
       {/* Other industry‑specific blocks */}

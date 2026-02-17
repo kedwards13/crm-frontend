@@ -19,8 +19,8 @@ const colorStyles = {
     glow: '0 0 8px rgba(10,132,255,0.7)',
   },
   orange: {
-    background: '#ff9f0a',
-    glow: '0 0 8px rgba(255,159,10,0.7)',
+    background: '#ff5500',
+    glow: '0 0 8px rgba(255,85,0,0.7)',
   },
   red: {
     background: '#ff453a',
@@ -29,10 +29,6 @@ const colorStyles = {
   purple: {
     background: '#bf5af2',
     glow: '0 0 8px rgba(191,90,242,0.7)',
-  },
-  green: {
-    background: '#30d158',
-    glow: '0 0 8px rgba(48,209,88,0.7)',
   },
   default: {
     background: '#5e5ce6',
@@ -113,7 +109,7 @@ const CalendarView = () => {
   const eventStyleGetter = (event) => {
     const status = (event.status || '').toLowerCase();
     const statusColor =
-      status === 'completed' ? 'green' :
+      status === 'completed' ? 'orange' :
       status === 'canceled' ? 'red' :
       status === 'cancelled' ? 'red' :
       status === 'in_progress' ? 'orange' :
