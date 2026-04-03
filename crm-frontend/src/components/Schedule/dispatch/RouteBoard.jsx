@@ -1008,50 +1008,16 @@ export default function RouteBoard() {
       ) : null}
 
       {hasBoardData ? (
-        <section className="dispatch-summary-grid">
-          <div className="dispatch-summary-card">
-            <span>Routes</span>
-            <strong>{boardSummary.routes}</strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Stops</span>
-            <strong>{boardSummary.stops}</strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Planned Time</span>
-            <strong>{formatHours(boardSummary.routeMinutes)}</strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Planned Value</span>
-            <strong>{formatCurrency(boardSummary.routeRevenue)}</strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Modified / Selected</span>
-            <strong>
-              {boardSummary.modified} / {boardSummary.selected}
-            </strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Loaded Window</span>
-            <strong>
-              {loadWindow.start_date === loadWindow.end_date
-                ? loadWindow.start_date
-                : `${loadWindow.start_date} → ${loadWindow.end_date}`}
-            </strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Apply Outcomes</span>
-            <strong>
-              {executionSummary.applied || 0} / {(executionSummary.skipped || 0) + (executionSummary.blocked || 0)} /{" "}
-              {(executionSummary.failed || 0) + (executionSummary.partial_sync || 0) + (executionSummary.drift_detected || 0)}
-            </strong>
-          </div>
-          <div className="dispatch-summary-card">
-            <span>Status Mix</span>
-            <strong>
-              {overallStatusCounts.completed || 0} done / {overallStatusCounts.scheduled || 0} scheduled
-            </strong>
-          </div>
+        <section className="dispatch-summary-bar">
+          <span>{boardSummary.routes} routes</span>
+          <span className="dispatch-summary-sep">·</span>
+          <span>{boardSummary.stops} stops</span>
+          <span className="dispatch-summary-sep">·</span>
+          <span>{formatHours(boardSummary.routeMinutes)}</span>
+          <span className="dispatch-summary-sep">·</span>
+          <span>{formatCurrency(boardSummary.routeRevenue)}</span>
+          <span className="dispatch-summary-sep">·</span>
+          <span>{overallStatusCounts.completed || 0}/{overallStatusCounts.scheduled || 0} scheduled</span>
         </section>
       ) : null}
 

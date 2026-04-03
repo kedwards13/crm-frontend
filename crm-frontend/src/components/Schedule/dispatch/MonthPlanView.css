@@ -258,3 +258,127 @@
 .mp-clr-warn { color: var(--mp-warn); }
 .mp-clr-danger { color: var(--mp-danger); }
 .mp-clr-purple { color: var(--mp-purple); }
+
+/* ── Day header right group ── */
+.mp-day-header-right { display: flex; align-items: center; gap: 10px; }
+
+/* ── Map button ── */
+.mp-btn-map {
+  background: var(--bg-hover); color: var(--text-muted);
+  font-size: 11px; padding: 3px 8px; border-radius: 4px;
+}
+.mp-btn-map:hover { background: var(--border); color: var(--text-main); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ROUTE MAP MODAL
+   ═══════════════════════════════════════════════════════════════ */
+
+.mp-map-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mp-map-modal {
+  width: 94vw; height: 90vh;
+  background: var(--bg-panel, var(--bg-0));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--sh-2, 0 8px 32px rgba(0,0,0,0.4));
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.mp-map-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-1);
+  flex-shrink: 0;
+}
+
+.mp-map-title {
+  font-size: var(--fs-3, 14px); font-weight: 600;
+  color: var(--text-main);
+}
+
+.mp-map-close {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 4px; cursor: pointer;
+  background: none; color: var(--text-muted);
+  font-size: 20px; line-height: 1;
+}
+.mp-map-close:hover { background: var(--bg-hover); color: var(--text-main); }
+
+.mp-map-canvas {
+  flex: 1; position: relative; min-height: 0;
+}
+
+.mp-map-inner {
+  width: 100%; height: 100%;
+}
+
+.mp-map-empty {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: var(--fs-2);
+}
+
+/* ── Stats overlay ── */
+.mp-map-stats {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
+  font-size: 11px; font-family: monospace;
+  flex-shrink: 0;
+}
+
+.mp-map-stat-row {
+  display: flex; align-items: center; gap: 6px;
+}
+
+.mp-map-stat-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.mp-map-stat-name {
+  font-weight: 500; color: var(--text-main);
+}
+
+.mp-map-stat-val {
+  color: var(--text-main);
+}
+
+.mp-map-stat-total {
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+}
+
+.mp-map-stat-warning {
+  color: var(--mp-warn);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* ── Info window ── */
+.mp-map-info {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 12px; line-height: 1.5;
+  min-width: 160px; max-width: 240px;
+}
+
+.mp-map-info-tech {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; margin-bottom: 2px;
+}
+
+.mp-map-info-name {
+  font-size: 13px; font-weight: 600; color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.mp-map-info-detail {
+  font-size: 11px; color: #64748b;
+}

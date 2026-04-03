@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom'
 import AppointmentsView from './AppointmentsView';
 import RoutePlanner from './RoutePlanner';
 import MonthPlanView from './dispatch/MonthPlanView';
+import JobPoolView from './JobPoolView';
 import './SchedulingDashboard.css';
 
 const TABS = [
@@ -48,7 +49,7 @@ const SchedulingDashboard = () => {
           <Route path="month" element={<RoutePlanner />} />
           <Route path="planner" element={<MonthPlanView />} />
           <Route path="appointments" element={<AppointmentsView />} />
-          <Route path="pool" element={<JobPoolPlaceholder />} />
+          <Route path="pool" element={<JobPoolView />} />
           <Route path="routing" element={<Navigate to="/schedule/day" replace />} />
           <Route path="route-view" element={<Navigate to="/schedule/day" replace />} />
           <Route path="routes" element={<Navigate to="/schedule/month" replace />} />
@@ -60,14 +61,5 @@ const SchedulingDashboard = () => {
     </div>
   );
 };
-
-function JobPoolPlaceholder() {
-  return (
-    <div className="sched-placeholder">
-      <h3>Job Pool</h3>
-      <p>Unscheduled and overdue jobs will appear here — filterable by due date, service type, tech eligibility, and customer constraints.</p>
-    </div>
-  );
-}
 
 export default SchedulingDashboard;

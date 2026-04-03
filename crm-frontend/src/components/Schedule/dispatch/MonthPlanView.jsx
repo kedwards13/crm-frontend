@@ -25,6 +25,7 @@ import {
   getMonthPlanIssues,
   getMonthPlanProjections,
 } from "../../../api/schedulingApi";
+import RouteMapModal from "./RouteMapModal";
 import "./MonthPlanView.css";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -195,9 +196,12 @@ export default function MonthPlanView() {
             customer_name: s.customer_name || s.customer || "",
             service_type: s.service_type_name || s.service_type || s.service || "",
             duration: s.duration_minutes || s.duration || 0,
+            time: s.scheduled_start || s.start_time || s.time || "",
             score: null,
             is_familiar_tech: null,
             is_existing: true,
+            customer_lat: s.lat ?? s.latitude ?? s.source_payload?.lat ?? null,
+            customer_lng: s.lng ?? s.longitude ?? s.source_payload?.lng ?? null,
           }))
         );
       }
@@ -481,6 +485,8 @@ function Cell({ c, sel, onClick }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function DayPanel({ date, detail, loading }) {
+  const [mapOpen, setMapOpen] = useState(false);
+
   if (loading) return <div className="mp-day-loading"><Loader2 className="mp-icon-sm mp-spin" />Loading…</div>;
   if (!detail) return null;
 
@@ -492,14 +498,20 @@ function DayPanel({ date, detail, loading }) {
 
   return (
     <div className="mp-day-panel">
+      <RouteMapModal open={mapOpen} onClose={() => setMapOpen(false)} dayData={detail} date={date} />
       <div className="mp-day-header">
         <span className="mp-day-title">{label}</span>
-        <span className="mp-text-muted mp-mono">
-          {exCount > 0 && <span className="mp-clr-info">{exCount} existing</span>}
-          {exCount > 0 && newCount > 0 && " · "}
-          {newCount > 0 && <span className="mp-clr-accent">{newCount} new</span>}
-          {!exCount && !newCount && "0 jobs"}
-        </span>
+        <div className="mp-day-header-right">
+          <button className="mp-btn mp-btn-map" onClick={() => setMapOpen(true)} title="View route map">
+            <MapPin className="mp-icon-sm" />Map
+          </button>
+          <span className="mp-text-muted mp-mono">
+            {exCount > 0 && <span className="mp-clr-info">{exCount} existing</span>}
+            {exCount > 0 && newCount > 0 && " · "}
+            {newCount > 0 && <span className="mp-clr-accent">{newCount} new</span>}
+            {!exCount && !newCount && "0 jobs"}
+          </span>
+        </div>
       </div>
       <div className="mp-day-techs">
         {Object.entries(groups).map(([tech, jobs]) => {
