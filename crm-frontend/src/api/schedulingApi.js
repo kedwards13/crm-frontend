@@ -113,8 +113,8 @@ export const getRouteMap = (params = {}) =>
 
 // ─── Month Fill (Auto-Scheduler) ───────────────────────────
 
-export const previewMonthFill = (month, constraints = {}, weights = {}) =>
-  api.post("/scheduling/month-fill/preview/", { month, constraints, weights });
+export const previewMonthFill = (month, constraints = {}, weights = {}, optimizeExisting = false) =>
+  api.post("/scheduling/month-fill/preview/", { month, constraints, weights, optimize_existing: optimizeExisting });
 
 export const getMonthPlan = (planId) =>
   api.get(`/scheduling/month-fill/${planId}/`);

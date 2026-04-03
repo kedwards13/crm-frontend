@@ -20,6 +20,7 @@ import {
   previewMonthFill,
   getMonthPlan,
   getMonthPlanDay,
+  getDispatchBoard,
   advanceMonthPlan,
   getMonthPlanIssues,
   getMonthPlanProjections,
@@ -68,12 +69,42 @@ export default function MonthPlanView() {
   const [issues, setIssues] = useState([]);
   const [projections, setProjections] = useState(null);
   const [err, setErr] = useState(null);
+  const [existing, setExisting] = useState(null); // {date_str: count} from dispatch board
 
   const md = useMemo(() => pm(monthStr), [monthStr]);
   const yr = md.getFullYear();
   const mo = md.getMonth();
   const total = dim(yr, mo);
   const pad = ((new Date(yr, mo, 1).getDay() || 7) - 1);
+
+  // Fetch existing FieldRoutes appointments on month change
+  useEffect(() => {
+    let cancelled = false;
+    const startDate = `${yr}-${String(mo + 1).padStart(2, "0")}-01`;
+    const endDate = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(total).padStart(2, "0")}`;
+    getDispatchBoard({ start_date: startDate, end_date: endDate, view: "month" })
+      .then(({ data }) => {
+        if (cancelled) return;
+        // Build per-day count from dispatch board days or routes
+        const counts = {};
+        const days = data?.days || [];
+        for (const day of days) {
+          const ds = day.date || day.day;
+          const jobs = day.total_jobs || day.job_count || day.stops || 0;
+          if (ds && jobs) counts[ds] = jobs;
+        }
+        // Fallback: count from baseline_items
+        if (!days.length && data?.baseline_items) {
+          for (const item of data.baseline_items) {
+            const d = (item.scheduled_start || item.date || "").slice(0, 10);
+            if (d) counts[d] = (counts[d] || 0) + 1;
+          }
+        }
+        setExisting(counts);
+      })
+      .catch(() => { if (!cancelled) setExisting(null); });
+    return () => { cancelled = true; };
+  }, [yr, mo, total]);
 
   const loadMeta = useCallback(async (pid) => {
     try {
@@ -144,9 +175,10 @@ export default function MonthPlanView() {
       const d = i + 1;
       const ds = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       const dow = new Date(yr, mo, d).getDay();
-      return { d, ds, we: dow === 0 || dow === 6, sum: sums[ds], iss: (issues || []).filter((x) => x.date === ds) };
+      const ex = (existing || {})[ds] || 0;
+      return { d, ds, we: dow === 0 || dow === 6, sum: sums[ds], iss: (issues || []).filter((x) => x.date === ds), existing: ex };
     });
-  }, [plan, issues, total, yr, mo]);
+  }, [plan, issues, existing, total, yr, mo]);
 
   const st = plan?.stats || {};
   const state = plan?.state;
@@ -263,10 +295,12 @@ export default function MonthPlanView() {
 function Cell({ c, sel, onClick }) {
   if (c.we) return <div className="mp-cell mp-cell-weekend"><span>{c.d}</span></div>;
 
-  const jobs = c.sum?.total_jobs || 0;
+  const newJobs = c.sum?.total_jobs || 0;
+  const ex = c.existing || 0;
   const techs = c.sum?.tech_utilization || [];
   const avg = techs.length ? Math.round(techs.reduce((s, t) => s + (t.utilization_pct || 0), 0) / techs.length) : 0;
   const hi = c.iss.length > 0;
+  const hasAny = newJobs > 0 || ex > 0;
 
   return (
     <button onClick={onClick} className={`mp-cell mp-cell-day ${sel ? "mp-cell-sel" : ""}`}>
@@ -274,15 +308,21 @@ function Cell({ c, sel, onClick }) {
         <span className="mp-cell-num">{c.d}</span>
         {hi && <AlertTriangle className="mp-icon-xs mp-clr-warn" />}
       </div>
-      {jobs > 0 ? (
+      {hasAny ? (
         <>
-          <span className="mp-cell-jobs">{jobs}<span className="mp-text-muted"> jobs</span></span>
-          <div className="mp-cell-bar-wrap">
-            <div className="mp-cell-bar-track">
-              <div className={`mp-cell-bar-fill ${utilClass(avg)}`} style={{ width: `${Math.min(avg, 100)}%` }} />
+          <span className="mp-cell-jobs">
+            {ex > 0 && <span className="mp-clr-info">{ex} existing</span>}
+            {ex > 0 && newJobs > 0 && <span className="mp-text-muted"> · </span>}
+            {newJobs > 0 && <span className="mp-clr-accent">{newJobs} new</span>}
+          </span>
+          {newJobs > 0 && (
+            <div className="mp-cell-bar-wrap">
+              <div className="mp-cell-bar-track">
+                <div className={`mp-cell-bar-fill ${utilClass(avg)}`} style={{ width: `${Math.min(avg, 100)}%` }} />
+              </div>
+              <span className={`mp-cell-bar-label ${utilClass(avg)}`}>{avg}%</span>
             </div>
-            <span className={`mp-cell-bar-label ${utilClass(avg)}`}>{avg}%</span>
-          </div>
+          )}
         </>
       ) : (
         <span className="mp-cell-empty">—</span>
