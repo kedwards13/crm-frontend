@@ -77,30 +77,32 @@ export default function MonthPlanView() {
   const total = dim(yr, mo);
   const pad = ((new Date(yr, mo, 1).getDay() || 7) - 1);
 
-  // Fetch existing FieldRoutes appointments on month change
+  // Fetch existing FieldRoutes appointments on month change.
+  // Uses baseline_items from dispatch board — these are the real scheduled appointments.
   useEffect(() => {
     let cancelled = false;
     const startDate = `${yr}-${String(mo + 1).padStart(2, "0")}-01`;
     const endDate = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(total).padStart(2, "0")}`;
+    setExisting(null);
     getDispatchBoard({ start_date: startDate, end_date: endDate, view: "month" })
       .then(({ data }) => {
         if (cancelled) return;
-        // Build per-day count from dispatch board days or routes
         const counts = {};
-        const days = data?.days || [];
-        for (const day of days) {
-          const ds = day.date || day.day;
-          const jobs = day.total_jobs || day.job_count || day.stops || 0;
-          if (ds && jobs) counts[ds] = jobs;
+        // Count from baseline_items (most accurate — one per scheduled appointment)
+        const items = data?.baseline_items || [];
+        for (const item of items) {
+          const d = String(item.scheduled_start || item.date || "").slice(0, 10);
+          if (d) counts[d] = (counts[d] || 0) + 1;
         }
-        // Fallback: count from baseline_items
-        if (!days.length && data?.baseline_items) {
-          for (const item of data.baseline_items) {
-            const d = (item.scheduled_start || item.date || "").slice(0, 10);
-            if (d) counts[d] = (counts[d] || 0) + 1;
+        // Fallback to days array if no baseline_items
+        if (!items.length) {
+          for (const day of data?.days || []) {
+            const ds = day.date || day.day || "";
+            const n = day.stop_count || day.total_jobs || day.job_count || 0;
+            if (ds && n) counts[ds] = n;
           }
         }
-        setExisting(counts);
+        setExisting(Object.keys(counts).length > 0 ? counts : null);
       })
       .catch(() => { if (!cancelled) setExisting(null); });
     return () => { cancelled = true; };
@@ -153,14 +155,71 @@ export default function MonthPlanView() {
   }, [plan, loadMeta]);
 
   useEffect(() => {
-    if (!selDay || !plan?.plan_id) { setDayDetail(null); return; }
-    let c = false;
+    if (!selDay) { setDayDetail(null); return; }
+    let cancelled = false;
     setDayLoading(true);
-    getMonthPlanDay(plan.plan_id, selDay)
-      .then(({ data }) => { if (!c) setDayDetail(data); })
-      .catch(() => { if (!c) setDayDetail(null); })
-      .finally(() => { if (!c) setDayLoading(false); });
-    return () => { c = true; };
+
+    // Fetch existing appointments for this day from dispatch board
+    const existingPromise = getDispatchBoard({ day: selDay, view: "day" })
+      .then(({ data }) => data)
+      .catch(() => null);
+
+    // Fetch new assignments from month plan (if a plan exists)
+    const newPromise = plan?.plan_id
+      ? getMonthPlanDay(plan.plan_id, selDay).then(({ data }) => data).catch(() => null)
+      : Promise.resolve(null);
+
+    Promise.all([existingPromise, newPromise]).then(([existingData, newData]) => {
+      if (cancelled) return;
+
+      // Build existing jobs grouped by tech from dispatch board routes
+      const existingByTech = {};
+      for (const route of existingData?.routes || []) {
+        const techName = route.technician_name || route.tech_name || "Unassigned";
+        const stops = route.stops || route.appointments || route.items || [];
+        existingByTech[techName] = (existingByTech[techName] || []).concat(
+          stops.map((s) => ({
+            job_id: s.id || s.appointment_id || s.external_id,
+            customer_name: s.customer_name || s.customer || "",
+            service_type: s.service_type_name || s.service_type || s.service || "",
+            duration: s.duration_minutes || s.duration || 0,
+            score: null,
+            is_familiar_tech: null,
+            is_existing: true,
+          }))
+        );
+      }
+
+      // Build new jobs from month plan
+      const newByTech = newData?.by_tech || {};
+
+      // Merge: existing first, then new (marked)
+      const merged = {};
+      for (const [tech, jobs] of Object.entries(existingByTech)) {
+        merged[tech] = [...jobs];
+      }
+      for (const [tech, jobs] of Object.entries(newByTech)) {
+        const tagged = jobs.map((j) => ({ ...j, is_existing: false, is_new: true }));
+        merged[tech] = [...(merged[tech] || []), ...tagged];
+      }
+
+      const existingCount = Object.values(existingByTech).reduce((s, a) => s + a.length, 0);
+      const newCount = Object.values(newByTech).reduce((s, a) => s + a.length, 0);
+
+      setDayDetail({
+        date: selDay,
+        by_tech: merged,
+        summary: {
+          ...(newData?.summary || {}),
+          total_jobs: existingCount + newCount,
+          existing_count: existingCount,
+          new_count: newCount,
+          total_duration: (newData?.summary?.total_duration || 0),
+        },
+      });
+    }).finally(() => { if (!cancelled) setDayLoading(false); });
+
+    return () => { cancelled = true; };
   }, [selDay, plan?.plan_id]);
 
   const shift = useCallback((d) => {
@@ -342,36 +401,50 @@ function DayPanel({ date, detail, loading }) {
   const label = new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   const groups = detail.by_tech || {};
   const sum = detail.summary || {};
+  const exCount = sum.existing_count || 0;
+  const newCount = sum.new_count || 0;
 
   return (
     <div className="mp-day-panel">
       <div className="mp-day-header">
         <span className="mp-day-title">{label}</span>
-        <span className="mp-text-muted mp-mono">{sum.total_jobs || 0} jobs · {Math.round((sum.total_duration || 0) / 60 * 10) / 10}h</span>
+        <span className="mp-text-muted mp-mono">
+          {exCount > 0 && <span className="mp-clr-info">{exCount} existing</span>}
+          {exCount > 0 && newCount > 0 && " · "}
+          {newCount > 0 && <span className="mp-clr-accent">{newCount} new</span>}
+          {!exCount && !newCount && "0 jobs"}
+        </span>
       </div>
       <div className="mp-day-techs">
         {Object.entries(groups).map(([tech, jobs]) => {
+          const existingJobs = jobs.filter((j) => j.is_existing);
+          const newJobs = jobs.filter((j) => !j.is_existing);
           const mins = jobs.reduce((s, j) => s + (j.duration || 0), 0);
-          const fam = jobs.filter((j) => j.is_familiar_tech).length;
+
           return (
             <div key={tech} className="mp-tech-section">
               <div className="mp-tech-header">
                 <span className="mp-tech-name">{tech}</span>
                 <div className="mp-tech-meta">
-                  <span>{jobs.length} jobs</span>
+                  {existingJobs.length > 0 && <span className="mp-clr-info">{existingJobs.length} existing</span>}
+                  {newJobs.length > 0 && <span className="mp-clr-accent">{newJobs.length} new</span>}
                   <span>{Math.round(mins / 60 * 10) / 10}h</span>
-                  <span className="mp-clr-accent">{fam}/{jobs.length} fam</span>
                 </div>
               </div>
               <table className="mp-job-table">
                 <tbody>
                   {jobs.map((j, i) => (
-                    <tr key={j.job_id || i} className="mp-job-row">
+                    <tr key={j.job_id || i} className={`mp-job-row ${j.is_new ? "mp-job-new" : ""}`}>
                       <td className="mp-job-num">{i + 1}</td>
-                      <td className="mp-job-customer">{j.customer_name}</td>
+                      <td className="mp-job-customer">
+                        {j.customer_name}
+                        {j.is_new && <span className="mp-badge-new">NEW</span>}
+                      </td>
                       <td className="mp-job-service">{j.service_type}</td>
-                      <td className="mp-job-dur mp-mono">{Math.max(j.duration, 0)}m</td>
-                      <td className={`mp-job-score mp-mono ${scoreClass(j.score)}`}>{Math.round(j.score)}</td>
+                      <td className="mp-job-dur mp-mono">{Math.max(j.duration || 0, 0)}m</td>
+                      <td className={`mp-job-score mp-mono ${j.score != null ? scoreClass(j.score) : "mp-text-muted"}`}>
+                        {j.score != null ? Math.round(j.score) : "—"}
+                      </td>
                       <td className="mp-job-fam">{j.is_familiar_tech && <MapPin className="mp-icon-xs mp-clr-accent" />}</td>
                     </tr>
                   ))}
