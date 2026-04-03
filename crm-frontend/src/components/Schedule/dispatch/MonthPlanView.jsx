@@ -66,6 +66,18 @@ export default function MonthPlanView() {
   const [selDay, setSelDay] = useState(null);
   const [dayDetail, setDayDetail] = useState(null);
   const [dayLoading, setDayLoading] = useState(false);
+  const [showConstraints, setShowConstraints] = useState(false);
+  const [confirmFinalize, setConfirmFinalize] = useState(false);
+  const [constraints, setConstraints] = useState({
+    due_date_deviation_days: 7,
+    max_jobs_per_tech_per_day: 10,
+  });
+  const [weights, setWeights] = useState({
+    tech_familiarity: 0.35,
+    due_date_fit: 0.25,
+    route_density: 0.25,
+    capacity_balance: 0.15,
+  });
   const [issues, setIssues] = useState([]);
   const [projections, setProjections] = useState(null);
   const [err, setErr] = useState(null);
@@ -120,7 +132,7 @@ export default function MonthPlanView() {
   const generate = useCallback(async () => {
     setGenerating(true); setErr(null);
     try {
-      const { data } = await previewMonthFill(monthStr);
+      const { data } = await previewMonthFill(monthStr, constraints, weights);
       setPlan(data);
       if (data.plan_id) {
         const [{ data: i }, { data: pr }] = await Promise.all([
@@ -130,7 +142,7 @@ export default function MonthPlanView() {
       }
     } catch (e) { setErr(e?.response?.data?.detail || "Generation failed"); }
     finally { setGenerating(false); }
-  }, [monthStr]);
+  }, [monthStr, constraints, weights]);
 
   const optimize = useCallback(async () => {
     if (!plan?.plan_id) return;
@@ -270,10 +282,15 @@ export default function MonthPlanView() {
 
         <div className="mp-header-actions">
           {(!state || state === "draft") && (
-            <button onClick={generate} disabled={generating} className="mp-btn mp-btn-accent">
-              {generating ? <Loader2 className="mp-icon-sm mp-spin" /> : <Sparkles className="mp-icon-sm" />}
-              {generating ? "Generating…" : plan ? "Re-fill" : "Auto-Fill"}
-            </button>
+            <>
+              <button onClick={() => setShowConstraints((v) => !v)} className={`mp-btn mp-btn-muted ${showConstraints ? "mp-btn-active" : ""}`}>
+                <Settings2 className="mp-icon-sm" />
+              </button>
+              <button onClick={generate} disabled={generating} className="mp-btn mp-btn-accent">
+                {generating ? <Loader2 className="mp-icon-sm mp-spin" /> : <Sparkles className="mp-icon-sm" />}
+                {generating ? "Generating…" : plan ? "Re-fill" : "Auto-Fill"}
+              </button>
+            </>
           )}
           {state === "draft" && plan && (
             <>
@@ -297,7 +314,7 @@ export default function MonthPlanView() {
           {state === "approved" && (
             <>
               <button onClick={() => advance("review")} className="mp-btn mp-btn-muted">Reopen</button>
-              <button onClick={() => advance("finalized")} className="mp-btn mp-btn-purple">
+              <button onClick={() => setConfirmFinalize(true)} className="mp-btn mp-btn-purple">
                 <CheckCircle2 className="mp-icon-sm" />Finalize
               </button>
             </>
@@ -308,6 +325,75 @@ export default function MonthPlanView() {
       {err && (
         <div className="mp-error">
           <XCircle className="mp-icon-sm" />{err}
+        </div>
+      )}
+
+      {/* Constraint panel */}
+      {showConstraints && (
+        <div className="mp-constraints">
+          <label className="mp-constraint-row">
+            <span>Due date deviation</span>
+            <input type="number" min={1} max={30} value={constraints.due_date_deviation_days}
+              onChange={(e) => setConstraints((p) => ({ ...p, due_date_deviation_days: Math.max(1, +e.target.value || 7) }))}
+              className="mp-constraint-input" />
+            <span className="mp-text-muted">days</span>
+          </label>
+          <label className="mp-constraint-row">
+            <span>Max jobs per tech/day</span>
+            <input type="number" min={1} max={20} value={constraints.max_jobs_per_tech_per_day}
+              onChange={(e) => setConstraints((p) => ({ ...p, max_jobs_per_tech_per_day: Math.max(1, +e.target.value || 10) }))}
+              className="mp-constraint-input" />
+          </label>
+          <div className="mp-constraint-divider" />
+          <label className="mp-constraint-row">
+            <span>Familiarity</span>
+            <input type="range" min={0} max={100} value={Math.round(weights.tech_familiarity * 100)}
+              onChange={(e) => setWeights((p) => ({ ...p, tech_familiarity: +e.target.value / 100 }))}
+              className="mp-constraint-range" />
+            <span className="mp-mono">{Math.round(weights.tech_familiarity * 100)}%</span>
+          </label>
+          <label className="mp-constraint-row">
+            <span>Due Date Fit</span>
+            <input type="range" min={0} max={100} value={Math.round(weights.due_date_fit * 100)}
+              onChange={(e) => setWeights((p) => ({ ...p, due_date_fit: +e.target.value / 100 }))}
+              className="mp-constraint-range" />
+            <span className="mp-mono">{Math.round(weights.due_date_fit * 100)}%</span>
+          </label>
+          <label className="mp-constraint-row">
+            <span>Route Density</span>
+            <input type="range" min={0} max={100} value={Math.round(weights.route_density * 100)}
+              onChange={(e) => setWeights((p) => ({ ...p, route_density: +e.target.value / 100 }))}
+              className="mp-constraint-range" />
+            <span className="mp-mono">{Math.round(weights.route_density * 100)}%</span>
+          </label>
+          <label className="mp-constraint-row">
+            <span>Capacity Balance</span>
+            <input type="range" min={0} max={100} value={Math.round(weights.capacity_balance * 100)}
+              onChange={(e) => setWeights((p) => ({ ...p, capacity_balance: +e.target.value / 100 }))}
+              className="mp-constraint-range" />
+            <span className="mp-mono">{Math.round(weights.capacity_balance * 100)}%</span>
+          </label>
+          <div className="mp-constraint-sum">
+            Total: {Math.round((weights.tech_familiarity + weights.due_date_fit + weights.route_density + weights.capacity_balance) * 100)}%
+            {Math.round((weights.tech_familiarity + weights.due_date_fit + weights.route_density + weights.capacity_balance) * 100) !== 100 &&
+              <span className="mp-clr-warn"> (should be 100%)</span>}
+          </div>
+        </div>
+      )}
+
+      {/* Finalize confirmation */}
+      {confirmFinalize && (
+        <div className="mp-confirm-overlay" onClick={() => setConfirmFinalize(false)}>
+          <div className="mp-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>Finalize Schedule?</h3>
+            <p>This will commit <b>{plan?.stats?.assigned || 0} assignments</b> to the CRM schedule. This action cannot be easily undone.</p>
+            <div className="mp-confirm-actions">
+              <button onClick={() => setConfirmFinalize(false)} className="mp-btn mp-btn-muted">Cancel</button>
+              <button onClick={() => { setConfirmFinalize(false); advance("finalized"); }} className="mp-btn mp-btn-purple">
+                <CheckCircle2 className="mp-icon-sm" />Confirm Finalize
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

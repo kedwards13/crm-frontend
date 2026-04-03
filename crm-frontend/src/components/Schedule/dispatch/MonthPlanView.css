@@ -215,6 +215,44 @@
 .mp-mono { font-family: monospace; }
 .mp-text-muted { color: var(--text-muted); }
 .mp-text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ── Constraint panel ── */
+.mp-constraints {
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+  background: var(--bg-1); display: flex; flex-wrap: wrap; gap: 8px 20px;
+  font-size: var(--fs-1);
+}
+.mp-constraint-row {
+  display: flex; align-items: center; gap: 6px; color: var(--text-main);
+}
+.mp-constraint-input {
+  width: 48px; padding: 2px 4px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg-0);
+  color: var(--text-main); font-family: monospace; font-size: 11px;
+  text-align: center;
+}
+.mp-constraint-range { width: 80px; accent-color: var(--mp-accent); }
+.mp-constraint-divider { width: 1px; height: 20px; background: var(--border); }
+.mp-constraint-sum {
+  font-size: 10px; font-family: monospace; color: var(--text-muted);
+  display: flex; align-items: center; gap: 4px;
+}
+.mp-btn-active { outline: 1px solid var(--accent); background: var(--accent-dim) !important; }
+
+/* ── Finalize confirmation ── */
+.mp-confirm-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center;
+}
+.mp-confirm-dialog {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 20px 24px; max-width: 420px;
+  box-shadow: var(--sh-2); color: var(--text-main);
+}
+.mp-confirm-dialog h3 { font-size: var(--fs-4); margin-bottom: 8px; }
+.mp-confirm-dialog p { font-size: var(--fs-2); color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+.mp-confirm-dialog b { color: var(--text-main); }
+.mp-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
 .mp-clr-accent { color: var(--mp-accent); }
 .mp-clr-info { color: var(--mp-info); }
 .mp-clr-warn { color: var(--mp-warn); }
