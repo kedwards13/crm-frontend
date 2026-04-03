@@ -1,10 +1,8 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import CalendarView from './CalendarView';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AppointmentsView from './AppointmentsView';
 import RoutePlanner from './RoutePlanner';
-import MapView from './MapView';
-import UnscheduledView from './UnscheduledView';
+import MonthPlanView from './dispatch/MonthPlanView';
 import './SchedulingDashboard.css';
 
 const SchedulingDashboard = () => {
@@ -12,15 +10,20 @@ const SchedulingDashboard = () => {
     <div className="scheduling-dashboard-container">
       <div className="scheduling-content">
         <Routes>
-          <Route path="calendar" element={<CalendarView />} />
+          <Route path="calendar" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="day" element={<RoutePlanner />} />
+          <Route path="range" element={<RoutePlanner />} />
+          <Route path="week" element={<Navigate to="/schedule/range" replace />} />
+          <Route path="month" element={<RoutePlanner />} />
+          <Route path="planner" element={<MonthPlanView />} />
           <Route path="appointments" element={<AppointmentsView />} />
-          <Route path="routing" element={<RoutePlanner />} />
-          <Route path="routes" element={<RoutePlanner />} />
-          <Route path="map" element={<MapView />} />
-          <Route path="unscheduled" element={<UnscheduledView />} />
-          <Route path="pool" element={<UnscheduledView />} />
-          {/* Default route goes to Calendar */}
-          <Route path="*" element={<CalendarView />} />
+          <Route path="routing" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="route-view" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="routes" element={<Navigate to="/schedule/month" replace />} />
+          <Route path="map" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="unscheduled" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="pool" element={<Navigate to="/schedule/day" replace />} />
+          <Route path="*" element={<Navigate to="/schedule/day" replace />} />
         </Routes>
       </div>
     </div>
