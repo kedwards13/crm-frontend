@@ -400,6 +400,7 @@ function Sidebar({ plan, issues, proj, onDay }) {
   const st = plan.stats || {};
   const un = plan.unassignable || [];
   const pc = proj?.count || 0;
+  const optimizedMoves = (plan.assignments || []).filter((a) => a.optimized);
 
   return (
     <div className="mp-sidebar-content">
@@ -433,6 +434,22 @@ function Sidebar({ plan, issues, proj, onDay }) {
               <div key={i} className="mp-list-item mp-list-item-danger">
                 <div>{u.customer_name}</div>
                 <div className="mp-text-muted">{u.service_type} · {u.reason?.replace(/_/g, " ")}</div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {optimizedMoves.length > 0 && (
+        <Section title={`Optimized · ${optimizedMoves.length}`} cls="mp-section-info">
+          <div className="mp-list">
+            {optimizedMoves.slice(0, 15).map((m, i) => (
+              <div key={i} className="mp-list-item mp-list-item-info">
+                <div>{m.customer_name}</div>
+                <div className="mp-text-muted">
+                  {m.service_type} → {m.tech_name} {m.date?.slice(5)}
+                  <span className="mp-clr-accent"> +{Math.round(m.score - (m.previous_score || 0))}pts</span>
+                </div>
               </div>
             ))}
           </div>

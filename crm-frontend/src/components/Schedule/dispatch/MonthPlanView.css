@@ -185,6 +185,7 @@
 }
 .mp-section-warn .mp-section-title { color: var(--mp-warn); }
 .mp-section-danger .mp-section-title { color: var(--mp-danger); }
+.mp-section-info .mp-section-title { color: var(--mp-info); }
 .mp-section-purple .mp-section-title { color: var(--mp-purple); }
 .mp-row { display: flex; justify-content: space-between; padding: 1px 0; }
 .mp-list { display: flex; flex-direction: column; gap: 2px; max-height: 160px; overflow: auto; }
@@ -196,6 +197,7 @@
 }
 .mp-list-item-warn:hover { background: rgba(245,158,11,0.08); cursor: pointer; }
 .mp-list-item-danger { background: rgba(239,68,68,0.05); }
+.mp-list-item-info { background: rgba(59,130,246,0.05); }
 .mp-list-item-row { display: flex; justify-content: space-between; }
 
 /* ── Utility classes ── */
