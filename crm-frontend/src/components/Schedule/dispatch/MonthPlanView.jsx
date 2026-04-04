@@ -518,7 +518,7 @@ function DraggableJobRow({ job, index, locked }) {
         {job.customer_name}
         {job.is_new && <span className="mp-badge-new">NEW</span>}
       </td>
-      <td className="mp-job-service">{job.service_type}</td>
+      <td className="mp-job-service">{job.service_type || job.service_type_name || ""}</td>
       <td className="mp-job-dur mp-mono">{Math.max(job.duration || 0, 0)}m</td>
       <td className={`mp-job-score mp-mono ${job.score != null ? scoreClass(job.score) : "mp-text-muted"}`}>
         {job.score != null ? Math.round(job.score) : "—"}
@@ -544,17 +544,10 @@ function DayPanel({ date, detail, loading, plan, onJobMoved }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [activeJob, setActiveJob] = useState(null);
 
-  if (loading) return <div className="mp-day-loading"><Loader2 className="mp-icon-sm mp-spin" />Loading…</div>;
-  if (!detail) return null;
-
-  const label = new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  const groups = detail.by_tech || {};
-  const sum = detail.summary || {};
-  const exCount = sum.existing_count || 0;
-  const newCount = sum.new_count || 0;
-  const canDrag = plan && (plan.state === "draft" || plan.state === "review");
+  const groups = (detail && detail.by_tech) || {};
 
   // Build tech lookup from groups for ID resolution
+  // NOTE: must be before early returns — React hooks must run in the same order every render
   const techLookup = useMemo(() => {
     const m = {};
     for (const [techName, jobs] of Object.entries(groups)) {
@@ -564,6 +557,15 @@ function DayPanel({ date, detail, loading, plan, onJobMoved }) {
     }
     return m;
   }, [groups]);
+
+  if (loading) return <div className="mp-day-loading"><Loader2 className="mp-icon-sm mp-spin" />Loading…</div>;
+  if (!detail) return null;
+
+  const label = new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const sum = detail.summary || {};
+  const exCount = sum.existing_count || 0;
+  const newCount = sum.new_count || 0;
+  const canDrag = plan && (plan.state === "draft" || plan.state === "review");
 
   function handleDragStart(event) {
     setActiveJob(event.active.data.current?.job || null);
@@ -671,7 +673,7 @@ function DayPanel({ date, detail, loading, plan, onJobMoved }) {
           {activeJob && (
             <div className="mp-drag-ghost">
               <span className="mp-drag-ghost-name">{activeJob.customer_name}</span>
-              <span className="mp-drag-ghost-svc">{activeJob.service_type}</span>
+              <span className="mp-drag-ghost-svc">{activeJob.service_type || activeJob.service_type_name || ""}</span>
             </div>
           )}
         </DragOverlay>
