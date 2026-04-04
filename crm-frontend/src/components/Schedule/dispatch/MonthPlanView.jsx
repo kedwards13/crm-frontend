@@ -24,6 +24,8 @@ import {
   advanceMonthPlan,
   getMonthPlanIssues,
   getMonthPlanProjections,
+  getExistingCounts,
+  adjustMonthPlan,
 } from "../../../api/schedulingApi";
 import RouteMapModal from "./RouteMapModal";
 import "./MonthPlanView.css";
@@ -90,36 +92,19 @@ export default function MonthPlanView() {
   const total = dim(yr, mo);
   const pad = ((new Date(yr, mo, 1).getDay() || 7) - 1);
 
-  // Fetch existing FieldRoutes appointments on month change.
-  // Uses baseline_items from dispatch board — these are the real scheduled appointments.
+  // Fetch existing FieldRoutes appointment counts per day via dedicated lightweight endpoint.
   useEffect(() => {
     let cancelled = false;
-    const startDate = `${yr}-${String(mo + 1).padStart(2, "0")}-01`;
-    const endDate = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(total).padStart(2, "0")}`;
     setExisting(null);
-    getDispatchBoard({ start_date: startDate, end_date: endDate, view: "month" })
+    getExistingCounts(monthStr)
       .then(({ data }) => {
         if (cancelled) return;
-        const counts = {};
-        // Count from baseline_items (most accurate — one per scheduled appointment)
-        const items = data?.baseline_items || [];
-        for (const item of items) {
-          const d = String(item.scheduled_start || item.date || "").slice(0, 10);
-          if (d) counts[d] = (counts[d] || 0) + 1;
-        }
-        // Fallback to days array if no baseline_items
-        if (!items.length) {
-          for (const day of data?.days || []) {
-            const ds = day.date || day.day || "";
-            const n = day.stop_count || day.total_jobs || day.job_count || 0;
-            if (ds && n) counts[ds] = n;
-          }
-        }
+        const counts = data?.counts || {};
         setExisting(Object.keys(counts).length > 0 ? counts : null);
       })
       .catch(() => { if (!cancelled) setExisting(null); });
     return () => { cancelled = true; };
-  }, [yr, mo, total]);
+  }, [monthStr]);
 
   const loadMeta = useCallback(async (pid) => {
     try {

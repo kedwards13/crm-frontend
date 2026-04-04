@@ -133,3 +133,6 @@ export const getMonthPlanIssues = (planId) =>
 
 export const getMonthPlanProjections = (planId) =>
   api.get(`/scheduling/month-fill/${planId}/projections/`);
+
+export const getExistingCounts = (month) =>
+  api.get("/scheduling/existing-counts/", { params: { month } });
