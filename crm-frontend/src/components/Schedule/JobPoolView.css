@@ -194,3 +194,54 @@
   font-size: var(--fs-3); font-weight: 600; color: var(--text-main);
   margin-bottom: 4px;
 }
+
+/* ── Map toggle ── */
+.jp-map-toggle {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-1);
+  color: var(--text-main);
+  cursor: pointer;
+  margin-right: 8px;
+}
+.jp-map-toggle:hover { background: var(--bg-2); }
+.jp-map-toggle-active {
+  background: var(--jp-accent);
+  color: #fff;
+  border-color: var(--jp-accent);
+}
+
+/* ── Map container ── */
+.jp-map-wrap {
+  margin: 0 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.jp-map-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+}
+.jp-legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.jp-map-msg {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.jp-text-muted { color: var(--text-muted, #94a3b8); }

@@ -136,3 +136,6 @@ export const getMonthPlanProjections = (planId) =>
 
 export const getExistingCounts = (month) =>
   api.get("/scheduling/existing-counts/", { params: { month } });
+
+export const getJobPoolGeo = (month) =>
+  api.get("/scheduling/job-pool-geo/", { params: { month } });

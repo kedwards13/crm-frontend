@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+  GoogleMap,
+  InfoWindow,
+  Marker,
+  useLoadScript,
+} from '@react-google-maps/api';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import {
   listServicePlans,
   listSchedules,
   listServiceTypes,
   listTechnicians,
+  getJobPoolGeo,
 } from '../../api/schedulingApi';
 import './JobPoolView.css';
 
@@ -73,6 +81,9 @@ export default function JobPoolView() {
   const [serviceTypeFilter, setServiceTypeFilter] = useState('');
   const [sortCol, setSortCol] = useState('due_date');
   const [sortDir, setSortDir] = useState('asc');
+  const [showMap, setShowMap] = useState(false);
+  const [geoJobs, setGeoJobs] = useState([]);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const { start: monthStart, end: monthEnd, label: monthLabel } = useMemo(
     () => monthBounds(year, month), [year, month]
@@ -102,6 +113,19 @@ export default function JobPoolView() {
   }, [monthStart, monthEnd]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Fetch geo data when map is shown
+  useEffect(() => {
+    if (!showMap) return;
+    let cancelled = false;
+    setGeoLoading(true);
+    const monthParam = `${year}-${String(month + 1).padStart(2, '0')}`;
+    getJobPoolGeo(monthParam)
+      .then(({ data }) => { if (!cancelled) setGeoJobs(data?.jobs || []); })
+      .catch(() => { if (!cancelled) setGeoJobs([]); })
+      .finally(() => { if (!cancelled) setGeoLoading(false); });
+    return () => { cancelled = true; };
+  }, [showMap, year, month]);
 
   /* ── Lookup maps ── */
   const svcTypeMap = useMemo(() => {
@@ -222,6 +246,13 @@ export default function JobPoolView() {
           <button className="jp-nav-btn" onClick={nextMonth} title="Next month">&rarr;</button>
         </div>
         <div className="jp-header-right">
+          <button
+            className={`jp-map-toggle ${showMap ? 'jp-map-toggle-active' : ''}`}
+            onClick={() => setShowMap((v) => !v)}
+            title={showMap ? 'Hide map' : 'Show map'}
+          >
+            {showMap ? 'Table' : 'Map'}
+          </button>
           <span style={{ fontSize: 11, color: 'var(--text-sub)', fontFamily: 'monospace' }}>
             {filtered.length} of {counts.total} jobs
           </span>
@@ -274,6 +305,11 @@ export default function JobPoolView() {
           <span>Failed to load job pool: {error}</span>
           <button className="jp-link" onClick={fetchData}>Retry</button>
         </div>
+      )}
+
+      {/* Map */}
+      {showMap && (
+        <JobPoolMap jobs={geoJobs} loading={geoLoading} todayStr={todayStr} />
       )}
 
       {/* Table */}
@@ -347,6 +383,123 @@ export default function JobPoolView() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   JOB POOL MAP
+   ���═════════════════════════��════════════════════════════════════ */
+
+const MAP_CONTAINER = { width: '100%', height: '400px' };
+const DEFAULT_CENTER = { lat: 30.3, lng: -97.7 };
+
+function markerColor(job, todayStr) {
+  if (job.due_date && job.due_date < todayStr) return '#ef4444'; // red — overdue
+  if (job.source === 'service_plan') return '#f59e0b'; // amber — due but unscheduled
+  return '#22c55e'; // green
+}
+
+function markerIcon(color) {
+  return {
+    path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',
+    fillColor: color,
+    fillOpacity: 1,
+    strokeColor: '#fff',
+    strokeWeight: 1.5,
+    scale: 1.4,
+    anchor: typeof window !== 'undefined' && window.google?.maps ? new window.google.maps.Point(12, 22) : undefined,
+  };
+}
+
+function JobPoolMap({ jobs, loading, todayStr }) {
+  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: apiKey || 'missing-key',
+  });
+
+  const mapRef = useRef(null);
+  const clustererRef = useRef(null);
+  const markersRef = useRef([]);
+  const [activeJob, setActiveJob] = useState(null);
+
+  const validJobs = useMemo(
+    () => jobs.filter((j) => j.lat && j.lng && j.lat !== 0 && j.lng !== 0),
+    [jobs]
+  );
+
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  // Create/update markers + clusterer when data changes
+  useEffect(() => {
+    if (!isLoaded || !mapRef.current || !window.google?.maps) return;
+    const map = mapRef.current;
+
+    // Clear old markers
+    for (const m of markersRef.current) m.setMap(null);
+    markersRef.current = [];
+    if (clustererRef.current) { clustererRef.current.clearMarkers(); clustererRef.current = null; }
+
+    if (validJobs.length === 0) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    const newMarkers = validJobs.map((job) => {
+      const color = markerColor(job, todayStr);
+      const pos = { lat: job.lat, lng: job.lng };
+      bounds.extend(pos);
+      const marker = new window.google.maps.Marker({
+        position: pos,
+        icon: markerIcon(color),
+        title: job.customer_name,
+      });
+      marker.addListener('click', () => setActiveJob(job));
+      return marker;
+    });
+    markersRef.current = newMarkers;
+
+    clustererRef.current = new MarkerClusterer({ map, markers: newMarkers });
+
+    map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+    if (validJobs.length === 1) map.setZoom(14);
+  }, [isLoaded, validJobs, todayStr]);
+
+  if (!apiKey) return <div className="jp-map-msg">Add REACT_APP_GOOGLE_MAPS_API_KEY to enable the map.</div>;
+  if (loadError) return <div className="jp-map-msg">Unable to load Google Maps.</div>;
+  if (!isLoaded || loading) return <div className="jp-map-msg">Loading map...</div>;
+
+  return (
+    <div className="jp-map-wrap">
+      <div className="jp-map-legend">
+        <span><span className="jp-legend-dot" style={{ background: '#ef4444' }} /> Overdue</span>
+        <span><span className="jp-legend-dot" style={{ background: '#f59e0b' }} /> Due</span>
+        <span><span className="jp-legend-dot" style={{ background: '#22c55e' }} /> Scheduled</span>
+        <span className="jp-text-muted">{validJobs.length} of {jobs.length} with coordinates</span>
+      </div>
+      <GoogleMap
+        mapContainerStyle={MAP_CONTAINER}
+        center={DEFAULT_CENTER}
+        zoom={10}
+        onLoad={onMapLoad}
+        options={{ disableDefaultUI: false, zoomControl: true, streetViewControl: false, mapTypeControl: false }}
+      >
+        {activeJob && activeJob.lat && (
+          <InfoWindow
+            position={{ lat: activeJob.lat, lng: activeJob.lng }}
+            onCloseClick={() => setActiveJob(null)}
+          >
+            <div style={{ maxWidth: 220, fontFamily: 'var(--font-sans)', fontSize: 12 }}>
+              <div style={{ fontWeight: 600, marginBottom: 2 }}>{activeJob.customer_name}</div>
+              <div style={{ color: '#64748b' }}>{activeJob.service_type}</div>
+              {activeJob.due_date && <div style={{ color: '#64748b' }}>Due: {activeJob.due_date}</div>}
+              {activeJob.preferred_tech && <div style={{ color: '#64748b' }}>Pref tech: {activeJob.preferred_tech}</div>}
+              <div style={{ color: '#64748b' }}>{activeJob.duration}m</div>
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
     </div>
   );
 }
