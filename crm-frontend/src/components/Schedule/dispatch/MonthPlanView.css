@@ -382,3 +382,45 @@
 .mp-map-info-detail {
   font-size: 11px; color: #64748b;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAG AND DROP
+   ═══════════════════════════════════════════════════════════════ */
+
+.mp-drag-handle {
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-sub, #64748b);
+  padding: 2px;
+  border-radius: 3px;
+}
+.mp-drag-handle:hover { color: var(--mp-accent); background: var(--bg-2, rgba(0,0,0,0.05)); }
+.mp-drag-handle:active { cursor: grabbing; }
+
+.mp-job-grip { width: 24px; text-align: center; }
+
+.mp-job-dragging { opacity: 0.4; }
+
+.mp-tech-drop-active {
+  outline: 2px dashed var(--mp-accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--mp-accent) 8%, transparent);
+  border-radius: 6px;
+}
+
+.mp-drag-ghost {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-1, #fff);
+  border: 1px solid var(--mp-accent);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.mp-drag-ghost-name { font-weight: 600; }
+.mp-drag-ghost-svc { color: var(--text-sub, #64748b); }

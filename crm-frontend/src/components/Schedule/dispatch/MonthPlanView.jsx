@@ -1,12 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  useDraggable,
+} from "@dnd-kit/core";
+import {
   AlertTriangle,
   Calendar,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
+  GripVertical,
   Loader2,
+  Lock,
   MapPin,
   Send,
   Settings2,
@@ -85,6 +96,7 @@ export default function MonthPlanView() {
   const [projections, setProjections] = useState(null);
   const [err, setErr] = useState(null);
   const [existing, setExisting] = useState(null); // {date_str: count} from dispatch board
+  const [dayRefresh, setDayRefresh] = useState(0);
 
   const md = useMemo(() => pm(monthStr), [monthStr]);
   const yr = md.getFullYear();
@@ -221,7 +233,7 @@ export default function MonthPlanView() {
     }).finally(() => { if (!cancelled) setDayLoading(false); });
 
     return () => { cancelled = true; };
-  }, [selDay, plan?.plan_id]);
+  }, [selDay, plan?.plan_id, dayRefresh]);
 
   const shift = useCallback((d) => {
     const x = pm(monthStr); x.setMonth(x.getMonth() + d);
@@ -410,7 +422,20 @@ export default function MonthPlanView() {
               <Cell key={c.d} c={c} sel={selDay === c.ds} onClick={() => setSelDay(selDay === c.ds ? null : c.ds)} />
             ))}
           </div>
-          {selDay && <DayPanel date={selDay} detail={dayDetail} loading={dayLoading} />}
+          {selDay && (
+            <DayPanel
+              date={selDay}
+              detail={dayDetail}
+              loading={dayLoading}
+              plan={plan}
+              onJobMoved={async (jobId, newTechId, newTechName, newTechExtId) => {
+                if (!plan?.plan_id) return;
+                await adjustMonthPlan(plan.plan_id, [{ job_id: jobId, new_tech_id: newTechId, new_tech_name: newTechName, new_tech_ext_id: newTechExtId }]);
+                await loadMeta(plan.plan_id);
+                setDayRefresh((n) => n + 1);
+              }}
+            />
+          )}
         </div>
 
         {/* Sidebar */}
@@ -466,11 +491,58 @@ function Cell({ c, sel, onClick }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   DAY PANEL
+   DAY PANEL (with drag-and-drop reassignment)
    ═══════════════════════════════════════════════════════════════ */
 
-function DayPanel({ date, detail, loading }) {
+function DraggableJobRow({ job, index, locked }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: job.job_id || `job-${index}`,
+    data: { job },
+    disabled: locked,
+  });
+  const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, opacity: isDragging ? 0.4 : 1 } : undefined;
+
+  return (
+    <tr ref={setNodeRef} style={style} className={`mp-job-row ${job.is_new ? "mp-job-new" : ""} ${isDragging ? "mp-job-dragging" : ""}`}>
+      <td className="mp-job-grip">
+        {locked ? (
+          <Lock className="mp-icon-xs mp-text-muted" title="Locked — existing or constrained" />
+        ) : (
+          <span {...attributes} {...listeners} className="mp-drag-handle" title="Drag to reassign">
+            <GripVertical className="mp-icon-xs" />
+          </span>
+        )}
+      </td>
+      <td className="mp-job-num">{index + 1}</td>
+      <td className="mp-job-customer">
+        {job.customer_name}
+        {job.is_new && <span className="mp-badge-new">NEW</span>}
+      </td>
+      <td className="mp-job-service">{job.service_type}</td>
+      <td className="mp-job-dur mp-mono">{Math.max(job.duration || 0, 0)}m</td>
+      <td className={`mp-job-score mp-mono ${job.score != null ? scoreClass(job.score) : "mp-text-muted"}`}>
+        {job.score != null ? Math.round(job.score) : "—"}
+      </td>
+      <td className="mp-job-fam">{job.is_familiar_tech && <MapPin className="mp-icon-xs mp-clr-accent" />}</td>
+    </tr>
+  );
+}
+
+function DroppableTechSection({ techName, children }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `tech-${techName}`, data: { techName } });
+  return (
+    <div ref={setNodeRef} className={`mp-tech-section ${isOver ? "mp-tech-drop-active" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
+function DayPanel({ date, detail, loading, plan, onJobMoved }) {
   const [mapOpen, setMapOpen] = useState(false);
+  const [confirmMove, setConfirmMove] = useState(null);
+  const [moving, setMoving] = useState(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const [activeJob, setActiveJob] = useState(null);
 
   if (loading) return <div className="mp-day-loading"><Loader2 className="mp-icon-sm mp-spin" />Loading…</div>;
   if (!detail) return null;
@@ -480,10 +552,76 @@ function DayPanel({ date, detail, loading }) {
   const sum = detail.summary || {};
   const exCount = sum.existing_count || 0;
   const newCount = sum.new_count || 0;
+  const canDrag = plan && (plan.state === "draft" || plan.state === "review");
+
+  // Build tech lookup from groups for ID resolution
+  const techLookup = useMemo(() => {
+    const m = {};
+    for (const [techName, jobs] of Object.entries(groups)) {
+      for (const j of jobs) {
+        if (j.tech_id) m[techName] = { id: j.tech_id, ext_id: j.tech_ext_id };
+      }
+    }
+    return m;
+  }, [groups]);
+
+  function handleDragStart(event) {
+    setActiveJob(event.active.data.current?.job || null);
+  }
+
+  function handleDragEnd(event) {
+    setActiveJob(null);
+    const { active, over } = event;
+    if (!over || !active) return;
+
+    const draggedJob = active.data.current?.job;
+    const targetTech = over.data.current?.techName;
+    if (!draggedJob || !targetTech) return;
+
+    // Find current tech
+    const currentTech = Object.entries(groups).find(([, jobs]) =>
+      jobs.some((j) => (j.job_id || "") === (draggedJob.job_id || ""))
+    )?.[0];
+
+    if (!currentTech || currentTech === targetTech) return;
+
+    setConfirmMove({ job: draggedJob, fromTech: currentTech, toTech: targetTech });
+  }
+
+  async function executeMove() {
+    if (!confirmMove || !onJobMoved) return;
+    const { job, toTech } = confirmMove;
+    const techInfo = techLookup[toTech];
+    setMoving(true);
+    try {
+      await onJobMoved(job.job_id, techInfo?.id, toTech, techInfo?.ext_id);
+    } finally {
+      setMoving(false);
+      setConfirmMove(null);
+    }
+  }
 
   return (
     <div className="mp-day-panel">
       <RouteMapModal open={mapOpen} onClose={() => setMapOpen(false)} dayData={detail} date={date} />
+
+      {/* Move confirmation dialog */}
+      {confirmMove && (
+        <div className="mp-confirm-overlay" onClick={() => setConfirmMove(null)}>
+          <div className="mp-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>Move Job?</h3>
+            <p>Move <b>{confirmMove.job.customer_name}</b> from <b>{confirmMove.fromTech}</b> to <b>{confirmMove.toTech}</b> on <b>{date}</b>?</p>
+            <div className="mp-confirm-actions">
+              <button onClick={() => setConfirmMove(null)} className="mp-btn mp-btn-muted" disabled={moving}>Cancel</button>
+              <button onClick={executeMove} className="mp-btn mp-btn-accent" disabled={moving}>
+                {moving ? <Loader2 className="mp-icon-sm mp-spin" /> : null}
+                {moving ? "Moving…" : "Confirm Move"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mp-day-header">
         <span className="mp-day-title">{label}</span>
         <div className="mp-day-header-right">
@@ -498,45 +636,46 @@ function DayPanel({ date, detail, loading }) {
           </span>
         </div>
       </div>
-      <div className="mp-day-techs">
-        {Object.entries(groups).map(([tech, jobs]) => {
-          const existingJobs = jobs.filter((j) => j.is_existing);
-          const newJobs = jobs.filter((j) => !j.is_existing);
-          const mins = jobs.reduce((s, j) => s + (j.duration || 0), 0);
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="mp-day-techs">
+          {Object.entries(groups).map(([tech, jobs]) => {
+            const existingJobs = jobs.filter((j) => j.is_existing);
+            const newJobs = jobs.filter((j) => !j.is_existing);
+            const mins = jobs.reduce((s, j) => s + (j.duration || 0), 0);
 
-          return (
-            <div key={tech} className="mp-tech-section">
-              <div className="mp-tech-header">
-                <span className="mp-tech-name">{tech}</span>
-                <div className="mp-tech-meta">
-                  {existingJobs.length > 0 && <span className="mp-clr-info">{existingJobs.length} existing</span>}
-                  {newJobs.length > 0 && <span className="mp-clr-accent">{newJobs.length} new</span>}
-                  <span>{Math.round(mins / 60 * 10) / 10}h</span>
+            return (
+              <DroppableTechSection key={tech} techName={tech}>
+                <div className="mp-tech-header">
+                  <span className="mp-tech-name">{tech}</span>
+                  <div className="mp-tech-meta">
+                    {existingJobs.length > 0 && <span className="mp-clr-info">{existingJobs.length} existing</span>}
+                    {newJobs.length > 0 && <span className="mp-clr-accent">{newJobs.length} new</span>}
+                    <span>{Math.round(mins / 60 * 10) / 10}h</span>
+                  </div>
                 </div>
-              </div>
-              <table className="mp-job-table">
-                <tbody>
-                  {jobs.map((j, i) => (
-                    <tr key={j.job_id || i} className={`mp-job-row ${j.is_new ? "mp-job-new" : ""}`}>
-                      <td className="mp-job-num">{i + 1}</td>
-                      <td className="mp-job-customer">
-                        {j.customer_name}
-                        {j.is_new && <span className="mp-badge-new">NEW</span>}
-                      </td>
-                      <td className="mp-job-service">{j.service_type}</td>
-                      <td className="mp-job-dur mp-mono">{Math.max(j.duration || 0, 0)}m</td>
-                      <td className={`mp-job-score mp-mono ${j.score != null ? scoreClass(j.score) : "mp-text-muted"}`}>
-                        {j.score != null ? Math.round(j.score) : "—"}
-                      </td>
-                      <td className="mp-job-fam">{j.is_familiar_tech && <MapPin className="mp-icon-xs mp-clr-accent" />}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                <table className="mp-job-table">
+                  <tbody>
+                    {jobs.map((j, i) => {
+                      const isLocked = j.is_existing || !canDrag || !!j.constraint_locked;
+                      return (
+                        <DraggableJobRow key={j.job_id || i} job={j} index={i} locked={isLocked} />
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </DroppableTechSection>
+            );
+          })}
+        </div>
+        <DragOverlay>
+          {activeJob && (
+            <div className="mp-drag-ghost">
+              <span className="mp-drag-ghost-name">{activeJob.customer_name}</span>
+              <span className="mp-drag-ghost-svc">{activeJob.service_type}</span>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }
