@@ -341,8 +341,8 @@
 }
 
 .dispatch-day-overview-card {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 14px;
   display: grid;
   gap: 10px;
@@ -351,8 +351,8 @@
 }
 
 .dispatch-day-overview-card.is-active {
-  border-color: #0f172a;
-  box-shadow: inset 0 0 0 1px #0f172a;
+  border-color: var(--text-main);
+  box-shadow: inset 0 0 0 1px var(--text-main);
 }
 
 .dispatch-day-overview-head {
@@ -369,7 +369,7 @@
 .dispatch-day-overview-head span,
 .dispatch-day-overview-metrics span {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .dispatch-day-overview-metrics,
@@ -420,9 +420,9 @@
 }
 
 .dispatch-inline-status.error {
-  color: #991b1b;
-  border-color: rgba(220, 38, 38, 0.24);
-  background: #fef2f2;
+  color: var(--danger, #ef4444);
+  border-color: rgba(239, 68, 68, 0.24);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .dispatch-state-panel {
@@ -446,13 +446,13 @@
 }
 
 .dispatch-state-panel.is-error {
-  border-color: rgba(220, 38, 38, 0.24);
-  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.24);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .dispatch-state-panel.is-error p,
 .dispatch-state-panel.is-error strong {
-  color: #991b1b;
+  color: var(--danger, #ef4444);
 }
 
 .dispatch-state-panel-actions {
@@ -477,21 +477,21 @@
 }
 
 .dispatch-result-chip.is-applied {
-  border-color: rgba(22, 163, 74, 0.28);
-  color: #166534;
-  background: #f0fdf4;
+  border-color: rgba(34, 197, 94, 0.28);
+  color: var(--success, #22c55e);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .dispatch-result-chip.is-skipped {
-  border-color: rgba(217, 119, 6, 0.28);
-  color: #92400e;
-  background: #fffbeb;
+  border-color: rgba(245, 158, 11, 0.28);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .dispatch-result-chip.is-failed {
-  border-color: rgba(220, 38, 38, 0.28);
-  color: #991b1b;
-  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.28);
+  color: var(--danger, #ef4444);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .dispatch-layout {
@@ -509,8 +509,7 @@
   flex-wrap: wrap;
   gap: 10px;
   align-items: stretch;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   padding-bottom: 4px;
 }
 
@@ -565,7 +564,6 @@
   flex-direction: column;
   overflow: visible;
   border-radius: 16px;
-  height: 100%;
 }
 
 .dispatch-route-card.is-drop-target {
@@ -695,11 +693,11 @@
   margin-top: 8px;
   display: inline-flex;
   padding: 3px 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   font-size: 11px;
   font-weight: 700;
-  color: #334155;
-  background: #f8fafc;
+  color: var(--text-main);
+  background: var(--bg-1);
 }
 
 .dispatch-route-warning-indicator {
@@ -709,9 +707,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  border: 1px solid rgba(234, 88, 12, 0.18);
-  color: #9a3412;
-  background: #fff7ed;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .dispatch-route-hovercard {
@@ -877,18 +875,18 @@
 
 .dispatch-pill.is-applied {
   border-left: 2px solid #16a34a;
-  background: #f0fdf4;
+  background: rgba(34, 197, 94, 0.08);
 }
 
 .dispatch-pill.is-skipped,
 .dispatch-pill.is-blocked {
   border-left: 2px solid #d97706;
-  background: #fffbeb;
+  background: rgba(245, 158, 11, 0.08);
 }
 
 .dispatch-pill.is-failed {
   border-left: 2px solid #dc2626;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .dispatch-pill-main {
@@ -977,13 +975,13 @@
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: rgba(148, 163, 184, 0.08);
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .dispatch-pill-reminder.is-active {
-  border-color: rgba(37, 99, 235, 0.2);
-  background: rgba(37, 99, 235, 0.1);
-  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.24);
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
 }
 
 .dispatch-pill-hovercard {
@@ -1056,9 +1054,9 @@
 }
 
 .dispatch-pill-hover-btn.is-active {
-  border-color: rgba(37, 99, 235, 0.24);
-  color: #1d4ed8;
-  background: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.28);
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
 }
 
 .dispatch-pill-value {
@@ -1104,9 +1102,9 @@
 }
 
 .dispatch-time-gap.is-overlap {
-  border-color: rgba(217, 119, 6, 0.26);
-  background: #fff7ed;
-  color: #9a3412;
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
 .dispatch-status-indicator {
@@ -1134,35 +1132,35 @@
 
 .dispatch-status-indicator.is-scheduled,
 .dispatch-status-indicator.is-active {
-  color: #1d4ed8;
-  border-color: rgba(37, 99, 235, 0.22);
-  background: #eff6ff;
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.28);
+  background: rgba(59, 130, 246, 0.12);
 }
 
 .dispatch-status-indicator.is-completed {
-  color: #166534;
-  border-color: rgba(22, 163, 74, 0.22);
-  background: #f0fdf4;
+  color: var(--success, #22c55e);
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
 }
 
 .dispatch-status-indicator.is-warning {
-  color: #92400e;
-  border-color: rgba(217, 119, 6, 0.22);
-  background: #fffbeb;
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.12);
 }
 
 .dispatch-status-indicator.is-failed,
 .dispatch-status-indicator.is-canceled {
-  color: #991b1b;
-  border-color: rgba(220, 38, 38, 0.22);
-  background: #fef2f2;
+  color: var(--danger, #ef4444);
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .dispatch-status-indicator.is-locked,
 .dispatch-status-indicator.is-muted {
-  color: #475569;
-  border-color: #e2e8f0;
-  background: #f8fafc;
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--surface-muted);
 }
 
 .dispatch-sidebar {
@@ -1320,8 +1318,8 @@
   display: grid;
   place-items: center;
   font-size: 13px;
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--text-muted);
+  background: var(--surface-muted);
 }
 
 .dispatch-map-popup {
@@ -1329,12 +1327,12 @@
   gap: 4px;
   min-width: 180px;
   font-size: 12px;
-  color: #334155;
+  color: var(--text-main);
 }
 
 .dispatch-map-popup strong {
   font-size: 14px;
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 .dispatch-map-popup-kicker {
