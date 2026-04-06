@@ -30,10 +30,11 @@ export const TabsTrigger = ({ value, current, onClick, children, className = '' 
       className={clsx(
         'px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2',
         active
-          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+          ? 'border-transparent'
           : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
         className
       )}
+      style={active ? { borderColor: 'var(--accent)', color: 'var(--accent-text)' } : undefined}
     >
       {children}
     </button>

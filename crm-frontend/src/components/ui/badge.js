@@ -4,14 +4,18 @@ import clsx from 'clsx';
 const badgeColors = {
   gray: 'bg-gray-100 text-gray-800 border border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
   blue: 'bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-800/20 dark:text-blue-300 dark:border-blue-500/40',
-  emerald: 'bg-orange-100 text-orange-900 border border-orange-300 dark:bg-orange-800/20 dark:text-orange-200 dark:border-orange-500/50',
-  accent: 'bg-orange-100 text-orange-900 border border-orange-300 dark:bg-orange-800/20 dark:text-orange-200 dark:border-orange-500/50',
+  emerald: 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-800/20 dark:text-emerald-300 dark:border-emerald-500/40',
+  accent: 'border',
   yellow: 'bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-700/30 dark:text-yellow-300 dark:border-yellow-500/40',
   red: 'bg-red-100 text-red-800 border border-red-300 dark:bg-red-800/20 dark:text-red-300 dark:border-red-500/40',
   purple: 'bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-800/20 dark:text-purple-300 dark:border-purple-500/40',
 };
 
 export default function Badge({ children, color = 'gray', className = '' }) {
+  const accentStyle = color === 'accent'
+    ? { background: 'var(--accent-dim)', color: 'var(--accent-text)', borderColor: 'rgba(var(--accent-rgb), 0.35)' }
+    : undefined;
+
   return (
     <span
       className={clsx(
@@ -19,6 +23,7 @@ export default function Badge({ children, color = 'gray', className = '' }) {
         badgeColors[color] || badgeColors.gray,
         className
       )}
+      style={accentStyle}
     >
       {children}
     </span>

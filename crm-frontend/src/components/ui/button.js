@@ -11,11 +11,11 @@ export const Button = ({
   ...props
 }) => {
   const base =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed';
 
   const variants = {
     primary:
-      'bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-sm hover:opacity-90',
+      'text-white shadow-sm hover:opacity-90',
     outline:
       'bg-transparent border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800',
     ghost:
@@ -30,9 +30,16 @@ export const Button = ({
     lg: 'px-6 py-3 text-base',
   };
 
+  const accentStyle = variant === 'primary'
+    ? { background: 'var(--accent-gradient)' }
+    : {};
+
+  const focusStyle = { '--tw-ring-color': 'var(--accent)' };
+
   return (
     <button
       className={clsx(base, variants[variant], sizes[size], className)}
+      style={{ ...accentStyle, ...focusStyle, ...props.style }}
       disabled={props.disabled || loading}
       {...props}
     >
