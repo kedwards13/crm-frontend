@@ -1,35 +1,40 @@
 // src/App.js
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Components
 import Layout from './components/Layout/Layout';
 import Login from './components/Auth/Login';
 import TenantSelector from './components/Auth/TenantSelector';
 import TenantSignUp from './components/Auth/TenantSignUp';
-import Dashboard from './components/Dashboards/Dashboard';
+import DashboardHome from './pages/Dashboard/DashboardHome.tsx';
+import AGIDashboard from './pages/Dashboard/AGIDashboard.tsx';
 import DashboardTasks from './components/Dashboards/DashboardTasks';
 import DashboardAlerts from './components/Dashboards/DashboardAlerts';
 import LeadsPage from './components/Leads/LeadsPage';
 import SchedulingDashboard from './components/Schedule/SchedulingDashboard';
 import CommunicationsPage from './components/Communications/CommunicationsPage';
 import Settings from './components/Settings/Settings';
-import Assistant from './components/Assistant/Assistant';
 import PipelineView from './components/Leads/Pipeline';
 import MarketplaceView from './components/Marketplace/MarketplaceView';
 import Campaigns from './components/Revival/Campaigns';
+import CampaignDetail from './components/Revival/CampaignDetail';
 import Planner from './components/Revival/Planner';
 import History from './components/Revival/History';
 import AiInsights from './components/Revival/AiInsights';
+import QuoteDetail from './pages/Quotes/QuoteDetail';
 import RevivalScanner from './components/Revival/Scanner';
 import Overview from './components/Revival/Overview';
-import AnalyticsPage from './components/Analytics/AnalyticsPage';
+import AnalyticsRouter from './components/Analytics/AnalyticsRouter';
 import FinancePage from './components/Finnance/FinancePage';
 import MarketingPage from './components/Marketing/MarketingPage';
 import CustomersPage from './components/Customers/CustomersPage';
 import TeamManagement from './components/Settings/TeamManagement';
 import OperationsRouter from './components/Operations/OperationsRouter';
 import api from './apiClient';
+import { ThemeProvider } from './theme/ThemeProvider';
 
 // Helpers
 import {
@@ -192,7 +197,8 @@ const AuthenticatedApp = () => {
   return (
     <Layout>
       <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/dashboard/agi" element={<AGIDashboard />} />
         <Route path="/dashboard/tasks" element={<DashboardTasks />} />
         <Route path="/dashboard/alerts" element={<DashboardAlerts />} />
         <Route path="/customers/*" element={<CustomersPage />} />
@@ -201,25 +207,33 @@ const AuthenticatedApp = () => {
         <Route path="/leads/under-contract" element={<MarketplaceView />} />
         <Route path="/schedule/*" element={<SchedulingDashboard />} />
         <Route path="/communication/*" element={<CommunicationsPage />} />
+        <Route path="/communications/*" element={<CommunicationsPage />} />
+        <Route path="/inbox/*" element={<Navigate to="/communication/inbox" replace />} />
 
         {/* Revival */}
+        <Route path="/quotes/:quoteId" element={<QuoteDetail />} />
+        <Route path="/revival/quote/:quoteId" element={<QuoteDetail />} />
         <Route path="/revival/overview" element={<Overview />} />
         <Route path="/revival/scanner" element={<RevivalScanner />} />
         <Route path="/revival/campaigns" element={<Campaigns />} />
+        <Route path="/revival/campaigns/:campaignId" element={<CampaignDetail />} />
         <Route path="/revival/planner" element={<Planner />} />
         <Route path="/revival/history" element={<History />} />
         <Route path="/revival/ai" element={<AiInsights />} />
+        <Route path="/revival/opportunities" element={<AiInsights />} />
         <Route path="/revival/*" element={<Navigate to="/revival/overview" replace />} />
 
         {/* Finance & Marketing */}
         <Route path="/finance/*" element={<FinancePage />} />
         <Route path="/marketing/*" element={<MarketingPage />} />
 
-        <Route path="/analytics/*" element={<AnalyticsPage />} />
+        <Route path="/analytics/*" element={<AnalyticsRouter />} />
         <Route path="/operations/*" element={<OperationsRouter />} />
+        <Route path="/team" element={<TeamManagement />} />
+        <Route path="/team/*" element={<TeamManagement />} />
         <Route path="/settings/team" element={<TeamManagement />} />
         <Route path="/settings/*" element={<Settings />} />
-        <Route path="/assistant" element={<Assistant />} />
+        <Route path="/assistant" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Layout>
@@ -286,14 +300,14 @@ const App = () => {
 
   return (
     <AuthContext.Provider value={auth}>
-      <Router>
-
-        {/* ⭐⭐⭐ GLOBAL MODAL ROOT — required for CustomerPopup */}
-        <div id="modal-root"></div>
-
-        <AppRoutes />
-
-      </Router>
+      <ThemeProvider>
+        <Router>
+          {/* ⭐⭐⭐ GLOBAL MODAL ROOT — required for CustomerPopup */}
+          <div id="modal-root"></div>
+          <AppRoutes />
+          <ToastContainer position="bottom-right" autoClose={2600} theme="colored" />
+        </Router>
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 };
