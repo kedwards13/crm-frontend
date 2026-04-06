@@ -1,25 +1,25 @@
 /* =============================================================================
-   Global Variables
+   Scoped Variables (inherits from tokens.css, no :root pollution)
    ============================================================================= */
-   :root {
-    --bg-page:       #1c1c1e;
-    --bg-card:       #2a2a3a;
-    --bg-card-hover: #444446;
-    --border-color:  #3d3d3d;
-    --text-light:    #f5f5f7;
-    --text-muted:    #aaa;
-    --accent:        #0a84ff;
-    --success:       #28a745;
-    --error:         #bd2130;
-    --shadow:        0 2px 8px rgba(0,0,0,0.3);
+  .customers-page {
+    --cp-bg-page:       var(--bg-app, #1c1c1e);
+    --cp-bg-card:       var(--bg-card, #2a2a3a);
+    --cp-bg-card-hover: var(--bg-hover, #444446);
+    --cp-border-color:  var(--border, #3d3d3d);
+    --cp-text-light:    var(--text-main, #f5f5f7);
+    --cp-text-muted:    var(--text-muted, #aaa);
+    --cp-accent:        var(--accent, #0a84ff);
+    --cp-success:       var(--success, #28a745);
+    --cp-error:         var(--destructive, #bd2130);
+    --cp-shadow:        var(--shadow-0, 0 2px 8px rgba(0,0,0,0.3));
   }
   
   /* =============================================================================
      Page Layout
      ============================================================================= */
   .customers-page {
-    background: var(--bg-page);
-    color: var(--text-light);
+    background: var(--cp-bg-page);
+    color: var(--cp-text-light);
     padding: 1.5rem;
     min-height: 100vh;
     box-sizing: border-box;
@@ -29,16 +29,16 @@
      Card & Panel Base Styles
      ============================================================================= */
   .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: var(--cp-bg-card);
+    border: 1px solid var(--cp-border-color);
     border-radius: 10px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--cp-shadow);
     margin: 1rem 0;
     padding: 1.5rem;
   }
-  
+
   .card:hover {
-    background: var(--bg-card-hover);
+    background: var(--cp-bg-card-hover);
   }
   
   /* =============================================================================
@@ -101,9 +101,9 @@
   /* =============================================================================
      Buttons & Forms
      ============================================================================= */
-  button, .btn-primary {
-    background: var(--accent);
-    color: #fff;
+  .customers-page button, .customers-page .btn-primary {
+    background: var(--cp-accent);
+    color: var(--accent-ink, #fff);
     border: none;
     border-radius: 6px;
     padding: 0.75rem 1.5rem;
@@ -111,37 +111,37 @@
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  
-  button:hover, .btn-primary:hover {
+
+  .customers-page button:hover, .customers-page .btn-primary:hover {
     transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.6);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.4);
   }
-  
-  input[type="file"],
-  select,
-  textarea,
-  .search-bar input {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+
+  .customers-page input[type="file"],
+  .customers-page select,
+  .customers-page textarea,
+  .customers-page .search-bar input {
+    background: var(--cp-bg-card);
+    border: 1px solid var(--cp-border-color);
     border-radius: 6px;
-    color: var(--text-light);
+    color: var(--cp-text-light);
     padding: 0.75rem;
     font-size: 0.95rem;
     transition: border-color 0.3s;
   }
-  
-  input[type="file"]:hover,
-  select:hover,
-  textarea:hover,
-  .search-bar input:hover {
-    border-color: var(--accent);
+
+  .customers-page input[type="file"]:hover,
+  .customers-page select:hover,
+  .customers-page textarea:hover,
+  .customers-page .search-bar input:hover {
+    border-color: var(--cp-accent);
   }
   
   /* =============================================================================
      Progress Bar
      ============================================================================= */
   .upload-progress {
-    background: var(--bg-card);
+    background: var(--cp-bg-card);
     border-radius: 6px;
     overflow: hidden;
     height: 12px;
@@ -149,7 +149,7 @@
   }
   
   .upload-progress-bar {
-    background: var(--accent);
+    background: var(--cp-accent);
     width: 0%;
     height: 100%;
     transition: width 0.3s;
@@ -168,7 +168,7 @@
      Error Banner
      ============================================================================= */
   .error-message {
-    background: var(--error);
+    background: var(--cp-error);
     color: #ffecec;
     padding: 1rem;
     border-radius: 6px;

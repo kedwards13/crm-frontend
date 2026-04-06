@@ -24,11 +24,11 @@
 }
 
 .dialer-card {
-  background: #0b1220;
-  border: 1px solid #1f2937;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px;
-  color: #e2e8f0;
+  color: var(--text-main);
 }
 
 .dialer-card__header {
@@ -40,9 +40,9 @@
 }
 
 .dialer-pill {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #e0f2fe;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  color: var(--accent-text);
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -51,8 +51,8 @@
 
 .dialer-pill.ghost {
   background: transparent;
-  border-color: #334155;
-  color: #cbd5e1;
+  border-color: var(--border-strong);
+  color: var(--text-muted);
 }
 
 .dialer-form {
@@ -68,9 +68,9 @@
 
 .dialer-form input,
 .dialer-form textarea {
-  background: #0f172a;
-  border: 1px solid #1f2937;
-  color: #f8fafc;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   border-radius: 10px;
   padding: 10px;
 }
@@ -89,10 +89,10 @@
 }
 
 .dialer-row {
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
-  background: #0f172a;
+  background: var(--surface-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -100,8 +100,8 @@
 }
 
 .dialer-row.active {
-  border-color: rgba(34, 211, 238, 0.8);
-  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.18);
+  border-color: rgba(var(--accent-rgb), 0.6);
+  box-shadow: 0 8px 22px rgba(var(--accent-rgb), 0.18);
 }
 
 .dialer-row__title {
@@ -116,9 +116,9 @@
 }
 
 .dialer-chip {
-  background: #111827;
-  border: 1px solid #1f2937;
-  color: #e2e8f0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   padding: 6px 10px;
   border-radius: 8px;
   font-weight: 600;
@@ -126,7 +126,7 @@
 
 .dialer-chip.ghost {
   background: transparent;
-  border-color: #334155;
+  border-color: var(--border-strong);
 }
 
 .dialer-actions {
@@ -143,10 +143,10 @@
 }
 
 .dialer-history__row {
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
-  background: #0f172a;
+  background: var(--surface-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -157,7 +157,7 @@
 }
 
 .muted {
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 @media (max-width: 720px) {

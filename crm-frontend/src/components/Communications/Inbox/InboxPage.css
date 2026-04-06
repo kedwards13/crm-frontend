@@ -3,7 +3,7 @@
 ============================================================ */
 .inbox-page {
   padding: 24px;
-  color: #e5e7eb;
+  color: var(--text-main);
 }
 
 .two-column {
@@ -42,10 +42,10 @@
 .search-group {
   display: flex;
   align-items: center;
-  background: #121417;
+  background: var(--surface-secondary);
   padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid #2e3138;
+  border: 1px solid var(--border);
   width: 100%;
   gap: 8px;
 }
@@ -54,15 +54,15 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: var(--text-main);
   width: 100%;
   font-size: 14px;
 }
 
 .toolbar-actions button {
-  background: #242529;
-  border: 1px solid #34363d;
-  color: #ddd;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
   margin-left: 6px;
   border-radius: 8px;
   padding: 8px 12px;
@@ -72,15 +72,15 @@
 }
 
 .toolbar-actions button:hover {
-  background: #34363d;
+  background: var(--border-strong);
 }
 
 /* ============================================================
    MESSAGE CARDS
 ============================================================ */
 .inbox-item {
-  background: #1d1f23;
-  border: 1px solid #2c2e34;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   padding: 15px 18px;
   border-radius: 12px;
   cursor: pointer;
@@ -88,8 +88,8 @@
 }
 
 .inbox-item:hover {
-  background: #26282d;
-  border-color: #3a3d45;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
 }
 
 .inbox-item.read {
@@ -105,13 +105,13 @@
 
 .from {
   font-weight: 600;
-  color: #f3f4f6;
+  color: var(--text-main);
   font-size: 15px;
 }
 
 .timestamp {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-sub);
 }
 
 /* ------------ Direction + Type Badge ---------------- */
@@ -119,12 +119,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #2b2d33;
-  border: 1px solid #3a3c43;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-strong);
   padding: 3px 7px;
   border-radius: 6px;
   font-size: 11px;
-  color: #d1d5db;
+  color: var(--text-muted);
   margin-left: 6px;
 }
 
@@ -132,12 +132,12 @@
   font-size: 15px;
   margin: 4px 0;
   font-weight: 600;
-  color: #fafafa;
+  color: var(--text-main);
 }
 
 .body-preview {
   font-size: 13px;
-  color: #c9cdd4;
+  color: var(--text-muted);
   max-height: 40px;
   overflow: hidden;
 }
@@ -147,7 +147,7 @@
 ============================================================ */
 .inbox-preview {
   flex: 1;
-  background: #1c1e22;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 22px;
   height: 100%;
@@ -157,27 +157,26 @@
   gap: 18px;
   overflow-y: auto;
   min-height: 0;
-  box-shadow: 0 0 20px rgba(0,0,0,0.25);
+  box-shadow: var(--shadow-0);
 }
 
-/* Remove giant spacing above AI panel */
 .inbox-preview > *:first-child {
   margin-top: -4px;
 }
 
 .inbox-preview h3 {
-  color: #f3f4f6;
+  color: var(--text-main);
   font-size: 18px;
   margin-bottom: -2px;
   margin-top: 4px;
 }
 
 /* ============================================================
-   ANALYZE + PROFILE BUTTONS (side by side)
+   ANALYZE + PROFILE BUTTONS
 ============================================================ */
 .analyze-btn,
 .view-profile-btn {
-  background: #0a84ff;
+  background: var(--accent);
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
@@ -194,11 +193,11 @@
 
 .analyze-btn:hover,
 .view-profile-btn:hover {
-  background: #0666cc;
+  background: var(--accent-dim);
 }
 
 .view-profile-btn {
-  background: #0a6bff;
+  background: var(--accent);
 }
 
 /* ============================================================
@@ -209,20 +208,19 @@
   min-height: 0;
   overflow-y: auto;
   padding: 18px 16px;
-  background: #121417;
+  background: var(--surface-secondary);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border: 1px solid #1f2125;
+  border: 1px solid var(--border);
 }
 
-/* Clean modern scrollbar */
 .thread-history::-webkit-scrollbar {
   width: 8px;
 }
 .thread-history::-webkit-scrollbar-thumb {
-  background: #2d2f33;
+  background: var(--border);
   border-radius: 6px;
 }
 
@@ -238,10 +236,9 @@
   word-wrap: break-word;
 }
 
-/* ===== OUTBOUND ===== */
 .msg-bubble.outbound {
   align-self: flex-end;
-  background: #2763d6;
+  background: var(--accent);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -251,16 +248,15 @@
   position: absolute;
   right: -6px;
   bottom: 0;
-  border-left: 8px solid #2763d6;
+  border-left: 8px solid var(--accent);
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
 }
 
-/* ===== INBOUND ===== */
 .msg-bubble.inbound {
   align-self: flex-start;
-  background: #2f3136;
-  color: #fff;
+  background: var(--bg-panel);
+  color: var(--text-main);
   border-bottom-left-radius: 4px;
 }
 
@@ -269,7 +265,7 @@
   position: absolute;
   left: -6px;
   bottom: 0;
-  border-right: 8px solid #2f3136;
+  border-right: 8px solid var(--bg-panel);
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
 }
@@ -288,100 +284,9 @@
   line-height: 1.48;
 }
 
-/* ============================================================
-   MMS MEDIA
-============================================================ */
 .mms-media img {
   max-width: 260px;
   border-radius: 10px;
   margin-top: 6px;
-  border: 1px solid #3a3c43;
-}
-
-/* ============================================================
-   EMAIL COMPOSER
-============================================================ */
-.email-composer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  backdrop-filter: blur(4px);
-}
-
-.email-composer {
-  background: #1c1e22;
-  width: 620px;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-}
-
-.composer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.composer-field label {
-  font-size: 13px;
-  color: #aaa;
-}
-
-.composer-field input,
-.composer-field textarea {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #121417;
-  color: #fff;
-  padding: 10px;
-  font-size: 14px;
-}
-
-.customer-dropdown {
-  position: absolute;
-  background: #1f2125;
-  border: 1px solid #333;
-  border-radius: 8px;
-  width: 100%;
-  max-height: 180px;
-  overflow-y: auto;
-  margin-top: 4px;
-  z-index: 20;
-}
-
-.dropdown-item {
-  padding: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.dropdown-item:hover {
-  background: #2a2c31;
-}
-
-.send-btn {
-  background: #0a84ff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: background 0.2s;
-}
-
-.send-btn:hover {
-  background: #0666cc;
+  border: 1px solid var(--border-strong);
 }
