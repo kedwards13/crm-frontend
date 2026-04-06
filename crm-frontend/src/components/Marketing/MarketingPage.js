@@ -1,192 +1,199 @@
-// src/components/Marketing/MarketingPage.js
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Campaigns from './Campaigns';
 import {
-  LineChart,
+  Area,
+  AreaChart,
+  Cell,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
 } from 'recharts';
+import Campaigns from './Campaigns';
+import InsightPanel from '../ui/InsightPanel';
+import StatCard from '../ui/StatCard';
+import WidgetGrid from '../ui/WidgetGrid';
+import WidgetPanel from '../ui/WidgetPanel';
+import { Megaphone, MousePointerClick, Target, TrendingUp } from 'lucide-react';
 import './MarketingPage.css';
 
-// Example data
 const socialMetricsData = [
-  { platform: 'Facebook', likes: 1200, shares: 300, comments: 150 },
-  { platform: 'Instagram', likes: 2000, shares: 400, comments: 250 },
-  { platform: 'Twitter', likes: 800, shares: 200, comments: 100 },
-  { platform: 'LinkedIn', likes: 600, shares: 150, comments: 80 },
+  { day: 'Mon', impressions: 2600, clicks: 310, conversions: 42 },
+  { day: 'Tue', impressions: 2900, clicks: 368, conversions: 48 },
+  { day: 'Wed', impressions: 2700, clicks: 355, conversions: 46 },
+  { day: 'Thu', impressions: 3400, clicks: 428, conversions: 62 },
+  { day: 'Fri', impressions: 3620, clicks: 452, conversions: 65 },
+  { day: 'Sat', impressions: 2800, clicks: 320, conversions: 43 },
+  { day: 'Sun', impressions: 2400, clicks: 280, conversions: 35 },
 ];
 
 const adsPerformanceData = [
-  { name: 'Impressions', value: 50000 },
-  { name: 'Clicks', value: 12000 },
-  { name: 'Conversions', value: 800 },
+  { name: 'Search Ads', value: 44 },
+  { name: 'Display Ads', value: 26 },
+  { name: 'Email Flows', value: 18 },
+  { name: 'Referrals', value: 12 },
 ];
 
-const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+const PIE_COLORS = ['var(--accent)', 'var(--accent-secondary)', '#f59e0b', '#8b5cf6'];
 
-const MarketingDashboard = () => {
+function MarketingDashboard() {
+  const stats = useMemo(() => {
+    const impressions = socialMetricsData.reduce((sum, item) => sum + item.impressions, 0);
+    const clicks = socialMetricsData.reduce((sum, item) => sum + item.clicks, 0);
+    const conversions = socialMetricsData.reduce((sum, item) => sum + item.conversions, 0);
+    const ctr = impressions ? ((clicks / impressions) * 100).toFixed(2) : '0.00';
+    return [
+      {
+        label: 'Campaign Reach',
+        value: `${impressions.toLocaleString()}`,
+        meta: 'Weekly impressions',
+        icon: <Megaphone size={15} />,
+      },
+      {
+        label: 'Click Through Rate',
+        value: `${ctr}%`,
+        meta: 'Clicks / impressions',
+        icon: <MousePointerClick size={15} />,
+      },
+      {
+        label: 'Lead Conversions',
+        value: `${conversions}`,
+        meta: 'Campaign-attributed conversions',
+        icon: <Target size={15} />,
+      },
+      {
+        label: 'Pipeline Influence',
+        value: '$42,600',
+        meta: 'Marketing-sourced revenue',
+        icon: <TrendingUp size={15} />,
+      },
+    ];
+  }, []);
+
+  const tasks = useMemo(
+    () => [
+      {
+        id: 'segment-refresh',
+        title: 'Refresh dormant-customer segment',
+        subtitle: 'Trigger reactivation sequence for 74 contacts',
+        value: 'Retention',
+      },
+      {
+        id: 'ads-budget',
+        title: 'Shift 12% budget to highest-ROI channel',
+        subtitle: 'Search ads outperforming display this week',
+        value: 'Budget',
+      },
+      {
+        id: 'landing-audit',
+        title: 'Audit landing page conversion friction',
+        subtitle: 'Drop-off increases after form step two',
+        value: 'Conversion',
+      },
+    ],
+    []
+  );
+
   return (
-    <div className="marketing-page">
-      <h1 className="marketing-title">Marketing Dashboard</h1>
-
-      {/* Social Media Metrics */}
-      <div className="marketing-section">
-        <h2 className="section-subtitle">Social Media Metrics</h2>
-        <div className="chart-wrapper">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={socialMetricsData}>
-              {/* DEFINITIONS for gradients & glow filters */}
-              <defs>
-                {/* Likes Gradient */}
-                <linearGradient id="likesGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#00f2fe" />
-                  <stop offset="100%" stopColor="#ff8c00" />
-                </linearGradient>
-                {/* Shares Gradient */}
-                <linearGradient id="sharesGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#9c49ff" />
-                  <stop offset="100%" stopColor="#ff4397" />
-                </linearGradient>
-                {/* Comments Gradient */}
-                <linearGradient id="commentsGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#54ff00" />
-                  <stop offset="100%" stopColor="#ffa500" />
-                </linearGradient>
-                {/* Glow Filter */}
-                <filter id="glowShadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow
-                    dx="0"
-                    dy="0"
-                    stdDeviation="4"
-                    floodColor="rgba(255,255,255,0.3)"
-                  />
-                </filter>
-              </defs>
-
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-              <XAxis dataKey="platform" stroke="#ccc" />
-              <YAxis stroke="#ccc" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#2a2a3a',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Legend
-                verticalAlign="top"
-                wrapperStyle={{ color: '#fff', marginBottom: 10 }}
-              />
-
-              <Line
-                type="monotone"
-                dataKey="likes"
-                stroke="url(#likesGradient)"
-                strokeWidth={3}
-                filter="url(#glowShadow)"
-                activeDot={{ r: 8 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="shares"
-                stroke="url(#sharesGradient)"
-                strokeWidth={3}
-                filter="url(#glowShadow)"
-              />
-              <Line
-                type="monotone"
-                dataKey="comments"
-                stroke="url(#commentsGradient)"
-                strokeWidth={3}
-                filter="url(#glowShadow)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+    <div className='marketing-page'>
+      <header className='marketing-header'>
+        <div>
+          <p>Growth Command</p>
+          <h1>Marketing Operations</h1>
+          <span>Campaign signal tracking, attribution, and execution recommendations.</span>
         </div>
-      </div>
+      </header>
 
-      {/* Ads Performance */}
-      <div className="marketing-section">
-        <h2 className="section-subtitle">Ads Performance</h2>
-        <div className="chart-wrapper">
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={adsPerformanceData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                {adsPerformanceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#2a2a3a',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Legend
-                verticalAlign="top"
-                wrapperStyle={{ color: '#fff' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <WidgetGrid columns={4} className='marketing-stat-grid'>
+        {stats.map((item) => (
+          <StatCard key={item.label} label={item.label} value={item.value} meta={item.meta} icon={item.icon} />
+        ))}
+      </WidgetGrid>
 
-      {/* AI Insights */}
-      <div className="marketing-section ai-insights">
-        <h2 className="section-subtitle">AI Insights &amp; Content Creation</h2>
-        <div className="orb-container">
-          <div className="ai-orb" />
-        </div>
-        <p>
-          Our AI system has analyzed your recent campaigns and recommends boosting
-          engagement on Instagram by increasing ad spend and using interactive content
-          formats. Explore new content ideas generated by our AI to maximize reach
-          and conversion.
-        </p>
-        <button className="ai-action-btn">Generate AI Content Ideas</button>
+      <div className='marketing-grid'>
+        <WidgetPanel title='Campaign Momentum' subtitle='Impressions, clicks, and conversions'>
+          <div className='marketing-chart'>
+            <ResponsiveContainer width='100%' height={220}>
+              <LineChart data={socialMetricsData}>
+                <CartesianGrid stroke='rgba(148,163,184,0.18)' strokeDasharray='3 3' />
+                <XAxis dataKey='day' stroke='var(--text-sub)' />
+                <YAxis stroke='var(--text-sub)' />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--surface-secondary)',
+                    border: '1px solid var(--panel-border)',
+                    borderRadius: 10,
+                  }}
+                />
+                <Legend />
+                <Line type='monotone' dataKey='impressions' stroke='var(--accent)' strokeWidth={3} dot={false} />
+                <Line type='monotone' dataKey='clicks' stroke='var(--accent-secondary)' strokeWidth={2.5} dot={false} />
+                <Line type='monotone' dataKey='conversions' stroke='#f59e0b' strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </WidgetPanel>
+
+        <WidgetPanel title='Channel Mix' subtitle='Attribution distribution'>
+          <div className='marketing-chart'>
+            <ResponsiveContainer width='100%' height={220}>
+              <PieChart>
+                <Pie data={adsPerformanceData} dataKey='value' nameKey='name' cx='50%' cy='50%' outerRadius={84} label>
+                  {adsPerformanceData.map((entry, index) => (
+                    <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--surface-secondary)',
+                    border: '1px solid var(--panel-border)',
+                    borderRadius: 10,
+                  }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </WidgetPanel>
+
+        <WidgetPanel title='Conversion Trend' subtitle='Weekly conversion lift'>
+          <div className='marketing-chart'>
+            <ResponsiveContainer width='100%' height={220}>
+              <AreaChart data={socialMetricsData}>
+                <CartesianGrid stroke='rgba(148,163,184,0.18)' strokeDasharray='3 3' />
+                <XAxis dataKey='day' stroke='var(--text-sub)' />
+                <YAxis stroke='var(--text-sub)' />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--surface-secondary)',
+                    border: '1px solid var(--panel-border)',
+                    borderRadius: 10,
+                  }}
+                />
+                <Area type='monotone' dataKey='conversions' stroke='var(--accent)' fill='rgba(var(--accent-rgb),0.22)' />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </WidgetPanel>
+
+        <InsightPanel title='Suggested Tasks' items={tasks} />
       </div>
     </div>
   );
-};
+}
 
-const Placeholder = ({ title }) => (
-  <div className="marketing-page">
-    <h1 className="marketing-title">{title}</h1>
-    <p className="muted">This section is ready for the next build-out.</p>
-  </div>
-);
-
-const MarketingPage = () => (
-  <Routes>
-    <Route index element={<MarketingDashboard />} />
-    <Route path="campaigns" element={<Campaigns />} />
-    <Route path="automations" element={<Placeholder title="Automations" />} />
-    <Route path="segments" element={<Placeholder title="Segments" />} />
-    <Route path="forms" element={<Placeholder title="Forms & Pages" />} />
-    <Route path="ai" element={<Placeholder title="AI Studio" />} />
-    <Route path="*" element={<MarketingDashboard />} />
-  </Routes>
-);
-
-export default MarketingPage;
+export default function MarketingPage() {
+  return (
+    <Routes>
+      <Route index element={<MarketingDashboard />} />
+      <Route path='campaigns' element={<Campaigns />} />
+      <Route path='*' element={<MarketingDashboard />} />
+    </Routes>
+  );
+}

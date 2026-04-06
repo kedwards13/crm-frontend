@@ -37,11 +37,12 @@ const base = {
       { path: '/customers',      label: 'Customers',      icon: 'FiUsers' },
       { path: '/schedule',       label: 'Schedule',       icon: 'FiCalendar' },
       { path: '/communication',  label: 'Communications', icon: 'FiPhone' },
-      { path: '/analytics',      label: 'Analytics',      icon: 'FiTrendingUp' },
+      { path: '/marketing',      label: 'Marketing',      icon: 'FiTag' },
       { path: '/finance',        label: 'Finance',        icon: 'FiBarChart2' },
+      { path: '/analytics',      label: 'Analytics',      icon: 'FiTrendingUp' },
       { path: '/revival',       label: 'Revival',        icon: 'FiBarChart2' },
       { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' },
-      { path: '/marketing',      label: 'Marketing',      icon: 'FiTag' },
+      { path: '/team',           label: 'Team',           icon: 'FiUsers' },
       { path: '/settings',       label: 'Settings',       icon: 'FiSettings' },
     ],
   
@@ -66,14 +67,12 @@ const base = {
         { key: 'list',     label: 'Customers',      path: '/customers/list' },
         { key: 'import',   label: 'Import',         path: '/customers/import', roles: ['Admin','Manager'] },
         { key: 'care',     label: 'Customer Care',  path: '/customers/care' },
-        { key: 'ai',       label: 'AI Insights',    path: '/customers/ai' },
+        { key: 'insights', label: 'Customer Insights', path: '/customers/ai' },
         { key: 'revival',  label: 'Revival Scans',  path: '/customers/revival' },
       ],
   
       '/schedule': [
-        { key: 'calendar',    label: 'Calendar',       path: '/schedule/calendar' },
-        { key: 'routing',     label: 'Route Planner',  path: '/schedule/routing' },
-        { key: 'unscheduled', label: 'Unscheduled',    path: '/schedule/unscheduled' },
+        { key: 'dispatch',    label: 'Dispatch',       path: '/schedule/day' },
       ],
   
       '/communication': [
@@ -82,8 +81,6 @@ const base = {
         { key: 'calls',      label: 'Calls',        path: '/communication/calls' },
         { key: 'dialer',     label: 'Dialer',       path: '/communication/dialer' },
         { key: 'email',      label: 'Email',        path: '/communication/email' },
-        { key: 'templates',  label: 'Templates',    path: '/communication/templates' },
-        { key: 'sequences',  label: 'Sequences',    path: '/communication/sequences' },
       ],
     
       '/revival': [
@@ -92,7 +89,7 @@ const base = {
         { key: 'campaigns', label: 'Campaigns', path: '/revival/campaigns' },
         { key: 'planner', label: 'Planner', path: '/revival/planner' },
         { key: 'history', label: 'History', path: '/revival/history' },
-        { key: 'ai', label: 'AI Insights', path: '/revival/ai' }
+        { key: 'opportunities', label: 'Revenue Opportunities', path: '/revival/ai' }
       ],
   
       '/analytics': [
@@ -121,21 +118,26 @@ const base = {
   
       '/marketing': [
         { key: 'campaigns',   label: 'Campaigns',    path: '/marketing/campaigns' },
-        { key: 'automations', label: 'Automations',  path: '/marketing/automations' },
-        { key: 'segments',    label: 'Segments',     path: '/marketing/segments' },
-        { key: 'forms',       label: 'Forms & Pages',path: '/marketing/forms' },
-        { key: 'ai',          label: 'AI Studio',    path: '/marketing/ai' },
       ],
   
       '/settings': [
+        { key: 'smart_config', label: 'Smart Config',    path: '/settings/smart-config' },
         { key: 'company',      label: 'Company Profile', path: '/settings/company' },
         { key: 'team',         label: 'Team & Roles',    path: '/settings/team' },
-        { key: 'preferences',  label: 'Preferences',     path: '/settings/preferences' },
+        { key: 'preferences',  label: 'Theme & Preferences', path: '/settings/preferences' },
         { key: 'branding',     label: 'Branding',        path: '/settings/branding' },
         { key: 'scheduling',   label: 'Scheduling',      path: '/settings/scheduling' },
+        { key: 'documents',    label: 'Document Center', path: '/settings/documents' },
+        { key: 'voice_sms',    label: 'Voice & SMS',     path: '/settings/phones' },
         { key: 'integrations', label: 'Integrations',    path: '/settings/integrations' },
+        { key: 'automations',  label: 'Automation Rules', path: '/settings/automations' },
         { key: 'security',     label: 'Security',        path: '/settings/security' },
         ],
+
+      '/team': [
+        { key: 'members', label: 'Team Directory', path: '/team' },
+        { key: 'routing', label: 'Call Routing', path: '/settings/team' },
+      ],
     },
   
     // Optional data schemas & filters (can be used to render tables/columns/forms)
@@ -313,10 +315,7 @@ const base = {
         ],
   
         '/schedule': [
-          { key: 'calendar', label: 'Calendar',        path: '/schedule/calendar' },
-          { key: 'routes',   label: 'Monthly Routes',  path: '/schedule/routes' },
-          { key: 'map',      label: 'Map View',        path: '/schedule/map' },
-          { key: 'pool',     label: 'Job Pool',        path: '/schedule/pool' },
+          { key: 'dispatch', label: 'Dispatch',        path: '/schedule/day' },
         ],
   
         // Deep operations vertical (pest)
@@ -329,6 +328,7 @@ const base = {
         ],
 
         '/settings': [
+            { key: 'smart_config', label: 'Smart Config',            path: '/settings/smart-config' },
             { key: 'company',      label: 'Company Profile',        path: '/settings/company' },
             { key: 'team',         label: 'Team & Roles',           path: '/settings/team' },
             { key: 'preferences',  label: 'Preferences',            path: '/settings/preferences' },
@@ -353,6 +353,54 @@ const base = {
         staffLabel: 'Technician',
         locationLabel: 'Service Address',
         defaultDurationMins: 90,
+      },
+      features: {
+        ...base.features,
+        subscriptions: false,
+        operations: true,
+      },
+    },
+
+    landscaping: {
+      labels: {
+        customers: 'Customers',
+        leads: 'Inbound Requests',
+        deals: 'Service Agreements',
+      },
+      nav: [
+        { path: '/dashboard',     label: 'Dashboard',      icon: 'FiHome' },
+        { path: '/leads',         label: 'Leads',          icon: 'FiFileText' },
+        { path: '/customers',     label: 'Customers',      icon: 'FiUsers' },
+        { path: '/schedule',      label: 'Schedule',       icon: 'FiCalendar' },
+        { path: '/communication', label: 'Communications', icon: 'FiPhone' },
+        { path: '/analytics',     label: 'Analytics',      icon: 'FiTrendingUp' },
+        { path: '/finance',       label: 'Finance',        icon: 'FiBarChart2' },
+        { path: '/marketing',     label: 'Marketing',      icon: 'FiTag' },
+        { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' },
+        { path: '/settings',      label: 'Settings',       icon: 'FiSettings' },
+      ],
+      subnav: {
+        ...base.subnav,
+        '/schedule': [
+          { key: 'dispatch', label: 'Dispatch',   path: '/schedule/day' },
+        ],
+        '/operations': [
+          { key: 'crews',      label: 'Crews',        path: '/operations/technicians' },
+          { key: 'inventory',  label: 'Inventory',    path: '/operations/inventory' },
+          { key: 'fleet',      label: 'Fleet',        path: '/operations/fleet' },
+          { key: 'training',   label: 'Training',     path: '/operations/training' },
+          { key: 'equipment',  label: 'Equipment',    path: '/operations/compliance' },
+        ],
+      },
+      fieldSchemas: {
+        leads: ['name','phone_number','email','service','service_address','message','created_at'],
+        customers: ['name','email','phone','service_plan','last_service','next_service'],
+      },
+      scheduling: {
+        serviceLabel: 'Service Program',
+        staffLabel: 'Crew Lead',
+        locationLabel: 'Property Address',
+        defaultDurationMins: 120,
       },
       features: {
         ...base.features,
@@ -535,10 +583,14 @@ const base = {
     return key ? (cfg.labels?.[key] ?? industries.general.labels[key]) : (cfg.labels || industries.general.labels);
   }
   
-  export function getNavForIndustry(industryKey, userRole = 'Member') {
-    const cfg = getIndustryConfig(industryKey);
-    return filterByRole(cfg.nav || industries.general.nav, userRole);
+export function getNavForIndustry(industryKey, userRole = 'Member') {
+  const cfg = getIndustryConfig(industryKey);
+  const nav = filterByRole(cfg.nav || industries.general.nav, userRole);
+  if (!nav.some((item) => item.path === '/team')) {
+    nav.splice(Math.max(nav.length - 1, 0), 0, { path: '/team', label: 'Team', icon: 'FiUsers' });
   }
+  return nav;
+}
   
   export function getSubNavForPage(basePath, industryKey, userRole = 'Member') {
     const cfg = getIndustryConfig(industryKey);
