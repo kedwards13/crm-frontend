@@ -2,6 +2,20 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Abon CRM Frontend (Audit Snapshot)
+- Entry point: `src/index.js` mounts `src/App.js` (React Router).
+- Auth + tenant selection:
+  - Tokens are stored in `localStorage` (`token`, `refresh`, `token_expiry`) and tenant context is stored via `helpers/tenantHelpers`.
+  - Global request wiring lives in `src/setupAxios.js` (adds `Authorization` + `X-Tenant-ID`; redirects to `/login` on `401` and `/select-account` on `403`).
+- Communications + webphone:
+  - `src/components/Communications/CommunicationsPage.jsx` wires WebRTC calling.
+  - Voice device lifecycle is wrapped in `src/services/voiceDevice.js` (Twilio `@twilio/voice-sdk` `Device`).
+  - CRM issues a client JWT via `POST /voice/webrtc/register` (CRM API), then the browser registers with Voice Service at `POST https://voice.abon.ai/voice/webrtc/register`.
+- Scheduling UI is under `src/components/Schedule/*` and consumes `src/api/schedulingApi.js`.
+- Pipeline board is `src/components/Leads/Pipeline.js` and depends on backend `pipeline_stage` truth.
+- Customer detail relies on backend hydration of quotes, leads, appointments, and jobs.
+- Scanner and quote detail are expected to preserve partial-review behavior and contract-conversion semantics.
+
 ## Available Scripts
 
 In the project directory, you can run:

@@ -1,0 +1,582 @@
+/* ============================================================
+   QUOTE DETAIL + CREATE
+   Production styling — uses design tokens from theme/tokens.css
+   so light & dark themes both render correctly.
+   ============================================================ */
+
+.quote-detail-page {
+  min-height: 100%;
+  padding: 28px 32px 48px;
+  background: transparent;  /* parent .content-area already has the app gradient */
+  color: var(--text-main);
+}
+
+.quote-detail-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.quote-detail-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quote-detail-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Cards (hero, grid cards, send modal) ---------- */
+.quote-detail-hero,
+.quote-detail-card {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--sh-1);
+  backdrop-filter: blur(var(--glass-blur, 14px));
+  color: var(--text-main);
+}
+
+.quote-detail-hero {
+  border-radius: var(--r-3, 22px);
+  padding: 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.quote-detail-hero > div:first-child {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.quote-detail-eyebrow {
+  margin: 0 0 8px;
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.quote-detail-hero h1 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  line-height: 1.1;
+  font-weight: 700;
+  word-wrap: break-word;
+}
+
+.quote-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--text-2);
+  font-size: 0.95rem;
+}
+
+/* ---------- Status pills ---------- */
+.quote-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  background: var(--bg-panel);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+.quote-status-pill.is-sent,
+.quote-status-pill.is-viewed {
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-text, var(--accent));
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+.quote-status-pill.is-accepted,
+.quote-status-pill.is-converted,
+.quote-status-pill.is-completed,
+.quote-status-pill.is-active {
+  background: var(--success-dim);
+  color: var(--success);
+  border-color: rgba(50, 206, 150, 0.32);
+}
+
+.quote-status-pill.is-rejected {
+  background: rgba(248, 113, 113, 0.16);
+  color: var(--danger);
+  border-color: rgba(248, 113, 113, 0.32);
+}
+
+.quote-status-pill.is-draft {
+  background: var(--warning-dim);
+  color: var(--warning);
+  border-color: rgba(233, 190, 109, 0.34);
+}
+
+/* ---------- Total card (right of hero) ---------- */
+.quote-total-card {
+  min-width: 220px;
+  flex: 0 0 auto;
+  border-radius: var(--r-2, 18px);
+  padding: 22px 24px;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(var(--accent-rgb), 0.08));
+  border: 1px solid rgba(var(--accent-rgb), 0.34);
+  color: var(--text-main);
+}
+
+.quote-total-card span {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-sub);
+}
+
+.quote-total-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Two-column detail grid ---------- */
+.quote-detail-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quote-detail-card {
+  border-radius: var(--r-3, 22px);
+  padding: 24px;
+}
+
+.quote-detail-card h2 {
+  margin: 0 0 14px;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.quote-detail-kv {
+  display: grid;
+  gap: 14px;
+}
+
+.quote-detail-kv div {
+  display: grid;
+  gap: 4px;
+}
+
+.quote-detail-kv dt {
+  color: var(--text-sub);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.quote-detail-kv dd {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* ---------- Section heads ---------- */
+.quote-detail-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.quote-detail-section-head h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.quote-detail-section-head p {
+  margin: 4px 0 0;
+  color: var(--text-sub);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+/* ---------- Line items table ---------- */
+.quote-detail-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-1, 12px);
+  border: 1px solid var(--border);
+}
+
+.quote-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.quote-detail-table th,
+.quote-detail-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.quote-detail-table th {
+  color: var(--text-sub);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--bg-panel);
+  white-space: nowrap;
+}
+
+.quote-detail-table td {
+  color: var(--text-main);
+  font-size: 0.94rem;
+}
+
+.quote-detail-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.quote-detail-table tfoot td {
+  border-top: 1px solid var(--border-strong);
+  border-bottom: none;
+  padding-top: 12px;
+  color: var(--text-main);
+  font-weight: 600;
+  background: var(--bg-panel);
+}
+
+.quote-detail-empty {
+  color: var(--text-sub);
+  text-align: center;
+  padding: 24px;
+}
+
+/* ---------- Copy blocks ---------- */
+.quote-detail-notes,
+.quote-detail-copy,
+.quote-detail-error {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.quote-detail-error {
+  color: var(--danger);
+}
+
+/* ---------- Form fields (create + edit) ---------- */
+.quote-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.quote-edit-field {
+  display: grid;
+  gap: 8px;
+}
+
+.quote-edit-field span {
+  color: var(--text-sub);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.quote-edit-field input,
+.quote-edit-field textarea,
+.quote-edit-field select {
+  width: 100%;
+  border-radius: var(--r-1, 10px);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  min-height: 44px;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.quote-edit-field textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.quote-edit-field input:focus-visible,
+.quote-edit-field textarea:focus-visible,
+.quote-edit-field select:focus-visible,
+.quote-create-input:focus-visible,
+.quote-send-field input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.24);
+}
+
+.quote-edit-field-full {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Line-item inline inputs ---------- */
+.quote-create-input {
+  width: 100%;
+  border-radius: var(--r-1, 10px);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  min-height: 40px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.quote-create-input-sm {
+  width: 110px;
+}
+
+.quote-remove-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--danger);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.quote-remove-btn:hover {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* ---------- Customer autocomplete dropdown ---------- */
+.quote-customer-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  border-radius: var(--r-2, 14px);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--sh-2);
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 6px;
+}
+
+.quote-customer-option {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font: inherit;
+  transition: background .12s ease;
+}
+
+.quote-customer-option:last-child {
+  border-bottom: 0;
+}
+
+.quote-customer-option:hover,
+.quote-customer-option:focus-visible {
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.quote-customer-option strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.quote-customer-option span {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+}
+
+/* ---------- Attachments (legacy; photo gallery uses inline styles) ---------- */
+.quote-attachment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-attachment-link {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 0.92rem;
+}
+
+.quote-attachment-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Send modal ---------- */
+.quote-send-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 7, 18, 0.6);
+  backdrop-filter: blur(6px);
+  padding: 24px;
+}
+
+.quote-send-modal {
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--r-3, 22px);
+  padding: 28px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--sh-2);
+  color: var(--text-main);
+}
+
+.quote-send-modal h3 {
+  margin: 0 0 18px;
+  color: var(--text-main);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.quote-send-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quote-send-tab {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--r-1, 12px);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-sub);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.15s ease;
+}
+
+.quote-send-tab:hover {
+  color: var(--text-main);
+  background: var(--bg-hover);
+}
+
+.quote-send-tab.is-active {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.4);
+  color: var(--accent);
+}
+
+.quote-send-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.quote-send-field span {
+  color: var(--text-sub);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.quote-send-field input {
+  width: 100%;
+  border-radius: var(--r-1, 12px);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 1rem;
+  min-height: 44px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.quote-send-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 880px) {
+  .quote-detail-page {
+    padding: 20px 16px 36px;
+  }
+
+  .quote-detail-hero {
+    padding: 22px;
+    flex-direction: column;
+  }
+
+  .quote-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-total-card {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .quote-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-detail-table th,
+  .quote-detail-table td {
+    padding: 12px 10px;
+  }
+}

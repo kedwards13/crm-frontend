@@ -1,10 +1,12 @@
 import React from 'react';
+import WidgetPanel from '../ui/WidgetPanel';
 
 const CustomerInsights = () => {
   return (
-    <div className="ai-insights-container">
-      <h2>AI Insights</h2>
-      <p>Smart suggestions, engagement scores, churn risk, etc.</p>
+    <div className='customers-dashboard'>
+      <WidgetPanel title='Customer Insights' subtitle='Smart suggestions, engagement scores, and churn risk'>
+        <p className='customers-note'>Operational AI insights are surfaced in the right control panel based on context.</p>
+      </WidgetPanel>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard';
 import CustomersPage from './components/Customers/CustomersPage';
 import LeadsPage from './components/Leads/LeadsPage';
-import AnalyticsPage from './components/Analytics/AnalyticsPage';
+import AnalyticsRouter from './components/Analytics/AnalyticsRouter';
 import SchedulingDashboard from './components/Schedule/SchedulingDashboard';
 import CommunicationsDashboard from './components/Communications/CommunicationsDashboard';
 import Settings from './components/Settings/Settings';
@@ -28,7 +28,7 @@ const AuthenticatedApp = () => {
           <Route path="communication/*" element={<CommunicationsDashboard />} />
           <Route path="finance" element={<FinancePage />} />
           <Route path="marketing" element={<MarketingPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="analytics/*" element={<AnalyticsRouter />} />
           <Route path="settings/team" element={<TeamManagement />} />
           <Route path="settings/*" element={<Settings />} />
           <Route path="*" element={<div>404 - Page Not Found</div>} />

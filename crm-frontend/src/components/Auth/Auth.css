@@ -165,7 +165,7 @@
 }
 
 .primary-link {
-  color: #ffffff;
+  color: var(--accent-ink, #ffffff);
   background: var(--primary);
   padding: 12px 16px;
   border-radius: var(--radius-sm);
@@ -223,7 +223,7 @@
   height: 44px;
   border-radius: var(--radius-sm);
   background: var(--primary);
-  color: #fff;
+  color: var(--accent-ink, #fff);
   display: grid;
   place-items: center;
   font-weight: 800;
@@ -327,7 +327,7 @@
   padding: 14px;
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--accent-ink, #ffffff);
   background: var(--primary);
   border: none;
   border-radius: var(--radius-sm);

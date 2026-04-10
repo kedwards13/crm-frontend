@@ -1,87 +1,123 @@
-// src/components/PhoneDialer.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  fetchCallLogs,
+  startBrowserOutboundCall,
+} from '../../../api/communications';
 import './PhoneDialer.css';
-import { API_BASE_URL } from '../../../config/env';
+
+const toRows = (value) =>
+  Array.isArray(value) ? value : Array.isArray(value?.results) ? value.results : [];
+
+const cleanDigits = (value) => String(value || '').replace(/\D+/g, '');
+
+const toE164 = (value) => {
+  const digits = cleanDigits(value);
+  if (!digits) return '';
+  if (digits.startsWith('1') && digits.length === 11) return `+${digits}`;
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length >= 11) return `+${digits}`;
+  return '';
+};
+
+const toLabel = (value) => {
+  const raw = String(value || '').trim();
+  return raw ? raw.replace(/_/g, ' ') : 'unknown';
+};
+
+const formatTime = (iso) => {
+  if (!iso) return 'Unknown time';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  return date.toLocaleString();
+};
 
 const PhoneDialer = () => {
-  // Input & status
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [fromNumber, setFromNumber] = useState('');
   const [callStatus, setCallStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // Call log state
   const [callLog, setCallLog] = useState([]);
-  // Stats state (placeholder counts)
-  const [stats, setStats] = useState({
-    todayCalls: 5,
-    voicemails: 2,
-    missedCalls: 1,
-  });
+
+  const loadCalls = async () => {
+    try {
+      const data = await fetchCallLogs({ limit: 25 });
+      setCallLog(toRows(data));
+    } catch {
+      setCallLog([]);
+    }
+  };
+
+  useEffect(() => {
+    loadCalls();
+  }, []);
+
+  const stats = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayCalls = callLog.filter((row) => {
+      const date = new Date(row?.created_at || row?.started_at || row?.timestamp || 0);
+      return !Number.isNaN(date.getTime()) && date.toDateString() === today;
+    }).length;
+    const voicemails = callLog.filter((row) =>
+      String(row?.outcome || row?.status || '').toLowerCase().includes('voicemail')
+    ).length;
+    const missedCalls = callLog.filter((row) =>
+      ['no_answer', 'missed', 'failed'].includes(
+        String(row?.outcome || row?.status || '').toLowerCase()
+      )
+    ).length;
+    return { todayCalls, voicemails, missedCalls };
+  }, [callLog]);
 
   const handleCall = async () => {
-    if (!phoneNumber.trim()) return;
+    const to = toE164(phoneNumber);
+    const from = toE164(fromNumber);
+
+    if (!to) {
+      setError('Enter a valid destination number.');
+      return;
+    }
+    if (!from) {
+      setError('Enter a valid caller ID number.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setCallStatus('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/comm/inbound-call/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: JSON.stringify({ phoneNumber }),
+      const data = await startBrowserOutboundCall({
+        to_number: to,
+        from_number: from,
       });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-      const data = await response.json();
-      setCallStatus(`Call initiated. Call SID: ${data.call_sid}`);
-      
-      // Update stats as needed (e.g., increment today's call count)
-      setStats(prev => ({
-        ...prev,
-        todayCalls: prev.todayCalls + 1,
-      }));
-      
-      // Add the call record to the log
-      setCallLog(prev => ([
-        { number: phoneNumber, time: new Date().toLocaleTimeString(), status: 'Initiated' },
-        ...prev,
-      ]));
+      setCallStatus(`Call initiated${data?.call_sid ? ` (${data.call_sid})` : ''}`);
+      setPhoneNumber('');
+      await loadCalls();
     } catch (err) {
-      console.error("Error making call:", err);
-      setError("Error initiating call. Please try again.");
+      setError(err?.response?.data?.detail || err?.message || 'Error initiating call.');
     } finally {
       setLoading(false);
-      setPhoneNumber('');
     }
   };
 
-  // Simulate fetching initial call log on mount
-  useEffect(() => {
-    const sampleRecords = [
-      { number: '(402) 625-3446', time: '10:15 AM', status: 'Voicemail Recorded' },
-      { number: '+15551234567', time: '09:30 AM', status: 'Call Back Required' }
-    ];
-    setCallLog(sampleRecords);
-  }, []);
-
-  // Handle clicking a call record (e.g., to initiate a callback)
   const handleCallBack = (record) => {
-    console.log(`Calling back ${record.number}`);
-    // Optionally add your callback functionality here
+    const next = record?.to_number || record?.counterparty_number || '';
+    setPhoneNumber(next);
   };
 
   return (
     <div className="phone-dialer-container">
-      {/* Dialer Card */}
       <div className="dialer-card">
         <h2 className="dialer-title">Phone Dialer</h2>
         <div className="dialer-input">
+          <input
+            type="tel"
+            placeholder="From (caller ID)"
+            value={fromNumber}
+            onChange={(e) => setFromNumber(e.target.value)}
+            className="phone-input"
+          />
           <input
             type="tel"
             placeholder="Enter phone number"
@@ -93,11 +129,10 @@ const PhoneDialer = () => {
             {loading ? 'Calling...' : 'Call'}
           </button>
         </div>
-        {callStatus && <div className="status-message">{callStatus}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {callStatus ? <div className="status-message">{callStatus}</div> : null}
+        {error ? <div className="error-message">{error}</div> : null}
       </div>
 
-      {/* Stats Row */}
       <div className="phone-stats-row">
         <div className="phone-stat-block">
           <div className="stat-count count-new">{stats.todayCalls}</div>
@@ -113,7 +148,6 @@ const PhoneDialer = () => {
         </div>
       </div>
 
-      {/* Call Log */}
       <div className="call-log">
         <h3 className="call-log-title">Call Log</h3>
         {callLog.length === 0 ? (
@@ -121,16 +155,23 @@ const PhoneDialer = () => {
         ) : (
           <ul className="call-log-list">
             {callLog.map((record, index) => (
-              <li key={index} className="call-record" onClick={() => handleCallBack(record)}>
+              <li key={record?.call_sid || index} className="call-record" onClick={() => handleCallBack(record)}>
                 <div className="record-details">
-                  <span className="record-number">{record.number}</span>
-                  <span className="record-time">{record.time}</span>
+                  <span className="record-number">
+                    {record?.to_number || record?.counterparty_number || 'Unknown number'}
+                  </span>
+                  <span className="record-time">
+                    {formatTime(record?.created_at || record?.started_at || record?.timestamp)}
+                  </span>
                 </div>
-                <div className="record-status">{record.status}</div>
-                <button className="call-back-btn" onClick={(e) => {
-                  e.stopPropagation();
-                  handleCallBack(record);
-                }}>
+                <div className="record-status">{toLabel(record?.outcome || record?.status)}</div>
+                <button
+                  className="call-back-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCallBack(record);
+                  }}
+                >
                   Call Back
                 </button>
               </li>

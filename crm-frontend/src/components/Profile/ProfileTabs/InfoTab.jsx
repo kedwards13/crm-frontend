@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { memo, useMemo, useState } from "react";
 import StreetViewEmbed from "../../../utils/StreetViewEmbed";
 import { toast } from "react-toastify";
 import { enrichCustomer } from "../../../api/customersApi";
@@ -14,7 +14,105 @@ import {
   getOrderAmountValue,
   formatCurrency,
 } from "../../../utils/orderUtils";
-import "./info-tab.css";
+import "./Info-tab.css";
+
+function readFieldValue(entity, name, fallback = "") {
+  if (!entity || !name) return fallback ?? "";
+
+  const candidates = [
+    entity[name],
+    entity.extended_fields?.[name],
+    entity.attributes?.[name],
+    entity.intake_attributes?.[name],
+  ];
+
+  for (const value of candidates) {
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+
+  return fallback ?? "";
+}
+
+function cleanText(value) {
+  return String(value || "").trim();
+}
+
+function buildAddressQuery(entity) {
+  const street = cleanText(readFieldValue(entity, "address"));
+  const city = cleanText(readFieldValue(entity, "city"));
+  const state = cleanText(readFieldValue(entity, "state"));
+  const zip = cleanText(readFieldValue(entity, "zip_code"));
+  const county = cleanText(readFieldValue(entity, "county"));
+  const country = cleanText(readFieldValue(entity, "country"));
+
+  const locality = [city, state, zip].filter(Boolean).join(" ");
+  return [street, locality, county, country].filter(Boolean).join(", ");
+}
+
+const InfoField = memo(function InfoField({
+  label,
+  name,
+  value,
+  onValueChange,
+  type = "text",
+  textarea = false,
+  className = "",
+  options,
+}) {
+  return (
+    <div className={`info-field ${className}`.trim()}>
+      <label className="info-label" htmlFor={`field-${name}`}>
+        {label}
+      </label>
+
+      {options ? (
+        <select
+          id={`field-${name}`}
+          className="info-input"
+          value={value}
+          onChange={(event) => onValueChange(name, event.target.value)}
+        >
+          <option value="">Select...</option>
+          {options.map((option) => (
+            <option
+              key={option.value || option}
+              value={option.value || option}
+            >
+              {option.label || option}
+            </option>
+          ))}
+        </select>
+      ) : textarea ? (
+        <textarea
+          id={`field-${name}`}
+          className="info-input info-textarea"
+          value={value}
+          onChange={(event) => onValueChange(name, event.target.value)}
+        />
+      ) : (
+        <input
+          id={`field-${name}`}
+          type={type}
+          className="info-input"
+          value={value}
+          onChange={(event) => onValueChange(name, event.target.value)}
+        />
+      )}
+    </div>
+  );
+});
+
+const InfoMapPanel = memo(function InfoMapPanel({ addressQuery }) {
+  if (!addressQuery) {
+    return (
+      <div className="info-map-empty">
+        Add the property address to preview the location.
+      </div>
+    );
+  }
+
+  return <StreetViewEmbed address={addressQuery} />;
+});
 
 export default function InfoTab({ lead, formData = {}, onChange, preferences }) {
   const [loadingEnrich, setLoadingEnrich] = useState(false);
@@ -25,7 +123,8 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
   );
   const isLoading = !lead;
 
-  const isCustomer = safeLead.object === "customer" || safeLead.customer_id != null;
+  const isCustomer =
+    safeLead.object === "customer" || safeLead.customer_id != null;
   const tenantIndustry =
     preferences?.industry || safeLead.industry || getIndustry("general");
   const uiConfig = getIndustryUIConfig(tenantIndustry, safeLead);
@@ -39,11 +138,10 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
   }, [orders, history]);
   const constraints = useMemo(() => extractConstraints(safeLead), [safeLead]);
   const rawNotes =
-    safeLead.notes ||
-    safeLead.special_instructions ||
-    safeLead.delivery_notes ||
-    safeLead.instructions ||
-    "";
+    readFieldValue(safeLead, "notes") ||
+    readFieldValue(safeLead, "special_instructions") ||
+    readFieldValue(safeLead, "delivery_notes") ||
+    readFieldValue(safeLead, "instructions");
   const opsNotes = Array.isArray(rawNotes)
     ? rawNotes.filter(Boolean).join(", ")
     : typeof rawNotes === "string"
@@ -51,13 +149,15 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
     : "";
   const hasConstraints =
     constraints.allergies.length > 0 || constraints.dietary.length > 0;
-  const hasNotes = Boolean(opsNotes);
   const historyOrders =
     history.length > 0 ? history : orderSummary.buckets.Fulfilled || [];
   const showOrderOps =
     isCustomer &&
     uiConfig.primaryObject === "orders" &&
-    (orders.length > 0 || historyOrders.length > 0 || hasConstraints || hasNotes);
+    (orders.length > 0 ||
+      historyOrders.length > 0 ||
+      hasConstraints ||
+      Boolean(opsNotes));
 
   const upcomingDates = useMemo(() => {
     const upcoming = [
@@ -73,10 +173,6 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
     return dates;
   }, [orderSummary.buckets]);
 
-  const updateField = (field, value) => {
-    onChange({ target: { name: field, value } });
-  };
-
   const dynamicFields = useMemo(() => {
     const overrides =
       preferences?.ai_mapping_overrides?.lead_form ||
@@ -89,132 +185,55 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
     }));
   }, [preferences]);
 
-  const Field = ({
-    label,
-    name,
-    type = "text",
-    textarea = false,
-    className = "",
-    options,
-    fallback,
-  }) => {
-    const value = safeLead[name] ?? fallback ?? "";
+  const addressQuery = useMemo(() => buildAddressQuery(safeLead), [safeLead]);
+  const leadNotes = cleanText(
+    readFieldValue(safeLead, "notes", readFieldValue(safeLead, "message"))
+  );
+  const leadSummary = cleanText(readFieldValue(safeLead, "summary"));
+  const leadStatus = cleanText(readFieldValue(safeLead, "status", "new"));
+  const leadAttribution = useMemo(() => {
+    const raw = safeLead?.attributes?.attribution;
+    return raw && typeof raw === "object" ? raw : null;
+  }, [safeLead]);
+  const mapHref = addressQuery
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        addressQuery
+      )}`
+    : "";
 
-    return (
-      <div className={`info-field ${className}`}>
-        <label className="info-label">{label}</label>
-
-        {options ? (
-          <select
-            className="info-input"
-            value={value}
-            onChange={(e) => updateField(name, e.target.value)}
-          >
-            <option value="">Select...</option>
-            {options.map((option) => (
-              <option
-                key={option.value || option}
-                value={option.value || option}
-              >
-                {option.label || option}
-              </option>
-            ))}
-          </select>
-        ) : textarea ? (
-          <textarea
-            className="info-input info-textarea"
-            value={value}
-            onChange={(e) => updateField(name, e.target.value)}
-          />
-        ) : (
-          <input
-            type={type}
-            className="info-input"
-            value={value}
-            onChange={(e) => updateField(name, e.target.value)}
-          />
-        )}
-      </div>
-    );
+  const updateField = (field, value) => {
+    onChange?.({ target: { name: field, value } });
   };
-
-  if (isLoading) {
-    return <div className="info-empty">Loading...</div>;
-  }
-
-  if (safeLead.object === "lead") {
-    const statusOptions = [
-      { value: "new", label: "New" },
-      { value: "contacted", label: "Contacted" },
-      { value: "qualified", label: "Qualified" },
-      { value: "scheduled", label: "Scheduled" },
-      { value: "closed", label: "Closed" },
-      { value: "dead", label: "Dead" },
-    ];
-
-    return (
-      <div className="info-tab">
-        <div className="info-main-row">
-          <div className="info-main-left">
-            <div className="info-group">
-              <div className="info-section-title">Lead Details</div>
-              <div className="info-grid-2">
-                <Field label="First Name" name="first_name" />
-                <Field label="Last Name" name="last_name" />
-                <Field label="Display Name" name="name" />
-                <Field label="Status" name="status" options={statusOptions} />
-                <Field
-                  label="Primary Email"
-                  name="primary_email"
-                  type="email"
-                  fallback={safeLead.email}
-                />
-                <Field
-                  label="Primary Phone"
-                  name="primary_phone"
-                  type="tel"
-                  fallback={safeLead.phone_number}
-                />
-                <Field label="Industry" name="industry" />
-                <Field label="Address" name="address" className="field-wide" />
-              </div>
-              {dynamicFields.length > 0 && (
-                <div className="info-grid-2">
-                  {dynamicFields.map((field) => (
-                    <Field
-                      key={field.name}
-                      label={field.label}
-                      name={field.name}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="info-main-right">
-            <div className="info-group">
-              <div className="info-section-title">Summary</div>
-              <div className="info-grid-2">
-                <Field label="Summary" name="summary" textarea className="field-wide" />
-                <Field label="Priority Score" name="priority_score" type="number" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const IndustryFields = () => {
     switch (safeLead.industry) {
       case "landscaping":
         return (
           <>
-            <Field label="Project Type" name="project_type" />
-            <Field label="Square Footage" name="square_footage" />
-            <Field label="Budget" name="budget" />
-            <Field label="Deadline" name="deadline" />
+            <InfoField
+              label="Project Type"
+              name="project_type"
+              value={readFieldValue(safeLead, "project_type")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Square Footage"
+              name="square_footage"
+              value={readFieldValue(safeLead, "square_footage")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Budget"
+              name="budget"
+              value={readFieldValue(safeLead, "budget")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Deadline"
+              name="deadline"
+              value={readFieldValue(safeLead, "deadline")}
+              onValueChange={updateField}
+            />
           </>
         );
 
@@ -222,30 +241,106 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
       case "pest_control":
         return (
           <>
-            <Field label="Service Type" name="service_type" />
-            <Field label="Irrigation Type" name="irrigation_type" />
-            <Field label="Last Treatment" name="last_treatment" />
-            <Field label="Notes" name="notes" textarea />
+            <InfoField
+              label="Service Type"
+              name="service_type"
+              value={readFieldValue(
+                safeLead,
+                "service_type",
+                readFieldValue(safeLead, "service")
+              )}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Irrigation Type"
+              name="irrigation_type"
+              value={readFieldValue(safeLead, "irrigation_type")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Last Treatment"
+              name="last_treatment"
+              value={readFieldValue(safeLead, "last_treatment")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Notes"
+              name="notes"
+              value={readFieldValue(
+                safeLead,
+                "notes",
+                readFieldValue(safeLead, "message")
+              )}
+              onValueChange={updateField}
+              textarea
+            />
           </>
         );
 
       case "cleaning":
         return (
           <>
-            <Field label="Cleaning Type" name="cleaning_type" />
-            <Field label="Frequency" name="frequency" />
-            <Field label="Pets" name="pets" />
-            <Field label="Notes" name="notes" textarea />
+            <InfoField
+              label="Cleaning Type"
+              name="cleaning_type"
+              value={readFieldValue(safeLead, "cleaning_type")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Frequency"
+              name="frequency"
+              value={readFieldValue(safeLead, "frequency")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Pets"
+              name="pets"
+              value={readFieldValue(safeLead, "pets")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Notes"
+              name="notes"
+              value={readFieldValue(
+                safeLead,
+                "notes",
+                readFieldValue(safeLead, "message")
+              )}
+              onValueChange={updateField}
+              textarea
+            />
           </>
         );
 
       case "real_estate":
         return (
           <>
-            <Field label="Property Type" name="property_type" />
-            <Field label="Bedrooms" type="number" name="number_of_bedrooms" />
-            <Field label="Bathrooms" type="number" name="number_of_bathrooms" />
-            <Field label="Condition" name="condition" />
+            <InfoField
+              label="Property Type"
+              name="property_type"
+              value={readFieldValue(safeLead, "property_type")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Bedrooms"
+              type="number"
+              name="number_of_bedrooms"
+              value={readFieldValue(safeLead, "number_of_bedrooms")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Bathrooms"
+              type="number"
+              name="number_of_bathrooms"
+              value={readFieldValue(safeLead, "number_of_bathrooms")}
+              onValueChange={updateField}
+            />
+            <InfoField
+              label="Condition"
+              name="condition"
+              value={readFieldValue(safeLead, "condition")}
+              onValueChange={updateField}
+            />
           </>
         );
 
@@ -270,6 +365,308 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
       toast.error("Enrichment error.");
     }
   };
+
+  if (isLoading) {
+    return <div className="info-empty">Loading...</div>;
+  }
+
+  if (safeLead.object === "lead") {
+    const statusOptions = [
+      { value: "new", label: "New" },
+      { value: "contacted", label: "Contacted" },
+      { value: "qualified", label: "Qualified" },
+      { value: "scheduled", label: "Scheduled" },
+      { value: "closed", label: "Closed" },
+      { value: "dead", label: "Dead" },
+    ];
+
+    return (
+      <div className="info-tab">
+        <div className="info-main-row info-main-row--lead">
+          <div className="info-main-left">
+            <div className="info-group info-group--dense">
+              <div className="info-section-header">
+                <div>
+                  <div className="info-section-eyebrow">Lead record</div>
+                  <div className="info-section-title">Customer Information</div>
+                </div>
+                <span className="info-status-chip">
+                  {leadStatus ? leadStatus.toUpperCase() : "NEW"}
+                </span>
+              </div>
+
+              <div className="info-grid-2 info-grid-tight">
+                <InfoField
+                  label="First Name"
+                  name="first_name"
+                  value={readFieldValue(safeLead, "first_name")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Last Name"
+                  name="last_name"
+                  value={readFieldValue(safeLead, "last_name")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Company Name"
+                  name="company_name"
+                  value={readFieldValue(safeLead, "company_name")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Primary Phone"
+                  name="primary_phone"
+                  type="tel"
+                  value={readFieldValue(
+                    safeLead,
+                    "primary_phone",
+                    readFieldValue(safeLead, "phone_number")
+                  )}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Primary Email"
+                  name="primary_email"
+                  type="email"
+                  value={readFieldValue(
+                    safeLead,
+                    "primary_email",
+                    readFieldValue(safeLead, "email")
+                  )}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Service Type"
+                  name="service_type"
+                  value={readFieldValue(
+                    safeLead,
+                    "service_type",
+                    readFieldValue(safeLead, "service")
+                  )}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Lead Source"
+                  name="lead_source"
+                  value={readFieldValue(
+                    safeLead,
+                    "lead_source",
+                    readFieldValue(safeLead, "source_host")
+                  )}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Industry"
+                  name="industry"
+                  value={readFieldValue(safeLead, "industry")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Status"
+                  name="status"
+                  value={readFieldValue(safeLead, "status")}
+                  onValueChange={updateField}
+                  options={statusOptions}
+                />
+              </div>
+            </div>
+
+            <div className="info-group info-group--dense">
+              <div className="info-section-header">
+                <div>
+                  <div className="info-section-eyebrow">Lead context</div>
+                  <div className="info-section-title">Notes & Summary</div>
+                </div>
+              </div>
+
+              <div className="info-grid-2 info-grid-tight">
+                <InfoField
+                  label="Priority Score"
+                  name="priority_score"
+                  type="number"
+                  value={readFieldValue(safeLead, "priority_score")}
+                  onValueChange={updateField}
+                />
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Created</span>
+                  <strong className="info-stat-value">
+                    {safeLead.created_at
+                      ? formatShortDate(safeLead.created_at)
+                      : "Unknown"}
+                  </strong>
+                </div>
+                <InfoField
+                  label="Message"
+                  name="notes"
+                  textarea
+                  className="field-wide"
+                  value={leadNotes}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Summary"
+                  name="summary"
+                  textarea
+                  className="field-wide"
+                  value={leadSummary}
+                  onValueChange={updateField}
+                />
+              </div>
+            </div>
+
+            <div className="info-group info-group--dense">
+              <div className="info-section-header">
+                <div>
+                  <div className="info-section-eyebrow">Revenue loop</div>
+                  <div className="info-section-title">Revenue Attribution</div>
+                </div>
+              </div>
+
+              <div className="info-grid-2 info-grid-tight">
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Revenue</span>
+                  <strong className="info-stat-value">
+                    {formatCurrency(Number(leadAttribution?.revenue_total || 0))}
+                  </strong>
+                </div>
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Outstanding</span>
+                  <strong className="info-stat-value">
+                    {formatCurrency(Number(leadAttribution?.outstanding_balance || 0))}
+                  </strong>
+                </div>
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Jobs</span>
+                  <strong className="info-stat-value">
+                    {Number(leadAttribution?.jobs_count || 0)}
+                  </strong>
+                </div>
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Paid Invoices</span>
+                  <strong className="info-stat-value">
+                    {Number(leadAttribution?.paid_invoices || 0)}
+                  </strong>
+                </div>
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Last Service</span>
+                  <strong className="info-stat-value">
+                    {leadAttribution?.last_service_date
+                      ? formatShortDate(leadAttribution.last_service_date)
+                      : "—"}
+                  </strong>
+                </div>
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Service Frequency</span>
+                  <strong className="info-stat-value">
+                    {cleanText(leadAttribution?.service_frequency) || "—"}
+                  </strong>
+                </div>
+                <div className="info-stat-card field-wide">
+                  <span className="info-stat-label">CLV Estimate</span>
+                  <strong className="info-stat-value">
+                    {formatCurrency(Number(leadAttribution?.clv_estimate || 0))}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-main-right">
+            <div className="info-group info-group--dense info-address-group">
+              <div className="info-section-header">
+                <div>
+                  <div className="info-section-eyebrow">Property</div>
+                  <div className="info-section-title">Address & Map</div>
+                </div>
+                {mapHref ? (
+                  <a
+                    className="info-map-link"
+                    href={mapHref}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open in Maps
+                  </a>
+                ) : null}
+              </div>
+
+              <div className="info-grid-address-top">
+                <InfoField
+                  label="Street Address"
+                  name="address"
+                  className="field-wide"
+                  value={readFieldValue(safeLead, "address")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Zip"
+                  name="zip_code"
+                  value={readFieldValue(safeLead, "zip_code")}
+                  onValueChange={updateField}
+                />
+              </div>
+
+              <div className="info-grid-4 info-grid-tight">
+                <InfoField
+                  label="City"
+                  name="city"
+                  value={readFieldValue(safeLead, "city")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="State"
+                  name="state"
+                  value={readFieldValue(safeLead, "state")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="County"
+                  name="county"
+                  value={readFieldValue(safeLead, "county")}
+                  onValueChange={updateField}
+                />
+                <InfoField
+                  label="Country"
+                  name="country"
+                  value={readFieldValue(safeLead, "country", "United States")}
+                  onValueChange={updateField}
+                />
+              </div>
+
+              <div className="info-map">
+                <InfoMapPanel addressQuery={addressQuery} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {dynamicFields.length > 0 ? (
+          <div className="info-secondary-row">
+            <div className="info-group info-group--dense info-secondary-single">
+              <div className="info-section-header">
+                <div>
+                  <div className="info-section-eyebrow">Extended fields</div>
+                  <div className="info-section-title">Additional Details</div>
+                </div>
+              </div>
+              <div className="info-grid-3 industry-grid">
+                {dynamicFields.map((field) => (
+                  <InfoField
+                    key={field.name}
+                    label={field.label}
+                    name={field.name}
+                    value={readFieldValue(safeLead, field.name)}
+                    onValueChange={updateField}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="info-tab">
@@ -326,7 +723,9 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
                   <div className="ops-label">Allergies</div>
                   <div className="ops-list">
                     {constraints.allergies.map((item) => (
-                      <span key={item} className="ops-chip">{item}</span>
+                      <span key={item} className="ops-chip">
+                        {item}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -336,7 +735,9 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
                   <div className="ops-label">Dietary</div>
                   <div className="ops-list">
                     {constraints.dietary.map((item) => (
-                      <span key={item} className="ops-chip">{item}</span>
+                      <span key={item} className="ops-chip">
+                        {item}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -418,85 +819,187 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
       )}
 
       <div className="info-main-row">
-        {/* LEFT SIDE */}
         <div className="info-main-left">
-          <div className="info-group">
-            <div className="info-section-title">Identity</div>
-            <div className="info-grid-2">
-              <Field label="First Name" name="first_name" />
-              <Field label="Last Name" name="last_name" />
-              <Field label="Full Name" name="full_name" />
-              <Field label="Company Name" name="company_name" />
+          <div className="info-group info-group--dense">
+            <div className="info-section-header">
+              <div>
+                <div className="info-section-eyebrow">Customer profile</div>
+                <div className="info-section-title">Contact Information</div>
+              </div>
+            </div>
+            <div className="info-grid-2 info-grid-tight">
+              <InfoField
+                label="First Name"
+                name="first_name"
+                value={readFieldValue(safeLead, "first_name")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Last Name"
+                name="last_name"
+                value={readFieldValue(safeLead, "last_name")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Company Name"
+                name="company_name"
+                className="field-wide"
+                value={readFieldValue(safeLead, "company_name")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Phone"
+                name="primary_phone"
+                type="tel"
+                value={readFieldValue(
+                  safeLead,
+                  "primary_phone",
+                  readFieldValue(safeLead, "phone_number")
+                )}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Email"
+                name="primary_email"
+                type="email"
+                value={readFieldValue(
+                  safeLead,
+                  "primary_email",
+                  readFieldValue(safeLead, "email")
+                )}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Secondary Phone"
+                name="secondary_phone"
+                type="tel"
+                value={readFieldValue(safeLead, "secondary_phone")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Secondary Email"
+                name="secondary_email"
+                type="email"
+                value={readFieldValue(safeLead, "secondary_email")}
+                onValueChange={updateField}
+              />
             </div>
           </div>
 
-          <div className="info-group">
-            <div className="info-section-title">Contact</div>
-            <div className="info-grid-2">
-              <Field label="Primary Phone" name="primary_phone" />
-              <Field label="Primary Email" name="primary_email" />
-              <Field label="Secondary Phone" name="secondary_phone" />
-              <Field label="Secondary Email" name="secondary_email" />
+          <div className="info-group info-group--dense">
+            <div className="info-section-header">
+              <div>
+                <div className="info-section-eyebrow">Account detail</div>
+                <div className="info-section-title">Service & Industry</div>
+              </div>
+              {isCustomer ? (
+                <button
+                  className="ai-btn"
+                  onClick={runEnrichment}
+                  disabled={loadingEnrich}
+                >
+                  {loadingEnrich ? "Enriching..." : "Enrich"}
+                </button>
+              ) : null}
             </div>
+            <div className="info-grid-2 info-grid-tight">
+              <IndustryFields />
+              <InfoField
+                label="Access Notes"
+                name="access_notes"
+                textarea
+                className="field-wide"
+                value={readFieldValue(safeLead, "access_notes")}
+                onValueChange={updateField}
+              />
+              {dynamicFields
+                .filter(
+                  (f) =>
+                    !["first_name", "last_name", "full_name", "name", "address", "city", "state", "zip_code", "county", "country", "primary_phone", "primary_email"].includes(f.name)
+                )
+                .map((field) => (
+                  <InfoField
+                    key={field.name}
+                    label={field.label}
+                    name={field.name}
+                    value={readFieldValue(safeLead, field.name)}
+                    onValueChange={updateField}
+                  />
+                ))}
+            </div>
+            {safeLead.ai?.summary ? (
+              <div className="ai-summary" style={{ marginTop: 10 }}>
+                {safeLead.ai.summary}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
         <div className="info-main-right">
-          <div className="info-group info-address-group">
-            <div className="info-section-title">Address</div>
-
-            {/* TOP ROW - STREET + ZIP */}
-            <div className="info-grid-2">
-              <Field label="Street Address" name="address" className="field-wide" />
-              <Field label="Zip" name="zip_code" />
+          <div className="info-group info-group--dense info-address-group">
+            <div className="info-section-header">
+              <div>
+                <div className="info-section-eyebrow">Property</div>
+                <div className="info-section-title">Address & Map</div>
+              </div>
+              {mapHref ? (
+                <a
+                  className="info-map-link"
+                  href={mapHref}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open in Maps
+                </a>
+              ) : null}
             </div>
 
-            {/* SECOND ROW - CITY, STATE, COUNTY, COUNTRY */}
-            <div className="info-grid-4">
-              <Field label="City" name="city" />
-              <Field label="State" name="state" />
-              <Field label="County" name="county" />
-              <Field label="Country" name="country" />
+            <div className="info-grid-address-top">
+              <InfoField
+                label="Street Address"
+                name="address"
+                className="field-wide"
+                value={readFieldValue(safeLead, "address")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Zip"
+                name="zip_code"
+                value={readFieldValue(safeLead, "zip_code")}
+                onValueChange={updateField}
+              />
             </div>
-          </div>
 
-          {/* MAP */}
-          <div className="info-map">
-            <StreetViewEmbed address={safeLead.address} />
-          </div>
-        </div>
-      </div>
+            <div className="info-grid-4 info-grid-tight">
+              <InfoField
+                label="City"
+                name="city"
+                value={readFieldValue(safeLead, "city")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="State"
+                name="state"
+                value={readFieldValue(safeLead, "state")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="County"
+                name="county"
+                value={readFieldValue(safeLead, "county")}
+                onValueChange={updateField}
+              />
+              <InfoField
+                label="Country"
+                name="country"
+                value={readFieldValue(safeLead, "country")}
+                onValueChange={updateField}
+              />
+            </div>
 
-      {/* SECOND ROW */}
-      <div className="info-secondary-row">
-        <div className="info-group info-industry-group">
-          <div className="info-section-title">Industry Details</div>
-          <div className="info-grid-3 industry-grid">
-            <IndustryFields />
-            {dynamicFields.length > 0 &&
-              dynamicFields.map((field) => (
-                <Field
-                  key={field.name}
-                  label={field.label}
-                  name={field.name}
-                  className="field-wide"
-                />
-              ))}
-          </div>
-        </div>
-
-        <div className="info-group info-ai-group">
-          <div className="info-section-title">AI Enrichment</div>
-          <div className="ai-layout">
-            <div className="ai-summary">{safeLead.ai?.summary || "No AI summary yet."}</div>
-            {isCustomer ? (
-              <button className="ai-btn" onClick={runEnrichment} disabled={loadingEnrich}>
-                {loadingEnrich ? "Enriching..." : "Run Enrichment"}
-              </button>
-            ) : (
-              <div className="ai-disabled">Convert to customer to enable enrichment.</div>
-            )}
+            <div className="info-map">
+              <InfoMapPanel addressQuery={addressQuery} />
+            </div>
           </div>
         </div>
       </div>

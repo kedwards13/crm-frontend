@@ -1,0 +1,91 @@
+.unified-feed {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100%;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.unified-feed__status-row {
+  margin: auto;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 20px;
+}
+
+.unified-feed__status-row.error {
+  color: #fca5a5;
+}
+
+.unified-feed__row {
+  display: flex;
+  width: 100%;
+}
+
+.unified-feed__row.inbound {
+  justify-content: flex-start;
+}
+
+.unified-feed__row.outbound {
+  justify-content: flex-end;
+}
+
+.unified-feed__bubble {
+  max-width: 75%;
+  border-radius: 18px;
+  padding: 10px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #fff;
+}
+
+.unified-feed__bubble.inbound {
+  background: var(--bg-bubble-in);
+  border-bottom-left-radius: 6px;
+}
+
+.unified-feed__bubble.outbound-sms {
+  background: var(--msg-blue);
+  border-bottom-right-radius: 6px;
+}
+
+.unified-feed__bubble.outbound-call {
+  background: var(--msg-green);
+  border-bottom-right-radius: 6px;
+}
+
+.unified-feed__bubble.outbound-email {
+  background: var(--bg-bubble-in);
+  border-bottom-right-radius: 6px;
+}
+
+.unified-feed__body {
+  font-size: 15px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.unified-feed__timestamp {
+  margin-top: 2px;
+  text-align: right;
+  font-size: 10px;
+}
+
+.unified-feed__timestamp.inbound {
+  color: #9ca3af;
+}
+
+.unified-feed__timestamp.outbound {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 760px) {
+  .unified-feed__bubble {
+    max-width: 88%;
+  }
+}

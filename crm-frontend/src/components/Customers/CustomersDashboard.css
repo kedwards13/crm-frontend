@@ -1,0 +1,41 @@
+@import '../../theme/tokens.css';
+@import '../ui/glass-system.css';
+
+.customers-dashboard {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.customers-dashboard header p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+.customers-dashboard header h2 {
+  margin: 4px 0;
+  font-size: clamp(24px, 3vw, 31px);
+}
+
+.customers-dashboard header span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.customers-focus-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.customers-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}

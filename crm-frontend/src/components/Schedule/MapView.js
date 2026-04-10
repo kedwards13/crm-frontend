@@ -5,6 +5,7 @@ import "./MapView.css";
 import api, { normalizeArray } from "../../apiClient";
 import { listCrmLeads } from "../../api/leadsApi";
 import { getCustomers } from "../../api/customersApi";
+import { getDispatchBoard, listSchedules, listTechnicians } from "../../api/schedulingApi";
 
 const DEFAULT_CENTER = { lat: 39.5, lng: -98.35 };
 
@@ -87,6 +88,12 @@ export default function MapView() {
     showLeads: true,
     query: "",
   });
+  const [routeSummary, setRouteSummary] = useState({
+    technicians: 0,
+    scheduledStops: 0,
+    openCapacity: 0,
+    travelHours: 0,
+  });
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey || "missing-key",
@@ -151,6 +158,69 @@ export default function MapView() {
   useEffect(() => {
     refreshData();
   }, [refreshData]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        try {
+          const boardRes = await getDispatchBoard({
+            day: new Date().toISOString().slice(0, 10),
+            include_opportunities: false,
+          });
+          const board = boardRes?.data || {};
+          if (mounted && board?.metrics) {
+            const metrics = board.metrics || {};
+            setRouteSummary({
+              technicians: metrics.routes || 0,
+              scheduledStops: metrics.assigned_stops || metrics.total_stops || 0,
+              openCapacity: metrics.unassigned_stops || 0,
+              travelHours: Math.round(((metrics.total_travel_minutes || 0) / 60) * 10) / 10,
+            });
+            return;
+          }
+        } catch {
+          // Fallback to legacy route summaries.
+        }
+
+        const [scheduleRes, techRes] = await Promise.all([
+          listSchedules({ page_size: 240 }),
+          listTechnicians({ page_size: 120 }).catch(() => ({ data: [] })),
+        ]);
+        if (!mounted) return;
+        const schedules = normalizeArray(scheduleRes.data);
+        const technicians = normalizeArray(techRes.data);
+        const travelSeconds = schedules.reduce(
+          (sum, row) => sum + Number(row.route_duration_s || row.drive_time_seconds || 0),
+          0
+        );
+        const totalCapacityMinutes = technicians.reduce(
+          (sum, tech) => sum + Number(tech.max_daily_minutes || 480),
+          0
+        );
+        const scheduledMinutes = schedules.reduce((sum, row) => {
+          const start = new Date(row.scheduled_start || row.start_time || 0);
+          const end = new Date(row.scheduled_end || row.end_time || 0);
+          if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return sum + 60;
+          return sum + Math.max(15, Math.round((end.getTime() - start.getTime()) / 60000));
+        }, 0);
+
+        setRouteSummary({
+          technicians: technicians.length,
+          scheduledStops: schedules.length,
+          openCapacity: Math.max(0, Math.round((totalCapacityMinutes - scheduledMinutes) / 60)),
+          travelHours: Math.round((travelSeconds / 3600) * 10) / 10,
+        });
+      } catch {
+        if (mounted) {
+          setRouteSummary((prev) => ({ ...prev }));
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const visibleItems = useMemo(() => {
     const query = filters.query.trim().toLowerCase();
@@ -359,6 +429,18 @@ export default function MapView() {
           <div className="value">
             {summary.customers} / {summary.leads}
           </div>
+        </div>
+        <div className="schedule-stat">
+          <div className="label">Technicians</div>
+          <div className="value">{routeSummary.technicians}</div>
+        </div>
+        <div className="schedule-stat">
+          <div className="label">Open Route Capacity</div>
+          <div className="value">{routeSummary.openCapacity}h</div>
+        </div>
+        <div className="schedule-stat">
+          <div className="label">Travel Time</div>
+          <div className="value">{routeSummary.travelHours}h</div>
         </div>
       </section>
 

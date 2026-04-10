@@ -13,7 +13,10 @@ import ServicesPricing from './services/ServicesPricing';
 import RoutingSettings from './routing/RoutingSettings';
 import InventorySettings from './inventory/InventorySettings';
 import CommsSettings from './comms/CommsSettings';
+import IntegrationsPage from './integrations/IntegrationsPage';
+import DocumentCenter from './documents/DocumentCenter';
 import SettingsLayout from '../../pages/settings/SettingsLayout.tsx';
+import SmartConfig from '../../pages/settings/SmartConfig.tsx';
 
 const Settings = () => {
   return (
@@ -32,6 +35,9 @@ const Settings = () => {
       <Route path="/inventory" element={<InventorySettings />} />
       <Route path="/automations" element={<Automations />} />
       <Route path="/billing" element={<Billing />} />
+      <Route path="/integrations" element={<IntegrationsPage />} />
+      <Route path="/documents" element={<DocumentCenter />} />
+      <Route path="/smart-config" element={<SmartConfig />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

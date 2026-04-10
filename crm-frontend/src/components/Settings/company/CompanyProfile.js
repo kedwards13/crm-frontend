@@ -154,7 +154,8 @@ export default function CompanyProfile() {
     primaryColor: '',
     serviceAreas: [],
   });
-  const [tenantSnapshot, setTenantSnapshot] = useState({});
+  const [tenantSnapshot, setTenantSnapshot] = useState(getActiveTenant() || {});
+  const [tenantPreferences, setTenantPreferences] = useState({});
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
 
@@ -163,24 +164,33 @@ export default function CompanyProfile() {
 
     (async () => {
       try {
-        const { data } = await api.get('/accounts/tenant/');
+        const [preferencesResponse, meResponse] = await Promise.all([
+          api.get('/accounts/preferences/').catch(() => ({ data: {} })),
+          api.get('/accounts/auth/me/').catch(() => ({ data: {} })),
+        ]);
         if (!mounted) return;
 
-        const tenantData = extractTenantPayload(data);
-        const preferences = tenantData?.preferences || {};
+        const activeTenant = getActiveTenant() || {};
+        const tenantData = {
+          ...activeTenant,
+          ...extractTenantPayload(meResponse?.data?.activeTenant || meResponse?.data?.tenant || {}),
+        };
+        const preferences = preferencesResponse?.data?.preferences || {};
+        const profile = preferences?.company_profile || {};
         const branding = preferences?.branding || {};
 
         setTenantSnapshot(tenantData);
+        setTenantPreferences(preferences);
         setForm((prev) => ({
           ...prev,
-          name: tenantData?.name || '',
-          domain: tenantData?.domain || '',
-          timezone: tenantData?.timezone || 'America/New_York',
-          address1: tenantData?.address1 || tenantData?.address_1 || '',
-          address2: tenantData?.address2 || tenantData?.address_2 || '',
-          city: tenantData?.city || '',
-          state: normalizeStateCode(tenantData?.state || tenantData?.province || ''),
-          zip: tenantData?.zip || tenantData?.zip_code || '',
+          name: profile?.name || tenantData?.name || '',
+          domain: profile?.domain || tenantData?.domain || '',
+          timezone: profile?.timezone || tenantData?.timezone || 'America/New_York',
+          address1: profile?.address1 || profile?.address_1 || '',
+          address2: profile?.address2 || profile?.address_2 || '',
+          city: profile?.city || '',
+          state: normalizeStateCode(profile?.state || profile?.province || ''),
+          zip: profile?.zip || profile?.zip_code || '',
           logo: branding?.logo_url || branding?.logo || tenantData?.logo || '',
           primaryColor:
             normalizeColor(
@@ -212,17 +222,8 @@ export default function CompanyProfile() {
     setMsg('');
 
     const normalizedColor = normalizeColor(form.primaryColor);
-    const nextPreferences = {
-      ...(tenantSnapshot?.preferences || {}),
-      branding: {
-        ...(tenantSnapshot?.preferences?.branding || {}),
-        logo_url: form.logo.trim(),
-        primary_color: normalizedColor,
-      },
-      service_areas: form.serviceAreas,
-    };
-
-    const payload = {
+    const companyProfile = {
+      ...(tenantPreferences?.company_profile || {}),
       name: form.name.trim(),
       domain: form.domain.trim(),
       timezone: form.timezone,
@@ -231,31 +232,34 @@ export default function CompanyProfile() {
       city: form.city.trim(),
       state: form.state,
       zip: form.zip.trim(),
-      preferences: nextPreferences,
+    };
+    const nextPreferences = {
+      ...(tenantPreferences || {}),
+      company_profile: companyProfile,
+      branding: {
+        ...(tenantPreferences?.branding || {}),
+        logo_url: form.logo.trim(),
+        primary_color: normalizedColor,
+      },
+      service_areas: form.serviceAreas,
     };
 
     try {
-      let response = null;
-      try {
-        response = await api.patch('/accounts/tenant/', payload);
-      } catch (error) {
-        if (error?.response?.status === 404 || error?.response?.status === 405) {
-          response = await api.put('/accounts/tenant/', payload);
-        } else {
-          throw error;
-        }
-      }
-
+      const response = await api.patch('/accounts/preferences/', {
+        preferences: nextPreferences,
+      });
+      const savedPreferences = response?.data?.preferences || nextPreferences;
       const updatedTenant = {
         ...tenantSnapshot,
-        ...payload,
-        ...(extractTenantPayload(response?.data) || {}),
-        preferences: nextPreferences,
+        name: form.name.trim() || tenantSnapshot?.name || '',
+        domain: form.domain.trim() || tenantSnapshot?.domain || '',
+        preferences: savedPreferences,
         logo: form.logo.trim(),
         primary_color: normalizedColor,
       };
 
       setTenantSnapshot(updatedTenant);
+      setTenantPreferences(savedPreferences);
       setMsg('✅ Saved!');
       setActiveTenant({
         ...(getActiveTenant() || {}),
@@ -263,6 +267,8 @@ export default function CompanyProfile() {
       });
     } catch (e) {
       const detail =
+        e?.payload?.detail ||
+        e?.payload?.error ||
         e?.response?.data?.detail ||
         e?.response?.data?.error ||
         'Save failed. Check fields or try again.';

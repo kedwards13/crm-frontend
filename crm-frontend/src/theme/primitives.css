@@ -9,6 +9,32 @@
 
 
 /* =========================================================
+   UNIVERSAL FOCUS RING
+   Anything focusable that doesn't define its own :focus-visible
+   picks up this accessible ring. Keep it subtle but visible in
+   both light and dark modes.
+   ========================================================= */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.28);
+  border-color: var(--accent);
+}
+
+/* Kill old :focus rings on click (keyboard users still see them). */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
+/* =========================================================
    CARDS (calm depth, not boxy)
    ========================================================= */
 .ui-card {

@@ -7,6 +7,14 @@
 - Assets belong in `src/assets/`; `public/` holds static files; `build/` is generated output—never edit directly.
 - Tests sit beside code as `*.test.js` (see `src/App.test.js`, `src/setupTests.js` for setup).
 
+## Runtime Architecture (Audit Snapshot)
+- Auth + tenant gating lives in `src/App.js` and `src/setupAxios.js` (adds `Authorization` + `X-Tenant-ID`, redirects on `401/403`).
+- Voice/webphone is initiated from `src/components/Communications/CommunicationsPage.jsx`:
+  - CRM token broker: `src/api/communications.js` (`fetchVoiceClientToken` calls `POST /voice/webrtc/register` on CRM).
+  - Voice Service registration: `src/api/voiceClient.js` (`POST https://voice.abon.ai/voice/webrtc/register`).
+  - Twilio browser device wrapper: `src/services/voiceDevice.js` (singleton `Device`).
+- Scheduling UI: `src/components/Schedule/*` backed by `src/api/schedulingApi.js`.
+
 ## Build, Test, and Development Commands
 - `npm install` installs dependencies (use Node 18+).
 - `npm start` runs the CRA dev server on `localhost:3000` with hot reload.

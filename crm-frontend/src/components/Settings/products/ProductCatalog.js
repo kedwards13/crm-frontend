@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../../config/env';
+import api from '../../../apiClient';
 import { getIndustry } from '../../../helpers/tenantHelpers';
 import '../SettingsCommon.css';
-
-const API = API_BASE_URL;
 
 const PRESETS = {
   pest_control: [
@@ -30,24 +27,22 @@ export default function ProductCatalog() {
   const industryKey = getIndustry('general');
   const [items, setItems] = useState([]);
   const [msg, setMsg] = useState('');
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/api/settings/products/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await api.get('/accounts/preferences/');
+        const catalog = data?.preferences?.product_catalog;
         if (!mounted) return;
-        const current = Array.isArray(data) ? data : [];
+        const current = Array.isArray(catalog) ? catalog : [];
         setItems(current.length ? current : PRESETS[industryKey] || []);
       } catch {
         setItems(PRESETS[industryKey] || []);
       }
     })();
     return () => { mounted = false; };
-  }, [token, industryKey]);
+  }, [industryKey]);
 
   const addRow = () => setItems(arr => [...arr, { sku: '', name: '', price: 0, unit: 'unit', tax: true }]);
   const update = (i, k, v) => setItems(arr => arr.map((it, idx) => idx === i ? { ...it, [k]: v } : it));
@@ -56,8 +51,10 @@ export default function ProductCatalog() {
   const save = async () => {
     setMsg('');
     try {
-      await axios.put(`${API}/api/settings/products/`, { items }, {
-        headers: { Authorization: `Bearer ${token}` }
+      await api.patch('/accounts/preferences/', {
+        preferences: {
+          product_catalog: items,
+        },
       });
       setMsg('Saved ✓');
     } catch {

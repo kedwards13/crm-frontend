@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import revivalApi from '../../api/revivalApi';
 import Scanner from './Scanner';
 import CustomerPopup from '../Profile/CustomerPopup';
 import { formatCurrency } from '../../utils/formatters';
 import Badge from '../ui/badge';
 import { Button } from '../ui/button';
+import { createRevivalCampaignDraft } from './campaignDrafts';
 import {
   EllipsisVertical,
   MessageSquareText,
@@ -17,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function RevivalOverview() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentQuotes, setRecentQuotes] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -25,6 +28,7 @@ export default function RevivalOverview() {
   const [tab, setTab] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [loading, setLoading] = useState(true);
+  const [campaigning, setCampaigning] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -32,6 +36,15 @@ export default function RevivalOverview() {
     loadData();
     return () => document.removeEventListener('click', handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    const quoteId = new URLSearchParams(window.location.search).get('quote_id');
+    if (!quoteId || !recentQuotes.length) return;
+    const match = recentQuotes.find((quote) => String(quote.id) === String(quoteId));
+    if (match) {
+      setSelectedQuote(match);
+    }
+  }, [recentQuotes]);
 
   const loadData = async () => {
     try {
@@ -77,6 +90,9 @@ export default function RevivalOverview() {
       case 'view':
         setSelectedQuote(quote);
         break;
+      case 'campaign':
+        handleCreateCampaignDraft([quote]);
+        break;
       case 'message':
         console.log('💬 Opening message thread for:', quote.customer_name);
         break;
@@ -94,6 +110,28 @@ export default function RevivalOverview() {
     }
   };
 
+  const handleCreateCampaignDraft = async (quotes = selectedQuotes) => {
+    if (!quotes.length) return;
+    setCampaigning(true);
+    try {
+      const { data } = await createRevivalCampaignDraft({
+        quotes,
+        name: quotes.length === 1 ? `Revival - ${quotes[0].customer_name || 'Customer'}` : '',
+      });
+      navigate('/revival/campaigns', {
+        state: {
+          campaignId: data?.id,
+          createdCampaignId: data?.id,
+          seedQuotes: quotes,
+        },
+      });
+    } catch (err) {
+      alert(`Unable to create campaign draft: ${err?.message || 'unknown error'}`);
+    } finally {
+      setCampaigning(false);
+    }
+  };
+
   const filteredQuotes = recentQuotes.filter((q) => {
     return tab === 'all' || (q.status || 'draft') === tab;
   });
@@ -103,6 +141,8 @@ export default function RevivalOverview() {
     if (sortBy === 'date') return new Date(b.created_at) - new Date(a.created_at);
     return 0;
   });
+
+  const selectedQuotes = sortedQuotes.filter((quote) => selected.includes(quote.id));
 
   const summary = stats || {};
   const kpiCards = [
@@ -158,7 +198,18 @@ export default function RevivalOverview() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">Revival Playbook</Button>
-          <Button variant="primary" className="shadow-lg">+ Start Campaign</Button>
+          <Button
+            variant="primary"
+            className="shadow-lg"
+            onClick={() =>
+              selectedQuotes.length
+                ? handleCreateCampaignDraft(selectedQuotes)
+                : navigate('/revival/campaigns')
+            }
+            loading={campaigning}
+          >
+            + Start Campaign
+          </Button>
         </div>
       </div>
 
@@ -186,6 +237,13 @@ export default function RevivalOverview() {
             <Badge color="blue">Smart Intake</Badge>
           </div>
           <Scanner />
+          <button
+            type="button"
+            className="mt-4 w-full rounded-lg border border-blue-500/30 bg-blue-500/10 py-2.5 text-sm font-semibold text-blue-300 hover:bg-blue-500/20 transition-colors"
+            onClick={() => window.location.assign('/quotes/create')}
+          >
+            + Create Quote Manually
+          </button>
         </div>
       </div>
 
@@ -224,8 +282,8 @@ export default function RevivalOverview() {
       {selected.length > 0 && (
         <div className="mb-4 flex items-center gap-3 text-sm bg-gray-900/40 border border-gray-700/60 p-3 rounded-md shadow-sm backdrop-blur-sm">
           <span className="text-gray-300">{selected.length} selected</span>
-          <Button variant="primary" size="sm">
-            <SendHorizonal size={16} className="mr-1" /> Send SMS
+          <Button variant="primary" size="sm" onClick={() => handleCreateCampaignDraft(selectedQuotes)} loading={campaigning}>
+            <SendHorizonal size={16} className="mr-1" /> Create Campaign Draft
           </Button>
           <Button variant="outline" size="sm">
             <CheckSquare size={16} className="mr-1" /> Update Status
@@ -294,6 +352,12 @@ export default function RevivalOverview() {
                       ref={dropdownRef}
                       className="absolute right-0 mt-2 w-44 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50"
                     >
+                      <button
+                        onClick={() => handleAction('campaign', q)}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
+                      >
+                        <SendHorizonal size={14} /> Campaign Draft
+                      </button>
                       <button
                         onClick={() => handleAction('message', q)}
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"

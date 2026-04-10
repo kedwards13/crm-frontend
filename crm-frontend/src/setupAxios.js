@@ -18,6 +18,7 @@ const TENANT_OPTIONAL_PATHS = [
   '/accounts/auth/login/',
   '/accounts/auth/refresh/',
   '/accounts/auth/switch-tenant/',
+  '/accounts/auth/tenant-signup/',
   '/accounts/tenant-signup/',
 ];
 

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../apiClient';
-import { listCrmLeads, updateCrmLead } from '../../api/leadsApi';
+import { listCrmLeads, updateLeadStage } from '../../api/leadsApi';
+import {
+  PIPELINE_STAGE_BOOKED,
+  getPipelineStageLabel,
+} from '../../constants/pipelineStages';
+import { normalizeLead } from '../../utils/normalizeLead';
 import './Marketplace.css';
 
 const MarketplaceView = () => {
@@ -15,16 +20,17 @@ const MarketplaceView = () => {
     const fetchData = async () => {
       let allLeads = [];
       try {
-        const resLeads = await listCrmLeads();
+        const resLeads = await listCrmLeads({ archived: 'all' });
         allLeads = Array.isArray(resLeads.data)
           ? resLeads.data
           : resLeads.data?.results || [];
+        allLeads = allLeads.map(normalizeLead);
       } catch {
         allLeads = [];
       }
 
       const underContract = allLeads.filter((lead) =>
-        lead.status === 'scheduled' ||
+        lead.safePipelineStage === PIPELINE_STAGE_BOOKED ||
         lead.deal_stage === 'under_contract' ||
         lead.attributes?.deal_stage === 'under_contract'
       );
@@ -70,7 +76,7 @@ const MarketplaceView = () => {
   };
 
   const markAsClosed = async (leadId) => {
-    await updateCrmLead(leadId, { status: 'closed' });
+    await updateLeadStage(leadId, PIPELINE_STAGE_BOOKED);
     setLeads(prev => prev.filter(l => l.id !== leadId));
     setFiltered(prev => prev.filter(l => l.id !== leadId));
   };
@@ -94,7 +100,7 @@ const MarketplaceView = () => {
             <p>Price: ${lead.estimated_price}</p>
             <div className="tags">
               <span>{lead.city}</span>
-              <span>Status: {lead.status}</span>
+              <span>Pipeline: {getPipelineStageLabel(lead.safePipelineStage || lead.pipeline_stage)}</span>
             </div>
             <div className="card-actions">
               <button onClick={() => handleViewMatches(lead)}>Match Buyers</button>

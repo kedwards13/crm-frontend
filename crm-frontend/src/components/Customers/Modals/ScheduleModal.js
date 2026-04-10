@@ -3,28 +3,19 @@ import { toast } from "react-toastify";
 import {
   listServiceTypes,
   listTechnicians,
-  listAvailability,
-  createSchedule,
-  quickBook,
 } from "../../../api/schedulingApi";
-import { createAppointment } from "../../../api/appointmentsApi";
+import {
+  createAppointment,
+  getAppointmentAvailableSlots,
+} from "../../../api/appointmentsApi";
 
 const formatDateInput = (value) => value.toISOString().slice(0, 10);
-const formatTimeInput = (value) => value.toTimeString().slice(0, 5);
-const getRoundedTime = () => {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const rounded = Math.ceil(minutes / 15) * 15;
-  now.setMinutes(rounded % 60);
-  if (rounded >= 60) now.setHours(now.getHours() + 1);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
-  return now;
-};
+const DURATION_OPTIONS = [30, 45, 60, 90, 120];
 
 const normalizeAvailability = (payload) => {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.slot_windows)) return payload.slot_windows;
   if (Array.isArray(payload.results)) return payload.results;
   if (Array.isArray(payload.slots)) return payload.slots;
   if (Array.isArray(payload.availability)) return payload.availability;
@@ -59,7 +50,6 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
   const [serviceLabelInput, setServiceLabelInput] = useState("");
   const [locationValue, setLocationValue] = useState("");
   const [dateValue, setDateValue] = useState("");
-  const [timeValue, setTimeValue] = useState("");
   const [durationMins, setDurationMins] = useState(defaultDuration);
   const [scheduleNotes, setScheduleNotes] = useState("");
   const [serviceTypes, setServiceTypes] = useState([]);
@@ -149,7 +139,6 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
     setAvailabilityError("");
     setSelectedSlot(null);
     setDateValue((prev) => prev || formatDateInput(new Date()));
-    setTimeValue((prev) => prev || formatTimeInput(getRoundedTime()));
   }, [record]);
 
   useEffect(() => {
@@ -167,16 +156,27 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
     setAvailabilityError("");
     try {
       const params = {
-        service_type_id: serviceTypeId,
         date: dateValue,
-        start_date: dateValue,
-        end_date: dateValue,
-        duration_minutes: Number(durationMins) || defaultDuration,
+        duration: Number(durationMins) || defaultDuration,
       };
-      if (assignedTechId) params.assigned_to = assignedTechId;
-      const { data } = await listAvailability(params);
+      if (serviceTypeId) params.service_type_id = serviceTypeId;
+      if (assignedTechId) params.assigned_user = assignedTechId;
+      const { data } = await getAppointmentAvailableSlots(params);
       const slots = normalizeAvailability(data)
         .map((slot, index) => {
+          if (typeof slot === "string") {
+            const startDate = new Date(slot);
+            if (Number.isNaN(startDate.getTime())) return null;
+            const endDate = new Date(
+              startDate.getTime() + (Number(durationMins) || defaultDuration) * 60000
+            );
+            return {
+              id: `${slot}-${index}`,
+              start: startDate.toISOString(),
+              end: endDate.toISOString(),
+              raw: { start: startDate.toISOString(), end: endDate.toISOString() },
+            };
+          }
           const start =
             slot.start ||
             slot.start_time ||
@@ -197,6 +197,10 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
       setAvailabilitySlots(slots);
       if (slots.length === 0) {
         setAvailabilityError("No available slots for this date.");
+      } else {
+        setSelectedSlot((prev) =>
+          prev && slots.find((slot) => slot.id === prev.id) ? prev : slots[0]
+        );
       }
     } catch (err) {
       setAvailabilityError(
@@ -236,20 +240,19 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
       return;
     }
 
-    if (!selectedSlot && (!dateValue || !timeValue)) {
-      toast.error("Select a date and time.");
+    if (!selectedSlot) {
+      toast.error("Select an available slot.");
       return;
     }
 
-    const slotStart = selectedSlot?.start ? new Date(selectedSlot.start) : null;
-    const slotEnd = selectedSlot?.end ? new Date(selectedSlot.end) : null;
-    const start = slotStart || new Date(`${dateValue}T${timeValue}`);
-    if (Number.isNaN(start.getTime())) {
+    const start = selectedSlot?.start ? new Date(selectedSlot.start) : null;
+    if (!start || Number.isNaN(start.getTime())) {
       toast.error("Invalid date/time.");
       return;
     }
 
     const duration = Number(durationMins) || defaultDuration;
+    const slotEnd = selectedSlot?.end ? new Date(selectedSlot.end) : null;
     const end =
       slotEnd && !Number.isNaN(slotEnd.getTime())
         ? slotEnd
@@ -277,54 +280,29 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
 
     try {
       setSubmitting(true);
-      if (customerId) {
-        if (serviceTypeId && serviceTypeId !== "custom") {
-          const quickPayload = {
-            customer_id: customerId,
-            service_type_id: serviceTypeId,
-            start: start.toISOString(),
-            notes,
-            duration_minutes: duration,
-          };
-          if (locationValue?.trim()) {
-            quickPayload.address = { address: locationValue.trim() };
-          }
-          if (assignedTechId) quickPayload.assigned_to = assignedTechId;
-          await quickBook(quickPayload);
-        } else {
-          const schedulePayload = {
-            customer: customerId,
-            scheduled_start: start.toISOString(),
-            scheduled_end: end.toISOString(),
-            status: "pending",
-            notes,
-          };
-          if (assignedTechId) {
-            schedulePayload.assigned_technician = assignedTechId;
-          }
-          if (locationValue?.trim()) {
-            schedulePayload.metadata = {
-              address: locationValue.trim(),
-            };
-          }
-          await createSchedule(schedulePayload);
-        }
-      } else {
-        const appointmentPayload = {
-          start_time: start.toISOString(),
-          end_time: end.toISOString(),
-          duration_minutes: duration,
-          notes,
-          lead: record.object === "lead" ? record.id : undefined,
-          customer: record.object === "customer" ? record.id : undefined,
-          service_type_id: serviceTypeId,
-        };
-        await createAppointment(appointmentPayload);
-      }
+      const appointmentPayload = {
+        customer_id: customerId || undefined,
+        lead_id: record.object === "lead" ? record.id : undefined,
+        assigned_user_id: assignedTechId || undefined,
+        assigned_user: assignedTechId || undefined,
+        scheduled_at: start.toISOString(),
+        start: start.toISOString(),
+        end: end.toISOString(),
+        duration_minutes: duration,
+        duration,
+        notes,
+        service_type: serviceLabelText || undefined,
+      };
+      await createAppointment(appointmentPayload);
       toast.success("Scheduled!");
       onClose?.();
-    } catch {
-      toast.error("Error scheduling");
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.detail ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Error scheduling"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -447,7 +425,6 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
                         if (Number.isNaN(start.getTime())) return;
                         setSelectedSlot(slot);
                         setDateValue(formatDateInput(start));
-                        setTimeValue(formatTimeInput(start));
                       }}
                     >
                       {formatSlotLabel(slot.start, slot.end)}
@@ -459,25 +436,17 @@ export default function ScheduleModal({ record, schedulingConfig, onClose }) {
 
             <div className="schedule-time-row">
               <div>
-                <label>Time</label>
-                <input
-                  type="time"
-                  value={timeValue}
-                  onChange={(e) => {
-                    setTimeValue(e.target.value);
-                    setSelectedSlot(null);
-                  }}
-                />
-              </div>
-              <div>
                 <label>Duration (mins)</label>
-                <input
-                  type="number"
-                  min="15"
-                  step="15"
+                <select
                   value={durationMins}
-                  onChange={(e) => setDurationMins(e.target.value)}
-                />
+                  onChange={(e) => setDurationMins(Number(e.target.value || defaultDuration))}
+                >
+                  {DURATION_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option} min
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

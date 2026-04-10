@@ -1,12 +1,16 @@
 // src/components/Layout/Layout.js
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { FiChevronLeft, FiChevronRight, FiMenu, FiX } from 'react-icons/fi';
 
 import Navigation from "./Navigation";
 import TopBar from "./TopBar";
+import RightInsightsPanel from "./RightInsightsPanel";
+import TopBarAssistant from "../Assistant/TopBarAssistant";
 
 import { getSubNavForPage } from "../../constants/uiRegistry";
 import { getIndustry, getUserRole } from "../../helpers/tenantHelpers";
+import { useTheme } from "../../theme/ThemeProvider";
 
 import "./Layout.css";
 
@@ -17,30 +21,10 @@ export default function Layout({ children }) {
   const [tabs, setTabs] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") return stored;
-    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  });
-
-  /* ---------------------------------------------
-     THEME SYSTEM (LIGHT + DARK)
-  --------------------------------------------- */
-  useEffect(() => {
-    const isDark = theme === "dark";
-    const body = document.body;
-
-    body.classList.toggle("dark-mode", isDark);
-    body.classList.toggle("light-mode", !isDark);
-    body.classList.toggle("dark", isDark);
-    body.classList.toggle("light", !isDark);
-
-    body.dataset.theme = theme;
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(true);
+  const { mode, accent, setAccent, toggleMode, presets } = useTheme();
 
   /* ---------------------------------------------
      SUBNAV CONTROL
@@ -82,6 +66,10 @@ export default function Layout({ children }) {
     return () => window.removeEventListener("storage", onStorage);
   }, [location, navigate]);
 
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
   const handleTabChange = (tabKey) => {
     const target = tabs.find((t) => t.key === tabKey);
     if (target && location.pathname !== target.path) {
@@ -90,9 +78,26 @@ export default function Layout({ children }) {
     }
   };
 
-  const handleGlobalSearch = ({ query, path }) => {
+  const handleGlobalSearch = ({ query, path, result }) => {
+    const route = result?.route || {};
     if (path) {
       navigate(path);
+      return;
+    }
+    if (route.web_path) {
+      navigate(route.web_path);
+      return;
+    }
+    if (result?.result_type === "customer" && route.customer_id) {
+      navigate(`/customers/list?search=${encodeURIComponent(String(route.customer_id))}`);
+      return;
+    }
+    if (result?.result_type === "lead" && route.lead_id) {
+      navigate(`/leads/${route.lead_id}`);
+      return;
+    }
+    if (result?.result_type === "quote" && route.quote_id) {
+      navigate(`/quotes/${encodeURIComponent(String(route.quote_id))}`);
       return;
     }
     if (query) {
@@ -102,9 +107,15 @@ export default function Layout({ children }) {
 
   const toggleSidebar = () => setCollapsed((v) => !v);
 
+  const showInsightsPanel = useMemo(
+    () =>
+      !location.pathname.startsWith("/communication") &&
+      !location.pathname.startsWith("/communications"),
+    [location.pathname]
+  );
   const shellContext = useMemo(
-    () => ({ collapsed }),
-    [collapsed]
+    () => ({ collapsed, withInsights: showInsightsPanel }),
+    [collapsed, showInsightsPanel]
   );
 
   const hasTabsData = Array.isArray(tabs);
@@ -130,56 +141,76 @@ export default function Layout({ children }) {
   return (
     <>
       <div
-        className={`layout-shell ${collapsed ? "collapsed" : ""} text-[var(--text-1)]`}
-        data-theme={theme}
+        className={`layout-shell ${collapsed ? "collapsed" : ""} ${showInsightsPanel ? "with-insights" : ""}`}
+        data-theme={mode}
       >
-        {/* Anthracite mesh background */}
-        <div
-          className="pointer-events-none absolute inset-0 -z-10"
-          aria-hidden
-          style={{
-            background: 'radial-gradient(circle at 10% 20%, rgba(99,102,241,0.14), transparent 25%), radial-gradient(circle at 85% 15%, rgba(16,185,129,0.12), transparent 28%), radial-gradient(circle at 40% 78%, rgba(244,63,94,0.12), transparent 30%), var(--bg)',
-            filter: 'saturate(1.05)',
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 -z-10 opacity-60"
-          aria-hidden
-          style={{
-            backgroundImage: 'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.0) 32%, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.0) 100%)',
-          }}
-        />
+        <button
+          type="button"
+          className={`mobile-nav-trigger ${mobileNavOpen ? 'is-open' : ''}`}
+          onClick={() => setMobileNavOpen((v) => !v)}
+          aria-label={mobileNavOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileNavOpen}
+        >
+          {mobileNavOpen ? <FiX size={18} /> : <FiMenu size={18} />}
+        </button>
 
-        <Navigation collapsed={collapsed} onToggle={toggleSidebar} />
+        <Navigation
+          collapsed={collapsed}
+          onToggle={toggleSidebar}
+          mobileOpen={mobileNavOpen}
+          onMobileOpenChange={setMobileNavOpen}
+        />
 
         <TopBar
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           inboxCount={3}
-          theme={theme}
-          onToggleTheme={() => setTheme((v) => (v === "dark" ? "light" : "dark"))}
+          theme={mode}
+          accent={accent}
+          presets={presets}
+          onSetAccent={setAccent}
+          onToggleTheme={toggleMode}
+          assistantOpen={assistantOpen}
+          onToggleAssistant={() => setAssistantOpen((current) => !current)}
           onSearchSelect={handleGlobalSearch}
         />
 
         <main
           className="content-area"
           data-shell={JSON.stringify(shellContext)}
-          style={{
-            background: theme === 'dark'
-              ? 'radial-gradient(140% 90% at 50% 20%, rgba(255,255,255,0.02), transparent 55%), radial-gradient(120% 60% at 20% 80%, rgba(99,102,241,0.08), transparent 50%)'
-              : 'radial-gradient(120% 70% at 60% 10%, rgba(99,102,241,0.08), transparent 50%)',
-          }}
         >
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/5 dark:border-white/5 shadow-[0_30px_120px_rgba(0,0,0,0.35)] blur-[80px]" aria-hidden />
-            <div className="relative rounded-[20px] border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[20px] shadow-[0_30px_80px_rgba(0,0,0,0.35)] p-6">
-              {children}
-            </div>
-          </div>
+          {children}
         </main>
+
+        {showInsightsPanel ? (
+          <aside
+            className={`layout-insights dispatch-live-panel ${insightsOpen ? "is-open" : "is-collapsed"}`}
+            aria-label="Global intelligence panel"
+          >
+            <button
+              type="button"
+              className="layout-insights-toggle"
+              onClick={() => setInsightsOpen((current) => !current)}
+              aria-expanded={insightsOpen}
+              aria-label={insightsOpen ? "Collapse live control panel" : "Expand live control panel"}
+            >
+              {insightsOpen ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
+            </button>
+
+            {insightsOpen ? (
+              <div className="layout-insights-body">
+                <RightInsightsPanel />
+              </div>
+            ) : (
+              <div className="layout-insights-rail" aria-hidden="true">
+                <span className="layout-insights-rail-copy">Live</span>
+              </div>
+            )}
+          </aside>
+        ) : null}
       </div>
-      
+      <TopBarAssistant open={assistantOpen} onClose={() => setAssistantOpen(false)} />
     </>
   );
 }

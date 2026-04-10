@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { listCrmLeads } from '../../api/leadsApi';
+import { PIPELINE_STAGE_BOOKED } from '../../constants/pipelineStages';
+import { normalizeLead } from '../../utils/normalizeLead';
 import './MarketplaceView.css';
 
 const MarketplaceView = () => {
@@ -7,14 +10,13 @@ const MarketplaceView = () => {
 
   useEffect(() => {
     const fetchLeads = async () => {
-      const token = localStorage.getItem('token');
       try {
-        const res = await fetch('http://127.0.0.1:808/api/leads/crm-leads/', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        const allLeads = Array.isArray(data) ? data : data.results || [];
-        const underContract = allLeads.filter(lead => lead.status === 'under_contract');
+        const res = await listCrmLeads({ archived: 'all' });
+        const data = res?.data;
+        const allLeads = (Array.isArray(data) ? data : data?.results || []).map(normalizeLead);
+        const underContract = allLeads.filter(
+          (lead) => lead.safePipelineStage === PIPELINE_STAGE_BOOKED || lead.status === 'under_contract'
+        );
         setLeads(underContract);
       } catch (err) {
         console.error('Error loading leads:', err);

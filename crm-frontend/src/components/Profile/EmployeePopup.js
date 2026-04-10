@@ -1,6 +1,6 @@
 // src/components/Settings/EmployeePopup.js
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import api from '../../apiClient';
 import './EmployeePopup.css';
 
 const PIPELINE_STATUSES = [
@@ -16,6 +16,13 @@ const normalizeUserRole = (value = '') => {
   if (normalized === 'member' || normalized === 'tech' || normalized === 'technician') return 'Tech';
   return 'Tech';
 };
+
+const USER_UPDATE_ENDPOINTS = (userId) => [
+  `/accounts/team/users/${userId}/`,
+  `/accounts/users/${userId}/`,
+];
+
+const isEndpointFallbackStatus = (status) => status === 404 || status === 405;
 
 const EmployeePopup = ({ employee, onClose, onSave }) => {
   // Create a local editable copy of the employee data
@@ -36,7 +43,32 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
   // Track if document save is in progress
   const [docSaving, setDocSaving] = useState(false);
 
-  const token = localStorage.getItem('token');
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const response = await api.get('/analytics/cost-configuration/');
+        const profiles = Array.isArray(response?.data?.compensation_profiles)
+          ? response.data.compensation_profiles
+          : [];
+        const match = profiles.find((row) => Number(row?.user_id) === Number(employee?.id));
+        if (!mounted || !match) return;
+        setUpdatedEmployee((prev) => ({
+          ...prev,
+          salary: match?.monthly_salary ?? prev.salary ?? '',
+          hourly_rate: match?.hourly_rate ?? prev.hourly_rate ?? '',
+          commissionRate: match?.commission_rate ?? prev.commissionRate ?? '',
+          compensation_type: match?.compensation_type || prev.compensation_type || 'salary',
+          compensation_notes: match?.notes || prev.compensation_notes || '',
+        }));
+      } catch {
+        // Keep popup usable even if compensation data is unavailable.
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [employee?.id]);
 
   // Switch tabs
   const handleTabChange = (tab) => setActiveTab(tab);
@@ -73,27 +105,43 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
       formData.append('last_name', updatedEmployee.last_name || updatedEmployee.lastName || '');
       formData.append('email', updatedEmployee.email || '');
       formData.append('phone_number', updatedEmployee.phone_number || '');
-      formData.append('address', updatedEmployee.address || '');
       formData.append('role', normalizeUserRole(updatedEmployee.role));
+      formData.append('external_sales_rep_id', updatedEmployee.external_sales_rep_id || '');
       formData.append('twilio_phone', updatedEmployee.twilio_phone || '');
       formData.append('call_forwarding', updatedEmployee.call_forwarding || '');
-      if (updatedEmployee.status) {
-        formData.append('status', updatedEmployee.status);
-      }
       if (avatarFile) {
         formData.append('avatar', avatarFile);
       }
-  
-      const response = await axios.patch(
-        `http://127.0.0.1:808/api/accounts/users/${updatedEmployee.id}/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
+
+      let response = null;
+      let lastError = null;
+      for (const endpoint of USER_UPDATE_ENDPOINTS(updatedEmployee.id)) {
+        try {
+          response = await api.patch(endpoint, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          break;
+        } catch (err) {
+          lastError = err;
+          if (isEndpointFallbackStatus(err?.response?.status)) continue;
+          break;
         }
-      );
+      }
+
+      if (!response) {
+        throw lastError || new Error('Unable to update team member.');
+      }
+
+      await api.patch(`/analytics/compensation-profiles/${updatedEmployee.id}/`, {
+        compensation_type: updatedEmployee.compensation_type || 'salary',
+        monthly_salary: updatedEmployee.salary || null,
+        hourly_rate: updatedEmployee.hourly_rate || null,
+        commission_rate: updatedEmployee.commissionRate || null,
+        notes: updatedEmployee.compensation_notes || '',
+        is_active: true,
+      });
   
       console.log("✅ Saved employee:", response.data);
       if (onSave) onSave(response.data);
@@ -110,29 +158,9 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
       alert("Please select a document to upload.");
       return;
     }
-    try {
-      setDocSaving(true);
-      const formData = new FormData();
-      formData.append('document', docFile);
-      // Optionally add more fields if needed to associate the document
-      const response = await axios.patch(
-        `http://127.0.0.1:808/api/accounts/users/${updatedEmployee.id}/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      console.log("✅ Document saved:", response.data);
-      alert("Document uploaded successfully.");
-    } catch (error) {
-      console.error("❌ Error saving document:", error);
-      alert("Failed to upload document. Please try again.");
-    } finally {
-      setDocSaving(false);
-    }
+    setDocSaving(true);
+    alert("Document upload is not supported by the current team member API.");
+    setDocSaving(false);
   };
 
   // Helper: Update employee status locally
@@ -244,6 +272,15 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
                   onChange={handleChange}
                 />
               </div>
+              <div className="popup-form-group">
+                <label>External Sales Rep ID</label>
+                <input
+                  type="text"
+                  name="external_sales_rep_id"
+                  value={updatedEmployee.external_sales_rep_id || ''}
+                  onChange={handleChange}
+                />
+              </div>
             </section>
           )}
 
@@ -251,11 +288,31 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
             <section className="tab-section">
               <h3>Pay Details</h3>
               <div className="popup-form-group">
+                <label>Compensation Type</label>
+                <select
+                  name="compensation_type"
+                  value={updatedEmployee.compensation_type || 'salary'}
+                  onChange={handleChange}
+                >
+                  <option value="salary">Salary</option>
+                  <option value="hourly">Hourly</option>
+                </select>
+              </div>
+              <div className="popup-form-group">
                 <label>Base Salary</label>
                 <input
                   type="number"
                   name="salary"
                   value={updatedEmployee.salary || ''}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="popup-form-group">
+                <label>Hourly Rate</label>
+                <input
+                  type="number"
+                  name="hourly_rate"
+                  value={updatedEmployee.hourly_rate || ''}
                   onChange={handleChange}
                 />
               </div>
@@ -295,6 +352,15 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
               <p className="tab-hint">
                 Track total sales or additional data here as needed.
               </p>
+              <div className="popup-form-group">
+                <label>Compensation Notes</label>
+                <textarea
+                  rows="3"
+                  name="compensation_notes"
+                  value={updatedEmployee.compensation_notes || ''}
+                  onChange={handleChange}
+                />
+              </div>
             </section>
           )}
 

@@ -5,6 +5,9 @@ import {
   FiMessageSquare,
   FiActivity,
 } from "react-icons/fi";
+import api from "../../../apiClient";
+import useAiCapabilities from "../../../hooks/useAiCapabilities";
+import CustomerIntelligencePanel from "../../Customers/components/CustomerIntelligencePanel";
 import "./AiTab.css";
 
 export default function AiTab({
@@ -15,19 +18,32 @@ export default function AiTab({
   setAiMessages,
   chatRef,
 }) {
+  const aiCapabilities = useAiCapabilities();
+
   useEffect(() => {
     if (chatRef?.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [aiMessages]);
-
-  const API_BASE = process.env.REACT_APP_API_BASE || "https://os.abon.ai";
+  }, [aiMessages, chatRef]);
 
   /* --------------------------------------------------------------
      SEND AI MESSAGE
      Full backend -> AI -> response pipeline
   -------------------------------------------------------------- */
   async function sendAiMessage() {
+    if (!aiCapabilities.intelligenceEnabled) {
+      setAiMessages((prev) => [
+        ...prev,
+        {
+          sender: "ai",
+          text:
+            aiCapabilities.error ||
+            aiCapabilities.disabledReason ||
+            "AI is disabled for this tenant. The CRM record remains fully available.",
+        },
+      ]);
+      return;
+    }
     if (!aiInput.trim()) return;
 
     const userInput = aiInput.trim();
@@ -37,27 +53,22 @@ export default function AiTab({
     setAiMessages((prev) => [...prev, { sender: "user", text: userInput }]);
 
     try {
-      const res = await fetch(`${API_BASE}/api/ai/chat/lead/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: userInput,
-          lead_context: lead.raw || lead,
-          tenant_id: lead.tenant || undefined,
-        }),
+      const res = await api.post("/assistant/query/", {
+        query: userInput,
+        context: "crm_profile_ai_tab",
+        lead_id: lead?.id || lead?.lead_id || lead?.raw?.id || undefined,
+        customer_id:
+          lead?.customer_id || lead?.raw?.customer_id || lead?.raw?.id || undefined,
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "AI request failed");
-
-      setAiMessages((prev) => [...prev, { sender: "ai", text: data.response }]);
+      const responseText = String(res?.data?.response || res?.data?.message || "").trim();
+      setAiMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: responseText || "AI did not return a response." },
+      ]);
     } catch (err) {
       setAiMessages((prev) => [
         ...prev,
-        { sender: "ai", text: "AI Error: " + err.message },
+        { sender: "ai", text: "AI Error: " + (err?.message || "request failed") },
       ]);
     }
   }
@@ -97,11 +108,31 @@ export default function AiTab({
     setTimeout(() => sendAiMessage(), 100);
   };
 
+  const raw = lead?.raw || {};
+  const objectType = String(lead?.object || raw?.object || "").trim().toLowerCase();
+  const customerId =
+    lead?.customer_id ||
+    raw?.customer_id ||
+    (objectType === "customer" ? lead?.id || raw?.id : "");
+  const leadId =
+    objectType === "lead" ? lead?.lead_id || lead?.id || raw?.lead_id || raw?.id : "";
+
   /* --------------------------------------------------------------
      RENDER
   -------------------------------------------------------------- */
   return (
     <div className="gt-ai">
+      <CustomerIntelligencePanel
+        customerId={customerId || undefined}
+        leadId={!customerId && leadId ? leadId : undefined}
+        compact
+        title="CRM Intelligence"
+        subtitle="Structured ontology context is the primary AI layer here. Freeform assistant prompts are secondary."
+        enabled={aiCapabilities.intelligenceEnabled}
+        availabilityLoading={aiCapabilities.loading}
+        disabledReason={aiCapabilities.error || aiCapabilities.disabledReason}
+      />
+
       {/* Header */}
       <div className="gt-ai-header">
         <div className="gt-ai-orb" />
@@ -120,6 +151,7 @@ export default function AiTab({
             key={idx}
             className="gt-ai-action-btn"
             onClick={() => runAction(action.cmd)}
+            disabled={!aiCapabilities.intelligenceEnabled}
           >
             <span className="gt-ai-action-icon">{action.icon}</span>
             <span>{action.label}</span>
@@ -142,11 +174,16 @@ export default function AiTab({
           type="text"
           className="gt-ai-input"
           value={aiInput}
-          placeholder="Ask the intelligence engine…"
+          placeholder={
+            aiCapabilities.intelligenceEnabled
+              ? "Ask the intelligence engine…"
+              : "AI is disabled. CRM data remains available."
+          }
           onChange={(e) => setAiInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendAiMessage()}
+          disabled={!aiCapabilities.intelligenceEnabled}
         />
-        <button className="gt-ai-send" onClick={sendAiMessage}>
+        <button className="gt-ai-send" onClick={sendAiMessage} disabled={!aiCapabilities.intelligenceEnabled}>
           Send
         </button>
       </div>

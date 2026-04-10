@@ -1,145 +1,77 @@
-/* ==========================================================
-   AI PANEL — PALANTIR x APPLE MINIMAL
-========================================================== */
+@import '../../theme/tokens.css';
+
 .ai-panel {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 12px 0;
-  color: #f1f3f5;
+  padding: 12px 0 2px;
+  color: var(--text-main);
 }
 
-/* Fade */
 .minimal-fade {
   animation: fadeIn 0.25s ease-out;
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(3px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================
-   SUMMARY & SUGGESTED REPLY CARDS
-========================================================== */
 .ai-card {
-  background: #1f2227;
+  background: linear-gradient(160deg, rgba(var(--accent-rgb), 0.08), transparent 44%), var(--bg-card);
   padding: 16px;
-  border-radius: 10px;
-  border: 1px solid #2b2e34;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-0);
 }
 
 .ai-card h3 {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 6px;
-  color: #ffffff;
+  margin: 0 0 6px;
+  color: var(--text-main);
+  letter-spacing: 0.01em;
 }
 
 .ai-card p {
-  color: #d8d9dc;
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0;
   line-height: 1.45;
 }
 
 .ai-suggest {
-  font-style: italic;
-  opacity: 0.85;
+  font-style: normal;
+  color: var(--text-main);
 }
 
-/* ==========================================================
-   CHAT AREA
-========================================================== */
-.ai-chat {
-  background: #1f2227;
-  border: 1px solid #2b2e34;
-  border-radius: 10px;
-  padding: 14px;
+.ai-action-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.chat-scroll {
-  max-height: 180px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
+  margin-top: 10px;
 }
 
-.chat-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.chat-scroll::-webkit-scrollbar-thumb {
-  background: #2f3137;
-  border-radius: 6px;
-}
-
-/* ==========================================================
-   CHAT BUBBLES
-========================================================== */
-.bubble {
-  max-width: 80%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  line-height: 1.4;
-}
-
-.bubble.user {
-  align-self: flex-end;
-  background: #0a84ff;
-  color: white;
-  border-bottom-right-radius: 4px;
-}
-
-.bubble.ai {
-  align-self: flex-start;
-  background: #2e3038;
-  border-bottom-left-radius: 4px;
-}
-
-/* ==========================================================
-   CHAT INPUT
-========================================================== */
-.chat-input-row {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.chat-input-row input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  background: #2a2c32;
-  border: 1px solid #3a3d45;
-  color: white;
-  outline: none;
-}
-
-.chat-input-row button {
-  background: #0a84ff;
-  color: white;
-  border: none;
-  padding: 0 16px;
-  border-radius: 8px;
+.ai-action-row button {
+  border: 1px solid rgba(var(--accent-rgb), 0.34);
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-text);
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 9px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.chat-input-row button:hover {
-  background: #0066cc;
+.ai-action-row button:hover {
+  filter: brightness(1.05);
 }
 
-/* ==========================================================
-   LOADING
-========================================================== */
 .ai-loading {
-  padding: 30px 6px;
+  padding: 24px 6px;
   text-align: left;
-  color: #ccc;
-  font-size: 14px;
+  color: var(--text-sub);
+  font-size: 13px;
 }

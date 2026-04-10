@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../../../apiClient";
 import { fetchCallLogs, startOutboundCall } from "../../../api/communications";
 import { CALL_STATES } from "../../../constants/callStates";
@@ -92,7 +93,9 @@ const sanitizeDialValue = (value = "") => {
 };
 
 export default function DialerPage() {
+  const location = useLocation();
   const tenantId = useMemo(() => getActiveTenant()?.id || "", []);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
@@ -121,6 +124,12 @@ export default function DialerPage() {
   const [selectedDialListId, setSelectedDialListId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadInfo, setUploadInfo] = useState(null);
+
+  useEffect(() => {
+    const target = searchParams.get("target_number") || "";
+    if (!target) return;
+    setDialInput((current) => current || sanitizeDialValue(target));
+  }, [searchParams]);
 
   useEffect(() => {
     const loadSessions = async () => {

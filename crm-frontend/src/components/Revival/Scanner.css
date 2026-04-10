@@ -1,54 +1,43 @@
 /* ==========================================================================
-   🌗 THEME: Light + Dark Mode
+   SCANNER PAGE
+   Scoped styles — all rules locked under .scanner-container to prevent
+   leakage into the rest of the CRM. Colors come from the design system
+   tokens (theme/tokens.css) so light/dark modes work automatically.
    ========================================================================== */
-   :root {
-    --text-color: #111;
-    --border-color: #d0d4d9;
-    --surface-muted: #f5f7fa;
-    --input-bg: #ffffff;
-    --btn-bg: #007aff;
-    --btn-hover: #005ecb;
-    --btn-text: #ffffff;
-    --muted-btn-bg: #e0e0e0;
-    --primary: #007aff;
-    --code-bg: #f1f2f4;
-    --accent-green: var(--accent);
-    --shadow-light: 0 2px 12px rgba(0,0,0,0.06);
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --text-color: #f1f1f1;
-      --border-color: #444c56;
-      --surface-muted: #161b22;
-      --input-bg: #1c2128;
-      --btn-bg: #1f6feb;
-      --btn-hover: #1158c7;
-      --btn-text: #ffffff;
-      --muted-btn-bg: #2c2f35;
-      --primary: #58a6ff;
-      --code-bg: #1b1f27;
-      --accent-green: var(--accent);
-      --shadow-light: 0 2px 12px rgba(255,255,255,0.04);
-    }
-  }
-  
-  /* ==========================================================================
-     ⚙️ LAYOUT
-     ========================================================================== */
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--surface-muted);
-    color: var(--text-color);
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-  }
-  
-  .scanner-container {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 32px 20px;
-  }
+
+/* Scanner-local aliases mapping to the design system. Scoped to the
+   container so they don't leak globally. */
+.scanner-container {
+  --s-text-color:    var(--text-main);
+  --s-border-color:  var(--border);
+  --s-surface-muted: var(--bg-panel);
+  --s-input-bg:      var(--bg-elev);
+  --s-btn-bg:        var(--accent);
+  --s-btn-hover:     var(--accent-secondary);
+  --s-btn-text:      var(--accent-ink, #fff);
+  --s-muted-btn-bg:  var(--bg-panel);
+  --s-primary:       var(--accent);
+  --s-code-bg:       var(--bg-panel);
+  --s-shadow-light:  var(--sh-1);
+
+  /* Back-compat for the rest of this file that still references these names. */
+  --text-color:   var(--s-text-color);
+  --border-color: var(--s-border-color);
+  --surface-muted: var(--s-surface-muted);
+  --input-bg:     var(--s-input-bg);
+  --btn-bg:       var(--s-btn-bg);
+  --btn-hover:    var(--s-btn-hover);
+  --btn-text:     var(--s-btn-text);
+  --muted-btn-bg: var(--s-muted-btn-bg);
+  --primary:      var(--s-primary);
+  --code-bg:      var(--s-code-bg);
+  --shadow-light: var(--s-shadow-light);
+
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  color: var(--text-main);
+}
   
   .scanner-layout {
     display: flex;
@@ -98,6 +87,13 @@
     font-size: 0.85rem;
     opacity: 0.75;
   }
+
+  .recent-scan-campaign-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
   
   .recent-scans .empty {
     opacity: 0.5;
@@ -118,46 +114,50 @@
   }
   
   /* ==========================================================================
-     🎯 UI ELEMENTS
+     🎯 UI ELEMENTS (scoped to .scanner-container)
      ========================================================================== */
-  input[type="file"] {
+  .scanner-container input[type="file"] {
     width: 100%;
-    padding: 12px;
-    border: 1px dashed var(--border-color);
+    padding: 14px;
+    border: 1px dashed var(--border);
     border-radius: 10px;
-    background: var(--input-bg);
+    background: var(--bg-panel);
     margin-bottom: 20px;
     font-size: 0.95rem;
     cursor: pointer;
+    color: var(--text-main);
+    min-height: 44px;
   }
-  
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  select {
+
+  .scanner-container input[type="text"],
+  .scanner-container input[type="number"],
+  .scanner-container input[type="date"],
+  .scanner-container select {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--input-bg);
-    color: var(--text-color);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-panel);
+    color: var(--text-main);
     font-size: 0.95rem;
+    min-height: 44px;
     margin-bottom: 16px;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
-  input:focus,
-  select:focus {
+
+  .scanner-container input:focus-visible,
+  .scanner-container select:focus-visible {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.24);
   }
-  
-  label {
-    font-size: 0.9rem;
-    font-weight: 500;
+
+  .scanner-container label {
+    font-size: 0.88rem;
+    font-weight: 600;
     display: block;
     margin-bottom: 6px;
+    color: var(--text-sub);
   }
   
   /* Buttons */
@@ -200,6 +200,143 @@
     text-align: center;
     margin: 16px 0;
     color: var(--primary);
+  }
+
+  .scanner-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .scanner-review-panel {
+    margin-bottom: 24px;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--input-bg);
+    box-shadow: var(--shadow-light);
+  }
+
+  .scanner-review-panel.needs-review {
+    border-color: #d9a441;
+    box-shadow: 0 0 0 1px rgba(217, 164, 65, 0.2);
+  }
+
+  .scanner-review-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .scanner-review-head h3 {
+    margin: 4px 0 0;
+  }
+
+  .scanner-review-eyebrow {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+
+  .scanner-review-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .scanner-review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .scanner-review-grid div {
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--surface-muted);
+  }
+
+  .scanner-review-grid span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    opacity: 0.72;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .scanner-review-grid strong {
+    font-size: 0.96rem;
+  }
+
+  .scanner-warning-list {
+    margin: 14px 0 0;
+    padding-left: 18px;
+    color: #9c6d00;
+  }
+
+  .scanner-warning-list li + li {
+    margin-top: 6px;
+  }
+
+  .confidence-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--primary);
+  }
+
+  .confidence-badge.high {
+    background: rgba(34, 139, 34, 0.14);
+    color: #1e7a34;
+  }
+
+  .confidence-badge.medium {
+    background: rgba(217, 164, 65, 0.16);
+    color: #9c6d00;
+  }
+
+  .confidence-badge.low {
+    background: rgba(194, 72, 72, 0.14);
+    color: #b13636;
+  }
+
+  .form-group.has-low-confidence input,
+  .form-group.has-low-confidence select {
+    border-color: #d9a441;
+    box-shadow: 0 0 0 2px rgba(217, 164, 65, 0.14);
+    background: rgba(255, 244, 214, 0.6);
+  }
+
+  .form-label-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .line-items-review-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .line-items-review-head.has-low-confidence h3 {
+    color: #9c6d00;
   }
   
   /* Line Items */
@@ -311,6 +448,13 @@
     .scanner-header {
       flex-direction: column;
       gap: 8px;
+      align-items: flex-start;
+    }
+
+    .scanner-review-head,
+    .form-label-row,
+    .line-items-review-head {
+      flex-direction: column;
       align-items: flex-start;
     }
   }

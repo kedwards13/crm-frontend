@@ -1,8 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, BellRing, Bot, MessageSquareText, PhoneCall } from 'lucide-react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import useTenantSettings from '../../hooks/useTenantSettings.ts';
 import NotificationSettings from './components/NotificationSettings.tsx';
 import AISettings from './components/AISettings.tsx';
@@ -234,8 +233,6 @@ export default function SettingsLayout() {
           </div>
         </div>
       ) : null}
-
-      <ToastContainer position="bottom-right" autoClose={2500} theme="colored" />
     </div>
   );
 }

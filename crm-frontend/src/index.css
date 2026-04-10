@@ -1,186 +1,90 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import './theme/tokens.css';
-
-:root {
-  --bg-app: #05050b;
-  --bg-surface: rgba(20, 20, 25, 0.72);
-  --bg-hover: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.1);
-  --border-light: rgba(255, 255, 255, 0.2);
-  --border-strong: rgba(255, 255, 255, 0.26);
-  --text-main: #f6f8ff;
-  --text-muted: #a7adc4;
-  --text-sub: #7b8198;
-  --text-1: var(--text-main);
-  --text-2: var(--text-muted);
-  --text-3: var(--text-sub);
-  --accent: #ff5b08;
-  --accent-rgb: 255, 91, 8;
-  --accent-dim: rgba(var(--accent-rgb), 0.16);
-  --accent-glow: rgba(var(--accent-rgb), 0.42);
-  --accent-gradient: linear-gradient(135deg, #ff5b08 0%, #ff8b00 100%);
-  --blue-gradient: linear-gradient(135deg, #0e6bff 0%, #26acff 100%);
-  --glass-blur: 20px;
-  --shadow-lg: 0 24px 70px -14px rgba(0, 0, 0, 0.65);
-  --inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.11);
-  --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.45);
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-}
-
-body[data-theme='light'] {
-  --bg-app: #eaf0f8;
-  --bg-surface: rgba(255, 255, 255, 0.78);
-  --bg-hover: rgba(15, 23, 42, 0.06);
-  --border: rgba(15, 23, 42, 0.14);
-  --border-light: rgba(15, 23, 42, 0.2);
-  --border-strong: rgba(15, 23, 42, 0.3);
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-sub: #64748b;
-  --text-1: var(--text-main);
-  --text-2: var(--text-muted);
-  --text-3: var(--text-sub);
-  --accent: #ff5b08;
-  --accent-rgb: 255, 91, 8;
-  --accent-dim: rgba(var(--accent-rgb), 0.12);
-  --accent-glow: rgba(var(--accent-rgb), 0.3);
-  --shadow-lg: 0 22px 58px -26px rgba(15, 23, 42, 0.24);
-  --inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
-}
+@import './components/ui/glass-system.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
 }
 
 html {
-  scrollbar-gutter: stable;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
-}
-
-body[data-theme='light'] * {
-  scrollbar-color: rgba(15, 23, 42, 0.28) transparent;
+  background: var(--bg-app-gradient);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  color: var(--text-main);
+  background: var(--bg-app-gradient);
   background-color: var(--bg-app);
-  background-image:
-    radial-gradient(circle at 0% 0%, rgba(255, 91, 8, 0.1), transparent 38%),
-    radial-gradient(circle at 100% 100%, rgba(14, 107, 255, 0.11), transparent 42%),
-    linear-gradient(140deg, rgba(255, 255, 255, 0.02), transparent 40%);
   background-attachment: fixed;
-  text-rendering: optimizeLegibility;
+  color: var(--text-main);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  color-scheme: dark;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
+html[data-theme='light'],
+body[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'],
+body[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* GLOBAL RESET */
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
   color: inherit;
 }
 
-::selection {
-  background: var(--accent);
-  color: #fff;
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
 }
 
-:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  border-color: rgba(var(--accent-rgb), 0.5);
+tr:hover td {
+  background: var(--bg-panel-hover);
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.35);
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.24);
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-body[data-theme='light'] ::-webkit-scrollbar-thumb {
-  background-color: rgba(15, 23, 42, 0.28);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.42);
-}
-
-body[data-theme='light'] ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(15, 23, 42, 0.44);
-}
-
-.glass-panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  backdrop-filter: blur(var(--glass-blur)) saturate(135%);
-  box-shadow: var(--shadow-lg), var(--inner-glow);
-}
-
-.glass-card,
-.panel,
-.dashboard-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  backdrop-filter: blur(var(--glass-blur)) saturate(130%);
-  box-shadow: var(--shadow-lg), var(--inner-glow);
-  overflow: hidden;
-}
-
 .btn-primary,
 .btn-new {
-  border: 1px solid transparent;
   background: var(--accent-gradient);
   color: #fff;
-  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+  border: 1px solid transparent;
+  box-shadow: var(--accent-glow);
 }
 
 .btn-primary:hover,
 .btn-new:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px -14px var(--accent-glow);
-}
-
-.btn-solid:hover:not(:disabled) {
-  background: #ffffff;
-  color: #080808;
-  box-shadow: 0 0 18px rgba(255, 255, 255, 0.4);
+  filter: brightness(1.03);
 }
 
 .sr-only {
@@ -195,13 +99,10 @@ body[data-theme='light'] ::-webkit-scrollbar-thumb:hover {
   border: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
-    scroll-behavior: auto !important;
+@media (max-width: 768px) {
+  button,
+  a,
+  [role='button'] {
+    min-height: 44px;
   }
 }

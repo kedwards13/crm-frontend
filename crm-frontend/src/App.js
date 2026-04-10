@@ -25,6 +25,7 @@ import Planner from './components/Revival/Planner';
 import History from './components/Revival/History';
 import AiInsights from './components/Revival/AiInsights';
 import QuoteDetail from './pages/Quotes/QuoteDetail';
+import QuoteCreate from './pages/Quotes/QuoteCreate';
 import RevivalScanner from './components/Revival/Scanner';
 import Overview from './components/Revival/Overview';
 import AnalyticsRouter from './components/Analytics/AnalyticsRouter';
@@ -202,15 +203,16 @@ const AuthenticatedApp = () => {
         <Route path="/dashboard/tasks" element={<DashboardTasks />} />
         <Route path="/dashboard/alerts" element={<DashboardAlerts />} />
         <Route path="/customers/*" element={<CustomersPage />} />
-        <Route path="/leads/*" element={<LeadsPage />} />
         <Route path="/leads/pipeline" element={<PipelineView />} />
         <Route path="/leads/under-contract" element={<MarketplaceView />} />
+        <Route path="/leads/*" element={<LeadsPage />} />
         <Route path="/schedule/*" element={<SchedulingDashboard />} />
         <Route path="/communication/*" element={<CommunicationsPage />} />
         <Route path="/communications/*" element={<CommunicationsPage />} />
         <Route path="/inbox/*" element={<Navigate to="/communication/inbox" replace />} />
 
         {/* Revival */}
+        <Route path="/quotes/create" element={<QuoteCreate />} />
         <Route path="/quotes/:quoteId" element={<QuoteDetail />} />
         <Route path="/revival/quote/:quoteId" element={<QuoteDetail />} />
         <Route path="/revival/overview" element={<Overview />} />

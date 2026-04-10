@@ -6,11 +6,13 @@ import {
   Mail,
   MapPin,
   MessageSquareText,
+  Pencil,
   Phone,
   X,
 } from "lucide-react";
 
-import { getCustomer } from "../../api/customersApi";
+import { toast } from "react-toastify";
+import { getCustomer, updateCustomer } from "../../api/customersApi";
 import { getOperationalCustomer } from "../../api/operationsCustomersApi";
 import { mapEntity } from "../../utils/contactMapper";
 import { getIndustryKey, getSchedulingConfig } from "../../constants/uiRegistry";
@@ -201,6 +203,9 @@ export default function CustomerDetailPage() {
   const [operationalSummary, setOperationalSummary] = useState(null);
   const [activeTab, setActiveTab] = useState("timeline");
   const [showSchedule, setShowSchedule] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState({});
 
   const industryKey = getIndustryKey("general");
   const schedulingConfig = getSchedulingConfig(industryKey);
@@ -407,6 +412,48 @@ export default function CustomerDetailPage() {
     return params.toString();
   }, [customerName, mergedCustomer, operationalSummary, primaryPhone, record]);
 
+  const openEditModal = () => {
+    setEditForm({
+      first_name: clean(mergedCustomer?.first_name || customerName?.split(" ")[0]),
+      last_name: clean(mergedCustomer?.last_name || customerName?.split(" ").slice(1).join(" ")),
+      company_name: clean(mergedCustomer?.company_name),
+      primary_phone: clean(primaryPhone),
+      primary_email: clean(primaryEmail),
+      address: clean(mergedCustomer?.address),
+      city: clean(mergedCustomer?.city),
+      state: clean(mergedCustomer?.state),
+      zip_code: clean(mergedCustomer?.zip_code),
+    });
+    setShowEdit(true);
+  };
+
+  const handleEditSave = async () => {
+    const crmId = mergedCustomer?.id || mergedCustomer?.customer_id || customerId;
+    if (!crmId) {
+      toast.error("Cannot edit: no CRM customer ID.");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const payload = {};
+      for (const [key, value] of Object.entries(editForm)) {
+        if (clean(value)) payload[key] = clean(value);
+      }
+      await updateCustomer(crmId, payload);
+      toast.success("Customer updated");
+      setShowEdit(false);
+      const response = await getCustomer(crmId);
+      setCustomer(response?.data || null);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || err?.message || "Unable to save");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const editField = (key) => (e) =>
+    setEditForm((prev) => ({ ...prev, [key]: e.target.value }));
+
   const content = useMemo(() => {
     if (!record && !operationalSummary) return null;
 
@@ -585,6 +632,10 @@ export default function CustomerDetailPage() {
               Email
             </button>
           ) : null}
+          <button type="button" className="cdp-action-btn" onClick={openEditModal}>
+            <Pencil size={16} />
+            Edit
+          </button>
           <button
             type="button"
             className="cdp-action-btn cdp-action-btn-primary"
@@ -664,6 +715,51 @@ export default function CustomerDetailPage() {
             />
           </div>
           <button className="cdp-modal-backdrop" onClick={() => setShowSchedule(false)} aria-label="Close" />
+        </div>
+      ) : null}
+
+      {showEdit ? (
+        <div className="cdp-modal">
+          <div className="cdp-modal-surface cdp-edit-surface" role="dialog" aria-modal="true">
+            <div className="cdp-edit-header">
+              <h3>Edit Customer</h3>
+              <button type="button" className="cdp-close" onClick={() => setShowEdit(false)} aria-label="Close">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="cdp-edit-grid">
+              {[
+                ["first_name", "First name"],
+                ["last_name", "Last name"],
+                ["company_name", "Company"],
+                ["primary_phone", "Phone"],
+                ["primary_email", "Email"],
+                ["address", "Address"],
+                ["city", "City"],
+                ["state", "State"],
+                ["zip_code", "ZIP"],
+              ].map(([key, label]) => (
+                <label key={key} className="cdp-edit-field">
+                  <span>{label}</span>
+                  <input value={editForm[key] || ""} onChange={editField(key)} />
+                </label>
+              ))}
+            </div>
+            <div className="cdp-edit-actions">
+              <button type="button" className="cdp-action-btn" onClick={() => setShowEdit(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="cdp-action-btn cdp-action-btn-primary"
+                onClick={handleEditSave}
+                disabled={editSaving}
+              >
+                {editSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+          <button className="cdp-modal-backdrop" onClick={() => setShowEdit(false)} aria-label="Close" />
         </div>
       ) : null}
     </div>

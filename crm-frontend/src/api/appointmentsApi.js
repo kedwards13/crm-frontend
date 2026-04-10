@@ -7,7 +7,21 @@ export const getAppointment = (id) =>
   api.get(`/appointments/appointments/${id}/`);
 
 export const createAppointment = (payload) =>
-  api.post("/appointments/appointments/", payload);
+  api.post("/appointments/appointments/", {
+    customer_id: payload?.customer_id ?? payload?.customer,
+    lead_id: payload?.lead_id ?? payload?.lead,
+    assigned_user_id:
+      payload?.assigned_user_id ?? payload?.assigned_user ?? payload?.assigned_to,
+    assigned_user: payload?.assigned_user ?? payload?.assigned_to,
+    scheduled_at: payload?.scheduled_at ?? payload?.start ?? payload?.start_time,
+    start: payload?.start ?? payload?.start_time ?? payload?.scheduled_at,
+    end: payload?.end ?? payload?.end_time,
+    duration_minutes: payload?.duration_minutes ?? payload?.duration,
+    duration: payload?.duration ?? payload?.duration_minutes,
+    service_type: payload?.service_type,
+    notes: payload?.notes,
+    tenant_id: payload?.tenant_id,
+  });
 
 export const updateAppointment = (id, payload) =>
   api.patch(`/appointments/appointments/${id}/`, payload);
@@ -35,6 +49,9 @@ export const remindToday = () =>
 
 export const appointmentOverview = (params = {}) =>
   api.get("/appointments/appointments/overview/", { params });
+
+export const getAppointmentAvailableSlots = (params = {}) =>
+  api.get("/appointments/available-slots/", { params });
 
 export const appointmentSmartReplyContext = (id) =>
   api.get(`/appointments/appointments/${id}/smart_reply_context/`);

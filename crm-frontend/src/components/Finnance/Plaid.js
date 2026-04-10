@@ -1,24 +1,29 @@
 import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
+import api from '../../apiClient';
 
 const PlaidLinkButton = () => {
+  const linkToken = process.env.REACT_APP_PLAID_LINK_TOKEN || '';
   const config = {
-    token: 'GENERATED_LINK_TOKEN_FROM_YOUR_BACKEND', // You need to create this via Plaid API on the backend
-    onSuccess: (public_token, metadata) => {
-      // Send the public_token to your backend
-      fetch('http://127.0.0.1:808/api/finance/exchange-token/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ public_token }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("Exchange response:", data);
-          // Save any necessary information, e.g., update state or notify the user
-        })
-        .catch((error) => {
-          console.error("Error exchanging token:", error);
+    token: linkToken || null,
+    onSuccess: async (public_token) => {
+      try {
+        // Persist lightweight connection status in tenant preferences until
+        // a dedicated Plaid exchange endpoint is added to backend.
+        await api.patch('/accounts/preferences/', {
+          preferences: {
+            integrations: {
+              plaid_linked: true,
+              plaid_last_linked_at: new Date().toISOString(),
+            },
+            finance: {
+              plaid_public_token_preview: String(public_token || '').slice(0, 8),
+            },
+          },
         });
+      } catch (error) {
+        console.warn('Could not persist Plaid connection status.', error);
+      }
     },
     onExit: (err, metadata) => {
       // Handle the case when your user exits Plaid Link
@@ -27,9 +32,10 @@ const PlaidLinkButton = () => {
   };
 
   const { open, ready } = usePlaidLink(config);
+  const disabled = !linkToken || !ready;
 
   return (
-    <button onClick={() => open()} disabled={!ready}>
+    <button onClick={() => open()} disabled={disabled} title={!linkToken ? 'Configure REACT_APP_PLAID_LINK_TOKEN' : undefined}>
       Link Bank Account
     </button>
   );

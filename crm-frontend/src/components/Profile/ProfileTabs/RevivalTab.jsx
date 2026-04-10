@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../../../utils/formatters";
 import revivalApi from "../../../api/revivalApi";
 import "./revival-tab.css";
@@ -12,6 +13,27 @@ function normalizePhone(phone) {
 
 export default function RevivalTab({ customer }) {
   const API_BASE = process.env.REACT_APP_API_BASE || "https://os.abon.ai";
+  const navigate = useNavigate();
+
+  const goCreateQuote = () => {
+    navigate("/quotes/create", {
+      state: {
+        customer: {
+          id: customer?.customer_id || customer?.id,
+          customer_id: customer?.customer_id || customer?.id,
+          first_name: customer?.first_name || "",
+          last_name: customer?.last_name || "",
+          full_name:
+            customer?.full_name ||
+            [customer?.first_name, customer?.last_name].filter(Boolean).join(" "),
+          company_name: customer?.company_name || "",
+          primary_phone: customer?.primary_phone || customer?.phone || "",
+          primary_email: customer?.primary_email || customer?.email || "",
+          service_type: customer?.service_type || customer?.service || "",
+        },
+      },
+    });
+  };
 
   const [quotes, setQuotes] = useState([]);
   const [loadingQuotes, setLoadingQuotes] = useState(true);
@@ -21,14 +43,53 @@ export default function RevivalTab({ customer }) {
   useEffect(() => {
     async function loadQuotes() {
       try {
-        const res = await revivalApi.listQuotes();
-        const raw = res.data;
+        /* -----------------------------
+           Customer Identifiers
+        ------------------------------*/
+        const cid =
+          customer?.customer_id ||
+          customer?.id ||
+          customer?.raw?.customer_id ||
+          customer?.raw?.id ||
+          null;
+        const cuid = customer?.universal_id || customer?.raw?.universal_id || null;
+
+        const phoneNorm = normalizePhone(
+          customer?.primary_phone ||
+            customer?.phone ||
+            customer?.raw?.primary_phone ||
+            customer?.raw?.phone
+        );
+        const email =
+          customer?.primary_email ||
+          customer?.email ||
+          customer?.raw?.primary_email ||
+          customer?.raw?.email;
+
+        const params = {};
+        if (cid) params.customer_id = String(cid);
+        if (cuid) params.party_universal_id = String(cuid);
+        if (phoneNorm) params.contact_phone = phoneNorm;
+        if (email) params.contact_email = email;
+
+        let res = await revivalApi.listQuotes(params);
+        let raw = res.data;
 
         let all = [];
         if (Array.isArray(raw)) all = raw;
         else if (Array.isArray(raw?.results)) all = raw.results;
         else if (Array.isArray(raw?.data)) all = raw.data;
         else if (Array.isArray(raw?.quotes)) all = raw.quotes;
+
+        if (!all.length && Object.keys(params).length > 0) {
+          // Compatibility fallback for tenants still returning broad quote lists.
+          res = await revivalApi.listQuotes();
+          raw = res.data;
+          if (Array.isArray(raw)) all = raw;
+          else if (Array.isArray(raw?.results)) all = raw.results;
+          else if (Array.isArray(raw?.data)) all = raw.data;
+          else if (Array.isArray(raw?.quotes)) all = raw.quotes;
+        }
 
         console.log("🔥 Revival list loaded:", all.length);
         console.log("🔥 Quotes:", all);
@@ -42,25 +103,23 @@ export default function RevivalTab({ customer }) {
         }
 
         /* -----------------------------
-           Customer Identifiers
-        ------------------------------*/
-        const cid = customer?.customer_id || customer?.id || null;
-        const cuid = customer?.universal_id || null;
-
-        const phoneNorm = normalizePhone(
-          customer?.primary_phone || customer?.phone
-        );
-        const email = customer?.primary_email || customer?.email;
-
-        /* -----------------------------
            CORRECT FILTER (FINAL)
         ------------------------------*/
         let filtered = all.filter((q) => {
-          const qCid = q.customer_external_id || null;
+          const qCid =
+            q.customer_external_id ||
+            q.customer_id ||
+            q.customer_pk ||
+            q.customer?.customer_id ||
+            q.customer?.id ||
+            q.customer ||
+            null;
           const qUid = q.customer_universal_id || null;
 
-          const qPhone = normalizePhone(q.customer_phone);
-          const qEmail = q.customer_email;
+          const qPhone = normalizePhone(
+            q.customer_phone || q.customer?.primary_phone || q.customer?.phone
+          );
+          const qEmail = q.customer_email || q.customer?.primary_email || q.customer?.email;
 
           return (
             // ID match
@@ -110,8 +169,27 @@ export default function RevivalTab({ customer }) {
 
   if (!quotes.length) {
     return (
-      <div className="p-4 text-gray-400 text-sm">
-        No quotes found for this customer.
+      <div className="p-6 text-center" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+        <p style={{ color: "#94a3b8", fontSize: 14, margin: 0 }}>
+          No quotes found for this contact yet.
+        </p>
+        <button
+          type="button"
+          onClick={goCreateQuote}
+          style={{
+            background: "var(--color-accent, #2563eb)",
+            color: "#ffffff",
+            border: 0,
+            borderRadius: 10,
+            padding: "12px 24px",
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: "pointer",
+            letterSpacing: "0.02em",
+          }}
+        >
+          + Create First Quote
+        </button>
       </div>
     );
   }
@@ -120,7 +198,7 @@ export default function RevivalTab({ customer }) {
        ACTION HANDLERS
   ------------------------------*/
   const viewDetails = (quote) => {
-    window.open(`/revival/quote/${quote.id}`, "_blank");
+    window.open(`/quotes/${quote.id}`, "_blank");
   };
 
   const sendQuoteAgain = async (quote) => {
@@ -161,7 +239,7 @@ export default function RevivalTab({ customer }) {
     setLoadingAction(quote.id);
     try {
       const res = await fetch(
-        `${API_BASE}/revival/export-pdf/${quote.id}/`,
+        `${API_BASE}/revival/${quote.id}/export-pdf/`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -225,6 +303,27 @@ export default function RevivalTab({ customer }) {
   ------------------------------*/
   return (
     <div className="revival-tab p-4 space-y-6">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <p style={{ color: "#94a3b8", fontSize: 13, margin: 0 }}>
+          {quotes.length} quote{quotes.length === 1 ? "" : "s"} on file
+        </p>
+        <button
+          type="button"
+          onClick={goCreateQuote}
+          style={{
+            background: "var(--color-accent, #2563eb)",
+            color: "#ffffff",
+            border: 0,
+            borderRadius: 8,
+            padding: "8px 16px",
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          + New Quote
+        </button>
+      </div>
       {quotes.map((q) => {
         const isExpanded = expanded === q.id;
 

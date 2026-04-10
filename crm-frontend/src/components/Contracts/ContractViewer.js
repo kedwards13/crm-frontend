@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './ContractViewer.css'; // Optional scoped styling
 
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL ||
+  process.env.REACT_APP_API_URL ||
+  'https://os.abon.ai/api';
+
 const ContractViewer = ({ contractToken, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -12,7 +17,7 @@ const ContractViewer = ({ contractToken, onClose }) => {
     const fetchPdf = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:808/api/sellers/contract/${contractToken}/`, {
+        const res = await fetch(`${API_BASE}/sellers/contract/${contractToken}/`, {
           headers: {
             Accept: 'application/pdf',
           },

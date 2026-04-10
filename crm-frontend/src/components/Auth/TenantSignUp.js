@@ -1,8 +1,7 @@
 // src/components/Auth/TenantSignUp.js
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../config/env';
+import api from '../../apiClient';
 import './Auth.css'; // Uses shared auth styles
 
 const TenantSignUp = () => {
@@ -80,7 +79,7 @@ const TenantSignUp = () => {
       return;
     }
     try {
-      const response = await axios.post(`${API_BASE_URL}/accounts/tenant-signup/`, formData);
+      const response = await api.post('/accounts/auth/tenant-signup/', formData);
       setSuccess(response.data.message);
       localStorage.setItem('token', response.data.access);
       localStorage.setItem('refresh', response.data.refresh);
@@ -98,7 +97,7 @@ const TenantSignUp = () => {
         navigate(isSetupComplete ? '/dashboard' : '/settings/team');
       }, 1500);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Something went wrong!';
+      const errorMsg = err?.payload?.error || err?.response?.data?.error || 'Something went wrong!';
       setError(errorMsg);
       console.error('Signup error:', errorMsg);
     } finally {

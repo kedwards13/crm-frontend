@@ -9,6 +9,22 @@ import AbonMark from '../../assets/brand/abon-mark.svg';
 
 import './Login.css';
 
+const getLoginErrorMessage = (error) => {
+  const status = Number(error?.status || error?.response?.status || 0);
+  const code = String(error?.code || '').toUpperCase();
+
+  if (status === 401) {
+    return 'Invalid email or password.';
+  }
+  if (code === 'ECONNABORTED' || code === 'ETIMEDOUT') {
+    return 'Login timed out. Please try again.';
+  }
+  if (code === 'ERR_NETWORK') {
+    return 'Unable to reach the server. Please try again.';
+  }
+  return error?.message || 'Login failed. Please try again.';
+};
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,7 +73,7 @@ const Login = () => {
       login(access, refresh, expiry, normalizedTenants, user);
       navigate(normalizedTenants.length === 1 ? '/dashboard' : '/select-account', { replace: true });
     } catch (err) {
-      setError('Invalid credentials.');
+      setError(getLoginErrorMessage(err));
     } finally {
       setLoading(false);
     }

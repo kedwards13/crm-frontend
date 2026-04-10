@@ -1,12 +1,15 @@
+@import '../../theme/tokens.css';
+@import '../ui/glass-system.css';
+
 .finance-shell {
-  padding: 24px;
-  color: var(--color-text, #e6e6e6);
+  padding-bottom: 24px;
+  color: var(--text-main);
 }
 
 .finance-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .finance-head {
@@ -19,11 +22,11 @@
 
 .finance-head h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .finance-muted {
-  color: var(--text-2, #9ca3af);
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -34,50 +37,66 @@
 }
 
 .finance-btn {
-  background: var(--accent-0, #0a84ff);
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.45);
+  background: var(--accent-gradient);
   color: #fff;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--accent-glow);
 }
 
 .finance-btn.secondary {
-  background: transparent;
-  border: 1px solid var(--color-border, #2c2f36);
-  color: var(--color-text, #e6e6e6);
+  border-color: var(--border);
+  background: var(--surface-secondary, var(--bg-2));
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.finance-btn:hover {
+  filter: brightness(1.03);
 }
 
 .finance-stat-grid {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .finance-stat {
-  background: var(--color-bg-card, #12151b);
-  border: 1px solid var(--color-border, #2c2f36);
-  border-radius: 12px;
+  border: 1px solid var(--panel-border, var(--glass-border));
+  border-radius: 14px;
+  background:
+    linear-gradient(165deg, rgba(var(--accent-rgb), 0.08), transparent 45%),
+    var(--panel-glass, var(--glass-bg));
+  box-shadow: var(--shadow-0);
+  backdrop-filter: blur(var(--glass-blur));
   padding: 12px;
 }
 
 .finance-stat .label {
   font-size: 12px;
-  color: var(--text-2, #9ca3af);
+  color: var(--text-muted);
 }
 
 .finance-stat .value {
-  font-size: 20px;
+  margin-top: 4px;
+  font-size: 21px;
   font-weight: 600;
 }
 
 .finance-card {
-  background: var(--color-bg-card, #12151b);
-  border: 1px solid var(--color-border, #2c2f36);
-  border-radius: 12px;
-  padding: 16px;
+  border: 1px solid var(--panel-border, var(--glass-border));
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(var(--accent-rgb), 0.08), transparent 42%),
+    var(--panel-glass, var(--glass-bg));
+  box-shadow: var(--shadow-0);
+  backdrop-filter: blur(var(--glass-blur));
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -99,18 +118,18 @@
 .finance-row {
   display: grid;
   grid-template-columns: var(--finance-columns);
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid var(--color-border, #2c2f36);
-  background: color-mix(in srgb, var(--color-bg-card, #12151b) 88%, #000 12%);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-secondary, var(--bg-2)) 88%, transparent);
 }
 
 .finance-row.head {
   background: transparent;
   border: none;
-  color: var(--text-2, #9ca3af);
+  color: var(--text-sub);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -122,10 +141,10 @@
   align-items: center;
   gap: 6px;
   border-radius: 999px;
-  border: 1px solid var(--color-border, #2c2f36);
+  border: 1px solid var(--border);
   padding: 3px 9px;
   font-size: 12px;
-  color: var(--text-2, #9ca3af);
+  color: var(--text-muted);
 }
 
 .finance-pill.success {
@@ -150,13 +169,13 @@
 }
 
 .plan-card {
-  border: 1px solid var(--color-border, #2c2f36);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: color-mix(in srgb, var(--color-bg-card, #12151b) 90%, #000 10%);
+  background: color-mix(in srgb, var(--surface-secondary, var(--bg-2)) 88%, transparent);
 }
 
 .plan-card h4 {
@@ -172,11 +191,21 @@
 .plan-features {
   margin: 0;
   padding-left: 16px;
-  color: var(--text-2, #9ca3af);
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color: #d1d5db;
+  color: var(--text-main);
+}
+
+@media (max-width: 940px) {
+  .finance-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .finance-row.head {
+    display: none;
+  }
 }

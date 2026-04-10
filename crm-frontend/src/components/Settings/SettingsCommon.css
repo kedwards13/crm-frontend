@@ -326,3 +326,93 @@ button.mini,
   background: var(--color-bg, #e0e0e0);
   color: var(--color-text, #333);
 }
+
+.settings-sub {
+  margin-top: -6px;
+  margin-bottom: 18px;
+  color: var(--text-2, #6b6f75);
+  font-size: 13px;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent, #2563eb) 42%, #d1d5db);
+  background: color-mix(in srgb, var(--color-accent, #2563eb) 14%, #ffffff);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.settings-list-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-integration-row {
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-bg, #fff);
+}
+
+.settings-integration-row strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.settings-integration-row p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2, #6b6f75);
+}
+
+.settings-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.settings-document-item {
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 10px;
+  background: var(--color-bg, #fff);
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-document-item strong {
+  display: block;
+}
+
+.settings-document-item p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-2, #6b6f75);
+}
+
+.settings-doc-meta {
+  text-align: right;
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  font-size: 11px;
+  color: var(--text-2, #6b6f75);
+}

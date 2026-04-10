@@ -1,211 +1,305 @@
-/* Wrapper */
+@import '../../theme/tokens.css';
+@import '../ui/glass-system.css';
+
 .gt-customerlist {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  
-  /* -----------------------------------------------
-     Toolbar
-  ------------------------------------------------ */
-  .gt-toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  
-  .gt-search {
-    flex: 1;
-    min-width: 260px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-  
-    background: var(--popup-card);
-    border: 1px solid var(--popup-border);
-    color: var(--popup-text);
-  }
-  
-  .gt-toolbar-actions {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .gt-select {
-    padding: 10px 14px;
-    border-radius: 10px;
-  
-    background: var(--popup-card);
-    border: 1px solid var(--popup-border);
-    color: var(--popup-text);
-  
-    font-size: 14px;
-  }
-  
-  .gt-btn {
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-  
-    background: var(--popup-card);
-    border: 1px solid var(--popup-border);
-    color: var(--popup-text);
-  }
-  
-  .gt-btn.blue,
-  .gt-btn.green {
-    background: var(--accent-0);
-    border: none;
-    color: #fff;
-  }
-  
-  .gt-btn:hover {
-    opacity: 0.9;
-  }
-  
-  /* -----------------------------------------------
-     Metrics
-  ------------------------------------------------ */
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gt-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gt-search {
+  flex: 1;
+  min-width: 280px;
+}
+
+.gt-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gt-filters {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.gt-filter-input {
+  min-width: 200px;
+}
+
+.gt-select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.gt-select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.24);
+}
+
+.gt-metrics {
+  --widget-columns: 5;
+}
+
+.gt-table-shell {
+  overflow: hidden;
+}
+
+.gt-table-scroll {
+  max-height: 64vh;
+  overflow: auto;
+}
+
+.gt-table-wrapper {
+  width: 100%;
+  min-width: 940px;
+}
+
+.gt-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-secondary, var(--bg-2)) 88%, transparent);
+}
+
+.gt-table-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.gt-table-footer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.gt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gt-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-secondary, var(--bg-2)) 88%, transparent);
+  color: var(--text-sub);
+  text-align: left;
+}
+
+.gt-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  height: 58px;
+}
+
+.gt-table tbody tr:hover {
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.gt-cell {
+  padding: 10px 8px;
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.gt-spacer {
+  border-bottom: none !important;
+  pointer-events: none;
+}
+
+.gt-spacer td {
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+}
+
+.name-col {
+  font-weight: 500;
+}
+
+.summary-col {
+  max-width: 260px;
+  color: var(--text-muted);
+}
+
+.gt-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.gt-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.gt-badge-ok {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(var(--accent-rgb), 0.34);
+  background: var(--accent-dim);
+  color: var(--accent-text, var(--accent));
+}
+
+.gt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gt-icon-btn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, box-shadow .15s ease;
+}
+
+.gt-icon-btn:hover,
+.gt-icon-btn.blue:hover,
+.gt-icon-btn.green:hover,
+.gt-icon-btn.amber:hover {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  color: var(--accent-text);
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+.gt-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.24);
+}
+
+.gt-loading,
+.gt-empty,
+.gt-error {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.gt-empty::before,
+.gt-loading::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  border: 1px dashed var(--border-strong);
+  margin-bottom: 4px;
+}
+
+.gt-empty::after {
+  content: "No records match your filters. Try clearing a filter or click + Add Customer in the toolbar.";
+  display: block;
+  max-width: 420px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.gt-error {
+  color: var(--danger);
+}
+
+.gt-cell {
+  padding: 14px 10px;
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.gt-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  height: 64px;
+  transition: background .12s ease;
+}
+
+.gt-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+@media (max-width: 1024px) {
   .gt-metrics {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+    --widget-columns: 2;
   }
-  
-  .gt-metric-card {
-    background: var(--popup-card);
-    border: 1px solid var(--popup-border);
-    border-radius: 12px;
-  
-    padding: 16px;
-    width: 170px;
-  }
-  
-  .gt-metric-card .label {
-    font-size: 13px;
-    color: var(--popup-muted);
-  }
-  
-  .gt-metric-card .value {
-    margin-top: 4px;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--popup-text);
-  }
-  
-  /* -----------------------------------------------
-     Table
-  ------------------------------------------------ */
-  .gt-table-wrapper {
+}
+
+@media (max-width: 768px) {
+  .gt-search {
     width: 100%;
-    overflow-x: auto;
-    border-radius: 14px;
-    border: 1px solid var(--popup-border);
+    min-width: 0;
   }
-  
-  .gt-table {
+
+  .gt-filter-input {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 0;
   }
-  
-  .gt-table thead th {
-    padding: 14px 8px;
-    font-size: 13px;
-    font-weight: 600;
-  
-    background: var(--popup-card);
-    border-bottom: 1px solid var(--popup-border);
-  
-    color: var(--popup-muted);
-    text-align: left;
+
+  .gt-select {
+    width: 100%;
   }
-  
-  .gt-table tbody tr {
-    border-bottom: 1px solid var(--popup-border);
-    cursor: pointer;
+
+  .gt-toolbar-actions {
+    width: 100%;
   }
-  
-  .gt-table tbody tr:hover {
-    background: rgba(255,255,255,0.02);
+
+  .gt-table-footer {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  .gt-cell {
-    padding: 12px 8px;
-    font-size: 14px;
-    color: var(--popup-text);
+
+  .gt-table-footer-actions {
+    justify-content: stretch;
   }
-  
-  /* Slimmer columns */
-  .name-col {
-    font-weight: 500;
-  }
-  
-  .summary-col {
-    max-width: 240px;
-  }
-  
-  /* -----------------------------------------------
-     Checkboxes
-  ------------------------------------------------ */
-  .gt-checkbox {
-    width: 16px;
-    height: 16px;
-  
-    accent-color: var(--popup-accent);
-  }
-  
-  /* Mobile fix */
-  @media (max-width: 600px) {
-    .gt-checkbox {
-      width: 20px;
-      height: 20px;
-    }
-  }
-  
-  /* -----------------------------------------------
-     Row Action Buttons
-  ------------------------------------------------ */
-  .gt-actions {
-    display: flex;
-    gap: 6px;
-  }
-  
-  .gt-icon-btn {
-    background: var(--popup-card);
-    border: 1px solid var(--popup-border);
-  
-    width: 32px;
-    height: 32px;
-  
-    border-radius: 8px;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    cursor: pointer;
-    transition: 0.15s;
-  }
-  
-  .gt-icon-btn.blue:hover,
-  .gt-icon-btn.green:hover,
-  .gt-icon-btn.amber:hover {
-    border-color: var(--accent-0);
-    color: var(--accent-0);
-  }
-  
-  /* -----------------------------------------------
-     Empty / Loading / Error States
-  ------------------------------------------------ */
-  .gt-loading,
-  .gt-empty,
-  .gt-error {
-    padding: 24px;
-    text-align: center;
-    font-size: 15px;
-    color: var(--popup-muted);
-  }
+}

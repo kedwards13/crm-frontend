@@ -1,182 +1,437 @@
-/* Base Mobile-First Styles */
 .team-management {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 1rem;
-    width: 95%;
-    margin: 14rem auto 1rem auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Arial', sans-serif;
+  --tm-bg: #0f1726;
+  --tm-surface: rgba(15, 24, 36, 0.84);
+  --tm-surface-soft: rgba(12, 20, 31, 0.68);
+  --tm-border: rgba(148, 163, 184, 0.26);
+  --tm-border-strong: rgba(56, 189, 248, 0.5);
+  --tm-text: #eaf2ff;
+  --tm-muted: #9fb3cc;
+  --tm-input-bg: rgba(2, 8, 18, 0.8);
+  --tm-input-border: rgba(148, 163, 184, 0.32);
+  --tm-primary: #0ea5e9;
+  --tm-primary-ink: #f8fdff;
+  --tm-danger: #ef4444;
+  --tm-success: #22c55e;
+  --tm-shadow: 0 24px 56px -40px rgba(2, 8, 18, 0.85);
+
+  width: min(1200px, calc(100% - 24px));
+  margin: 20px auto 28px;
+  border: 1px solid var(--tm-border);
+  border-radius: 20px;
+  padding: 20px;
+  color: var(--tm-text);
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 42%),
+    linear-gradient(160deg, rgba(9, 15, 24, 0.96), rgba(10, 14, 24, 0.92));
+  box-shadow: var(--tm-shadow);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+}
+
+body[data-theme='light'] .team-management,
+body.light-mode .team-management,
+body.light .team-management {
+  --tm-bg: #f4f7fb;
+  --tm-surface: rgba(255, 255, 255, 0.92);
+  --tm-surface-soft: rgba(248, 251, 255, 0.92);
+  --tm-border: rgba(148, 163, 184, 0.34);
+  --tm-border-strong: rgba(14, 165, 233, 0.45);
+  --tm-text: #0f1a2b;
+  --tm-muted: #4a5d77;
+  --tm-input-bg: rgba(255, 255, 255, 0.92);
+  --tm-input-border: rgba(148, 163, 184, 0.42);
+  --tm-shadow: 0 18px 40px -26px rgba(15, 23, 42, 0.24);
+
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.2), transparent 44%),
+    linear-gradient(180deg, #f8fbff, #f1f6fc);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.team-header h2,
+.team-management h3,
+.team-management h4 {
+  margin: 0;
+  color: var(--tm-text);
+}
+
+.team-header h2 {
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  letter-spacing: 0.01em;
+}
+
+.team-management h3 {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tm-border);
+}
+
+.team-muted {
+  margin: 0;
+  color: var(--tm-muted);
+  font-size: 0.92rem;
+}
+
+.logout-btn,
+.team-management button,
+.ghost-btn,
+.ring-remove-btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.team-management button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.team-management button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.logout-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.34);
+  color: #fecaca;
+}
+
+body[data-theme='light'] .logout-btn,
+body.light-mode .logout-btn,
+body.light .logout-btn {
+  color: #b42318;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.team-form,
+.team-routing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.team-form {
+  margin-bottom: 16px;
+}
+
+.team-form button,
+.team-routing-actions button {
+  grid-column: 1 / -1;
+  background: linear-gradient(120deg, #0ea5e9, #0284c7);
+  border-color: rgba(14, 165, 233, 0.42);
+  color: var(--tm-primary-ink);
+}
+
+.team-management input,
+.team-management select {
+  width: 100%;
+  border: 1px solid var(--tm-input-border);
+  border-radius: 10px;
+  background: var(--tm-input-bg);
+  color: var(--tm-text);
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.team-management input::placeholder {
+  color: var(--tm-muted);
+  opacity: 0.78;
+}
+
+.team-management input:focus,
+.team-management select:focus {
+  border-color: var(--tm-border-strong);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+.success-message,
+.error-message {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.success-message {
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.38);
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.error-message {
+  color: #fecdd3;
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+body[data-theme='light'] .success-message,
+body.light-mode .success-message,
+body.light .success-message {
+  color: #166534;
+}
+
+body[data-theme='light'] .error-message,
+body.light-mode .error-message,
+body.light .error-message {
+  color: #b42318;
+}
+
+.team-empty {
+  border: 1px dashed var(--tm-border);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--tm-surface-soft);
+  display: grid;
+  gap: 10px;
+}
+
+.team-list-container {
+  border: 1px solid var(--tm-border);
+  border-radius: 14px;
+  background: var(--tm-surface-soft);
+  padding: 12px;
+}
+
+.team-list {
+  display: grid;
+  gap: 10px;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--tm-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--tm-surface);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-card:hover {
+  border-color: var(--tm-border-strong);
+  box-shadow: 0 12px 24px -20px rgba(14, 165, 233, 0.6);
+}
+
+.user-card-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid var(--tm-border);
+  object-fit: cover;
+}
+
+.user-card-info h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.user-card-info p {
+  margin: 4px 0 0;
+  color: var(--tm-muted);
+  font-size: 0.9rem;
+}
+
+.ghost-btn {
+  background: transparent;
+  border-color: var(--tm-border);
+  color: var(--tm-text);
+}
+
+.ghost-btn:hover {
+  border-color: var(--tm-border-strong);
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.team-routing-panel {
+  margin-top: 18px;
+  border: 1px solid var(--tm-border);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--tm-surface-soft);
+  display: grid;
+  gap: 12px;
+}
+
+.team-routing-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.team-routing-grid label,
+.ring-timeout-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--tm-muted);
+}
+
+.team-routing-toggles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.team-toggle-item,
+.ring-active-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--tm-border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--tm-surface);
+  font-size: 0.88rem;
+}
+
+.team-toggle-item input,
+.ring-active-field input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.ring-group-editor {
+  border: 1px solid var(--tm-border);
+  border-radius: 14px;
+  background: var(--tm-surface);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.ring-group-editor-head {
+  display: grid;
+  gap: 6px;
+}
+
+.ring-group-add-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.ring-member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ring-member-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--tm-border);
+  border-radius: 12px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--tm-surface) 90%, transparent);
+}
+
+.ring-drag-handle {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--tm-muted);
+  letter-spacing: 0.08em;
+  cursor: grab;
+  user-select: none;
+}
+
+.ring-member-meta {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.ring-member-meta strong {
+  font-size: 0.93rem;
+}
+
+.ring-member-meta small {
+  color: var(--tm-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ring-member-meta .ring-identity {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.ring-timeout-field {
+  min-width: 90px;
+}
+
+.ring-timeout-field input {
+  max-width: 90px;
+}
+
+.ring-remove-btn {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.34);
+  color: #fecaca;
+}
+
+body[data-theme='light'] .ring-remove-btn,
+body.light-mode .ring-remove-btn,
+body.light .ring-remove-btn {
+  color: #b42318;
+}
+
+.team-routing-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 920px) {
+  .team-management {
+    width: calc(100% - 16px);
+    margin: 14px auto 18px;
+    padding: 14px;
+    border-radius: 16px;
   }
-  
-  .team-management h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: #333;
-    border-bottom: 2px solid #00b3ff;
-    padding-bottom: 0.5rem;
-  }
-  
-  .team-management form {
-    display: grid;
+
+  .team-form,
+  .team-routing-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
   }
-  
-  .team-management input,
-  .team-management select {
+
+  .ring-group-add-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ring-member-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ring-timeout-field input {
+    max-width: 100%;
+  }
+
+  .team-routing-actions {
+    justify-content: stretch;
+  }
+
+  .team-routing-actions button {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.3s ease;
   }
-  
-  .team-management input:focus,
-  .team-management select:focus {
-    border-color: #00b3ff;
-  }
-  
-  .team-management button {
-    background-color: #00b3ff;
-    color: white;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .team-management button:hover {
-    background-color: #00b3ff;
-  }
-  
-  .team-management button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .success-message {
-    color: #28a745;
-    background-color: #e6f9ea;
-    padding: 0.75rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    font-weight: bold;
-  }
-  
-  .error-message {
-    color: #dc3545;
-    background-color: #fbeaea;
-    padding: 0.75rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    font-weight: bold;
-  }
-  
-  .team-management h3 {
-    font-size: 1.4rem;
-    margin-bottom: 0.5rem;
-    color: #555;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
-  }
-  
-  .team-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  /* User Card Styles */
-  .user-card {
-    display: flex;
-    align-items: center;
-    border: 1px solid #f0f0f0;
-    border-radius: 5px;
-    background-color: #fafafa;
-    padding: 1rem;
-    transition: box-shadow 0.3s ease;
-  }
-  
-  .user-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .user-card-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 1rem;
-  }
-  
-  .user-card-info h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #333;
-  }
-  
-  .user-card-info p {
-    margin: 0.25rem 0 0;
-    color: #555;
-  }
-  
-  /* Tablet Styles: screens 600px and wider */
-  @media (min-width: 600px) {
-    .team-management {
-      padding: 2rem;
-      max-width: 800px;
-      margin: 2rem auto;
-    }
-  
-    .team-management h2 {
-      font-size: 1.75rem;
-    }
-  
-    .team-management form {
-      grid-template-columns: 1fr 1fr;
-    }
-  
-    .team-management button {
-      grid-column: span 2;
-    }
-  }
-  
-  /* Desktop/Extra-Large Screens: 992px and wider */
-  @media (min-width: 992px) {
-    .team-management h2 {
-      font-size: 2rem;
-    }
-  
-    .team-management input,
-    .team-management select {
-      font-size: 1.1rem;
-    }
-  
-    .team-management button {
-      font-size: 1.1rem;
-    }
-  
-    .user-card {
-      padding: 1.25rem;
-    }
-  
-    .user-card-avatar {
-      width: 60px;
-      height: 60px;
-    }
-  
-    .user-card-info h4 {
-      font-size: 1.2rem;
-    }
-  
-    .user-card-info p {
-      font-size: 1rem;
-    }
-  }
+}

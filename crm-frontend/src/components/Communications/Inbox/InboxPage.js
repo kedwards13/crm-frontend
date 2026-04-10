@@ -1,4 +1,3 @@
-// crm-frontend/src/components/Communications/Inbox/InboxPage.js
 import React, { useEffect, useState } from "react";
 
 import {
@@ -6,9 +5,9 @@ import {
   updateMessageStatus,
   fetchThreadByTarget,
   fetchSmartReply,
+  createFollowUpTask,
 } from "../../../api/communications";
 
-import api from "../../../apiClient";
 import AIInsightsPanel from "../AIInsightsPanel";
 import CustomerPopup from "../../Profile/CustomerPopup";
 
@@ -22,6 +21,13 @@ import {
 } from "lucide-react";
 
 import "./InboxPage.css";
+
+const formatTimestamp = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+};
 
 /* ----------------------------------------------------------
    Direction Badge Component
@@ -53,6 +59,7 @@ export default function InboxPage() {
   const [messages, setMessages] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [activeThread, setActiveThread] = useState([]);
@@ -68,11 +75,16 @@ export default function InboxPage() {
   const [query, setQuery] = useState("");
 
   /* ----------------------------------------------------------
-     LOAD INBOX → Auto-select the newest message
+      LOAD INBOX → Auto-select the newest message
   ---------------------------------------------------------- */
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError("");
+
     fetchInboxMessages()
       .then((data) => {
+        if (cancelled) return;
         setMessages(data);
         setFiltered(data);
 
@@ -80,23 +92,45 @@ export default function InboxPage() {
           autoSelectMessage(data[0]);
         }
       })
-      .finally(() => setLoading(false));
+      .catch((error) => {
+        if (cancelled) return;
+        setLoadError(error?.message || "Unable to load inbox messages.");
+        setMessages([]);
+        setFiltered([]);
+        setSelectedMessage(null);
+        setActiveThread([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /* ----------------------------------------------------------
-     Auto-select + AI + Thread
+      Auto-select + AI + Thread
   ---------------------------------------------------------- */
   const autoSelectMessage = async (msg) => {
     setSelectedMessage(msg);
-
-    const thread = await fetchThreadByTarget(msg.party_universal_id);
-    setActiveThread(thread);
-
-    runAI(msg.party_universal_id);
+    try {
+      const thread = await fetchThreadByTarget({
+        party_universal_id: msg.party_universal_id,
+        thread_id: msg.thread_id,
+        contact_phone: msg.contact_phone,
+        customer_id: msg.customer_id,
+        lead_id: msg.lead_id,
+      });
+      setActiveThread(thread);
+    } catch {
+      setActiveThread([]);
+    }
+    runAI(msg.party_universal_id || msg.thread_id || msg.contact_phone);
   };
 
   /* ----------------------------------------------------------
-     User manually selects a message
+      User manually selects a message
   ---------------------------------------------------------- */
   const openMessage = async (msg) => {
     await updateMessageStatus(msg.id, { is_read: true });
@@ -107,16 +141,31 @@ export default function InboxPage() {
 
     setSelectedMessage(msg);
 
-    const thread = await fetchThreadByTarget(msg.party_universal_id);
-    setActiveThread(thread);
+    try {
+      const thread = await fetchThreadByTarget({
+        party_universal_id: msg.party_universal_id,
+        thread_id: msg.thread_id,
+        contact_phone: msg.contact_phone,
+        customer_id: msg.customer_id,
+        lead_id: msg.lead_id,
+      });
+      setActiveThread(thread);
+    } catch {
+      setActiveThread([]);
+    }
 
-    runAI(msg.party_universal_id);
+    runAI(msg.party_universal_id || msg.thread_id || msg.contact_phone);
   };
 
   /* ----------------------------------------------------------
-     AI Run
+      AI Run
   ---------------------------------------------------------- */
   const runAI = async (partyUID) => {
+    if (!partyUID) {
+      setAiReply("AI unavailable.");
+      setAiSentiment("neutral");
+      return;
+    }
     setAiLoading(true);
 
     try {
@@ -132,7 +181,7 @@ export default function InboxPage() {
   };
 
   /* ----------------------------------------------------------
-     Search
+      Search
   ---------------------------------------------------------- */
   const handleSearch = (e) => {
     const v = e.target.value.toLowerCase();
@@ -143,6 +192,7 @@ export default function InboxPage() {
     setFiltered(
       messages.filter(
         (m) =>
+          (m.display_name || "").toLowerCase().includes(v) ||
           (m.from || "").toLowerCase().includes(v) ||
           (m.body || "").toLowerCase().includes(v) ||
           (m.subject || "").toLowerCase().includes(v)
@@ -150,8 +200,25 @@ export default function InboxPage() {
     );
   };
 
+  const createFollowUp = async () => {
+    if (!selectedMessage) return;
+    try {
+      await createFollowUpTask({
+        title: "Communication follow-up",
+        description:
+          aiReply || selectedMessage?.body || "Review recent conversation and respond.",
+        task_type: "follow_up",
+        status: "pending",
+        lead: selectedMessage?.lead_id || undefined,
+      });
+      alert("Follow-up task created.");
+    } catch {
+      alert("Unable to create follow-up task.");
+    }
+  };
+
   /* ==========================================================
-     RENDER
+      RENDER
 ========================================================== */
   return (
     <div className="inbox-page two-column">
@@ -179,9 +246,13 @@ export default function InboxPage() {
 
         <h2>Unified Inbox</h2>
 
+        {loadError ? (
+          <p style={{ color: "#ef4444", fontWeight: 600 }}>{loadError}</p>
+        ) : null}
+
         {loading ? (
           <p>Loading…</p>
-        ) : filtered.length === 0 ? (
+        ) : !loadError && filtered.length === 0 ? (
           <p>No messages.</p>
         ) : (
           filtered.map((msg) => (
@@ -192,14 +263,12 @@ export default function InboxPage() {
             >
               <div className="item-header">
                 <span className="from">
-                  {msg.from || msg.contact_phone || msg.contact_email}
+                  {msg.display_name || msg.from || msg.contact_phone || msg.contact_email}
                 </span>
 
                 <DirectionBadge msg={msg} />
 
-                <span className="timestamp">
-                  {new Date(msg.timestamp).toLocaleString()}
-                </span>
+                <span className="timestamp">{formatTimestamp(msg.timestamp)}</span>
               </div>
 
               <div className="subject">
@@ -229,6 +298,7 @@ export default function InboxPage() {
           customerId={selectedMessage?.customer_id}
           partyId={selectedMessage?.party_universal_id}
           customerName={
+            selectedMessage?.display_name ||
             selectedMessage?.from ||
             selectedMessage?.contact_name ||
             "Customer"
@@ -236,6 +306,7 @@ export default function InboxPage() {
           suggestedReply={aiReply}
           sentiment={aiSentiment}
           loading={aiLoading}
+          onCreateFollowUp={createFollowUp}
         />
 
         {/* ANALYZE BUTTON */}
@@ -269,7 +340,8 @@ export default function InboxPage() {
           <>
             <h3>
               Conversation with{" "}
-              {selectedMessage?.from ||
+              {selectedMessage?.display_name ||
+                selectedMessage?.from ||
                 selectedMessage?.contact_phone ||
                 selectedMessage?.contact_email}
             </h3>
@@ -279,7 +351,7 @@ export default function InboxPage() {
                 <div key={m.id} className={`msg-bubble ${m.direction}`}>
                   <div className="bubble-header">
                     <DirectionBadge msg={m} />
-                    <span>{new Date(m.timestamp).toLocaleString()}</span>
+                    <span>{formatTimestamp(m.timestamp)}</span>
                   </div>
 
                   {m.media_urls?.length > 0 && (
@@ -301,7 +373,7 @@ export default function InboxPage() {
         )}
       </div>
 
-      {/* CUSTOMER POPUP (only opens when user clicks "View Profile") */}
+      {/* CUSTOMER POPUP */}
       {popupData && (
         <CustomerPopup
           lead={popupData}

@@ -1,35 +1,27 @@
 import ReactDOM from "react-dom";
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, GripHorizontal } from "lucide-react";
 import { toast } from "react-toastify";
 import "./CustomerPopup.css";
 
 import InfoTab from "./ProfileTabs/InfoTab";
-import DocumentsTab from "./ProfileTabs/DocumentsTab";
-import ContractsTab from "./ProfileTabs/ContractsTab";
-import TasksTab from "./ProfileTabs/TasksTab";
 import AiTab from "./ProfileTabs/AiTab";
 import CommunicationsTab from "./ProfileTabs/CommunicationsTab";
+import TimelineTab from "./ProfileTabs/TimelineTab";
+import AppointmentsTab from "./ProfileTabs/AppointmentsTab";
+import WorkOrdersTab from "./ProfileTabs/WorkOrdersTab";
+import InvoicesTab from "./ProfileTabs/InvoicesTab";
+import CustomerCampaignsTab from "./ProfileTabs/CustomerCampaignsTab";
 import RevivalTab from "./ProfileTabs/RevivalTab";
-import BillingTab from "./ProfileTabs/BillingTab";
+import NotesTab from "./ProfileTabs/NotesTab";
+import FilesTab from "./ProfileTabs/FilesTab";
 import ScheduleModal from "../Customers/Modals/ScheduleModal";
 import StatusModal from "../Customers/Modals/StatusModal";
 
 import { mapEntity } from "../../utils/contactMapper";
 import api from "../../apiClient";
 import { getIndustryKey, getSchedulingConfig } from "../../constants/uiRegistry";
-
-/* ============================================================
-   TEMPORARY APPOINTMENTS TAB
-============================================================ */
-function AppointmentTab() {
-  return (
-    <div style={{ padding: 20 }}>
-      <h3>Appointments</h3>
-      <p>Scheduling UI coming next step.</p>
-    </div>
-  );
-}
 
 /* ============================================================
    DRAGGABLE HOOK (header grip only)
@@ -78,10 +70,11 @@ const useDraggable = () => {
    MAIN POPUP
 ============================================================ */
 function CustomerPopupInternal({ lead, onClose }) {
+  const navigate = useNavigate();
   const [record, setRecord] = useState(null);
   const [formData, setFormData] = useState({});
   const [preferences, setPreferences] = useState(null);
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -110,11 +103,19 @@ function CustomerPopupInternal({ lead, onClose }) {
   }, [record]);
 
   useEffect(() => {
+    const onEsc = (event) => {
+      if (event.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
+  useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const { data } = await api.get("/accounts/tenant/preferences/");
-        if (mounted) setPreferences(data || {});
+        const { data } = await api.get("/accounts/preferences/");
+        if (mounted) setPreferences(data?.preferences || {});
       } catch {
         if (mounted) setPreferences(null);
       }
@@ -222,7 +223,7 @@ function CustomerPopupInternal({ lead, onClose }) {
   const updatePaths = {
     lead: `/leads/crm-leads/${record.id}/`,
     customer: `/customers/${record.id}/`,
-    revival: `/revival/scanner/${record.id}/`,
+    revival: `/revival/${record.id}/`,
   };
 
   const updateUrl =
@@ -236,7 +237,7 @@ function CustomerPopupInternal({ lead, onClose }) {
     record.object === "lead"
       ? `/leads/${record.id}/convert-to-customer/`
       : record.object === "revival"
-      ? "/revival/transfer/"
+      ? `/revival/${record.id}/convert/`
       : null;
 
   const isLead = record.object === "lead";
@@ -247,11 +248,18 @@ function CustomerPopupInternal({ lead, onClose }) {
   const canSchedule = !!record.id;
   const displayIndustry = record.raw?.industry || record.industry || "general";
 
+  const updateProfileField = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const buildLeadPayload = (raw = {}) => {
     const payload = {};
     const name = raw.name || raw.full_name;
     const primaryEmail = raw.primary_email ?? raw.email;
     const primaryPhone = raw.primary_phone ?? raw.phone_number;
+    const serviceType = raw.service_type ?? raw.service;
+    const leadSource = raw.lead_source ?? raw.source_host;
+    const notes = raw.notes ?? raw.message;
 
     if (raw.first_name !== undefined) payload.first_name = raw.first_name;
     if (raw.last_name !== undefined) payload.last_name = raw.last_name;
@@ -272,15 +280,15 @@ function CustomerPopupInternal({ lead, onClose }) {
     }
     if (raw.status !== undefined) payload.status = raw.status;
 
-    if (raw.service !== undefined) payload.service = raw.service;
-    if (raw.message !== undefined) payload.message = raw.message;
+    if (serviceType !== undefined) payload.service = serviceType;
+    if (notes !== undefined) payload.message = notes;
     if (raw.industry_role !== undefined) payload.industry_role = raw.industry_role;
     if (raw.company_name !== undefined) payload.company_name = raw.company_name;
     if (raw.is_business !== undefined) payload.is_business = raw.is_business;
     if (raw.address !== undefined) payload.address = raw.address;
     if (raw.attributes != null) payload.attributes = raw.attributes;
     if (raw.intake_attributes != null) payload.intake_attributes = raw.intake_attributes;
-    if (raw.source_host !== undefined) payload.source_host = raw.source_host;
+    if (leadSource !== undefined) payload.source_host = leadSource;
     if (raw.recaptcha_score !== undefined) payload.recaptcha_score = raw.recaptcha_score;
 
     const offering = raw.offering?.id ?? raw.offering;
@@ -302,7 +310,10 @@ function CustomerPopupInternal({ lead, onClose }) {
       "primary_email",
       "primary_phone",
       "service",
+      "service_type",
+      "lead_source",
       "message",
+      "notes",
       "industry",
       "industry_role",
       "company_name",
@@ -319,17 +330,46 @@ function CustomerPopupInternal({ lead, onClose }) {
       "tags",
     ]);
 
-    const metadata = {};
+    const attributePatch = {};
     Object.entries(formData || {}).forEach(([key, val]) => {
       if (val === undefined || String(val).trim() === "") return;
       if (allowed.has(key)) {
         if (payload[key] === undefined) payload[key] = val;
       } else {
-        metadata[key] = val;
+        attributePatch[key] = val;
       }
     });
-    if (Object.keys(metadata).length) {
-      payload.metadata = { ...(payload.metadata || {}), ...metadata };
+    if (raw.service_type !== undefined && payload.service === undefined) {
+      payload.service = raw.service_type;
+    }
+    if (raw.lead_source !== undefined && payload.source_host === undefined) {
+      payload.source_host = raw.lead_source;
+    }
+    if (raw.notes !== undefined && payload.message === undefined) {
+      payload.message = raw.notes;
+    }
+
+    if (
+      payload.service !== undefined ||
+      payload.source_host !== undefined ||
+      payload.message !== undefined ||
+      Object.keys(attributePatch).length > 0
+    ) {
+      const baseAttributes = raw.attributes && typeof raw.attributes === "object" ? raw.attributes : {};
+      const leadMetadata = {
+        ...(payload.service !== undefined ? { service_type: payload.service } : {}),
+        ...(payload.source_host !== undefined ? { lead_source: payload.source_host } : {}),
+        ...(payload.message !== undefined ? { notes: payload.message } : {}),
+      };
+      payload.attributes = {
+        ...baseAttributes,
+        ...leadMetadata,
+        ...attributePatch,
+      };
+      payload.intake_attributes = {
+        ...(raw.intake_attributes && typeof raw.intake_attributes === "object" ? raw.intake_attributes : {}),
+        ...leadMetadata,
+      };
     }
 
     const cleaned = Object.fromEntries(
@@ -359,7 +399,8 @@ function CustomerPopupInternal({ lead, onClose }) {
       "county",
       "country",
       "industry",
-      "notes",
+      "access_notes",
+      "extended_fields",
     ].forEach((key) => {
       if (raw[key] !== undefined) payload[key] = raw[key];
     });
@@ -389,19 +430,25 @@ function CustomerPopupInternal({ lead, onClose }) {
       "county",
       "country",
       "industry",
-      "notes",
+      "access_notes",
+      "extended_fields",
     ]);
-    const metadata = {};
+    const extendedFieldsPatch = {};
     Object.entries(formData || {}).forEach(([key, val]) => {
       if (val === undefined || String(val).trim() === "") return;
       if (allowed.has(key)) {
         if (payload[key] === undefined) payload[key] = val;
       } else {
-        metadata[key] = val;
+        extendedFieldsPatch[key] = val;
       }
     });
-    if (Object.keys(metadata).length) {
-      payload.metadata = { ...(payload.metadata || {}), ...metadata };
+    if (Object.keys(extendedFieldsPatch).length) {
+      payload.extended_fields = {
+        ...(raw.extended_fields && typeof raw.extended_fields === "object"
+          ? raw.extended_fields
+          : {}),
+        ...extendedFieldsPatch,
+      };
     }
 
     const cleaned = Object.fromEntries(
@@ -427,21 +474,41 @@ function CustomerPopupInternal({ lead, onClose }) {
         workingData.primary_email ||
         workingData.secondary_email;
       if (isCreate) {
-        if (!workingData.first_name && !workingData.name) {
-          toast.error("First name is required.");
-          return;
-        }
-        if (!workingData.last_name) {
-          toast.error("Last name is required.");
-          return;
-        }
-        if (!hasPhone && !hasEmail) {
-          toast.error("Provide at least one phone or email.");
-          return;
-        }
-        if (!workingData.address) {
-          toast.error("Address is required.");
-          return;
+        if (isLead) {
+          const leadName = (workingData.name || `${workingData.first_name || ""} ${workingData.last_name || ""}`.trim() || "").trim();
+          const required = [
+            { key: "name", value: leadName },
+            { key: "phone", value: workingData.primary_phone || workingData.phone_number },
+            { key: "email", value: workingData.primary_email || workingData.email },
+            { key: "address", value: workingData.address },
+            { key: "service_type", value: workingData.service_type || workingData.service },
+            { key: "lead_source", value: workingData.lead_source || workingData.source_host },
+            { key: "notes", value: workingData.notes || workingData.message },
+          ];
+          const missing = required
+            .filter((item) => !String(item.value || "").trim())
+            .map((item) => item.key);
+          if (missing.length > 0) {
+            toast.error(`Complete required lead fields: ${missing.join(", ")}`);
+            return;
+          }
+        } else {
+          if (!workingData.first_name && !workingData.name) {
+            toast.error("First name is required.");
+            return;
+          }
+          if (!workingData.last_name) {
+            toast.error("Last name is required.");
+            return;
+          }
+          if (!hasPhone && !hasEmail) {
+            toast.error("Provide at least one phone or email.");
+            return;
+          }
+          if (!workingData.address) {
+            toast.error("Address is required.");
+            return;
+          }
         }
       }
       if (isLead) {
@@ -474,6 +541,24 @@ function CustomerPopupInternal({ lead, onClose }) {
         await api.patch(updateUrl, record.raw);
       }
 
+      const nextRaw = { ...(record?.raw || {}), ...workingData };
+      const nextFullName =
+        nextRaw.full_name ||
+        nextRaw.name ||
+        `${nextRaw.first_name || ""} ${nextRaw.last_name || ""}`.trim() ||
+        record.full_name;
+
+      setRecord((prev) =>
+        prev
+          ? {
+              ...prev,
+              full_name: nextFullName,
+              industry: nextRaw.industry || prev.industry,
+              raw: nextRaw,
+            }
+          : prev
+      );
+      setFormData(nextRaw);
       toast.success("Saved.");
     } catch (err) {
       const detail =
@@ -543,7 +628,7 @@ function CustomerPopupInternal({ lead, onClose }) {
     const raw = { ...record.raw, object: record.object, industry: record.industry };
 
     switch (activeTab) {
-      case "info":
+      case "overview":
         return (
           <InfoTab
             lead={raw}
@@ -551,24 +636,25 @@ function CustomerPopupInternal({ lead, onClose }) {
             preferences={preferences}
             onChange={(e) => {
               const { name, value } = e.target;
-              setFormData((prev) => ({ ...prev, [name]: value }));
-              setRecord((prev) =>
-                prev
-                  ? { ...prev, raw: { ...prev.raw, [name]: value } }
-                  : prev
-              );
+              updateProfileField(name, value);
             }}
           />
         );
+      case "timeline":
+        return <TimelineTab record={record} />;
+      case "appointments":
+        return <AppointmentsTab record={record} />;
+      case "work_orders":
+        return <WorkOrdersTab record={record} />;
+      case "communications":
+        return <CommunicationsTab lead={record} />;
+      case "invoices":
+        return <InvoicesTab record={record} />;
+      case "campaigns":
+        return <CustomerCampaignsTab record={record} />;
       case "revival":
         return <RevivalTab customer={record} />;
-      case "contracts":
-        return <ContractsTab lead={raw} />;
-      case "documents":
-        return <DocumentsTab lead={raw} />;
-      case "tasks":
-        return <TasksTab lead={raw} />;
-      case "ai":
+      case "ai_insights":
         return (
           <AiTab
             lead={record}
@@ -579,13 +665,16 @@ function CustomerPopupInternal({ lead, onClose }) {
             chatRef={chatRef}
           />
         );
-      case "billing":
-        return <BillingTab />;
-      case "comms":
-      case "communications":
-        return <CommunicationsTab lead={record} />;
-      case "appointments":
-        return <AppointmentTab />;
+      case "notes":
+        return (
+          <NotesTab
+            record={record}
+            formData={formData}
+            onFieldChange={updateProfileField}
+          />
+        );
+      case "files":
+        return <FilesTab record={record} />;
       default:
         return <div style={{ padding: 20 }}>Unknown</div>;
     }
@@ -595,15 +684,17 @@ function CustomerPopupInternal({ lead, onClose }) {
      JSX
   --------------------------------------------------------- */
   const tabs = [
-    { id: "info", label: "INFO" },
-    { id: "revival", label: "REVIVAL" },
-    { id: "contracts", label: "CONTRACTS" },
-    { id: "documents", label: "DOCUMENTS" },
-    { id: "tasks", label: "TASKS" },
-    { id: "ai", label: "AI" },
-    { id: "billing", label: "BILLING" },
-    { id: "comms", label: "COMMS" },
+    { id: "overview", label: "OVERVIEW" },
+    { id: "timeline", label: "TIMELINE" },
     { id: "appointments", label: "APPOINTMENTS" },
+    { id: "work_orders", label: "WORK ORDERS" },
+    { id: "communications", label: "COMMUNICATIONS" },
+    { id: "invoices", label: "INVOICES" },
+    { id: "campaigns", label: "CAMPAIGNS" },
+    { id: "revival", label: "REVIVAL QUOTES" },
+    { id: "ai_insights", label: "AI INSIGHTS" },
+    { id: "notes", label: "NOTES" },
+    { id: "files", label: "FILES" },
   ];
   const nameLabel =
     record.full_name ||
@@ -613,14 +704,19 @@ function CustomerPopupInternal({ lead, onClose }) {
   const statusLabel = record.raw?.status || record.status || "";
 
   return (
-    <div className="popup-overlay customer-popup-wrapper">
+    <div
+      className="popup-overlay customer-popup-wrapper"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose?.();
+      }}
+    >
       <div
         className="popup-container"
         style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-        onMouseDown={handleMouseDown}
+        onClick={(event) => event.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="popup-header popup-drag-handle">
+        <div className="popup-header popup-drag-handle" onMouseDown={handleMouseDown}>
           <div className="header-info">
             <span className="drag-hint" aria-hidden="true">
               <GripHorizontal size={16} />
@@ -641,6 +737,7 @@ function CustomerPopupInternal({ lead, onClose }) {
             )}
             <button
               className="btn-icon"
+              type="button"
               onClick={onClose}
               aria-label="Close"
               data-no-drag
@@ -680,6 +777,37 @@ function CustomerPopupInternal({ lead, onClose }) {
                 Convert
               </button>
             )}
+
+            <button
+              className="btn-ghost"
+              onClick={() => {
+                onClose?.();
+                navigate("/quotes/create", {
+                  state: {
+                    customer: {
+                      id: record?.customer_id || record?.id,
+                      customer_id: record?.customer_id || record?.id,
+                      first_name: record?.first_name || "",
+                      last_name: record?.last_name || "",
+                      full_name:
+                        record?.full_name ||
+                        record?.raw?.name ||
+                        [record?.first_name, record?.last_name].filter(Boolean).join(" "),
+                      company_name: record?.company_name || "",
+                      primary_phone:
+                        record?.primary_phone || record?.phone || record?.phone_number || "",
+                      primary_email: record?.primary_email || record?.email || "",
+                      service_type: record?.service_type || record?.service || "",
+                      message: record?.message || record?.notes || "",
+                    },
+                  },
+                });
+              }}
+              data-no-drag
+              title="Create a new quote for this contact"
+            >
+              + New Quote
+            </button>
 
             <button
               className="btn-ghost"

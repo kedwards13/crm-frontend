@@ -1,29 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../../config/env';
+import api from '../../../apiClient';
 import '../SettingsCommon.css';
-
-const API = API_BASE_URL;
 
 export default function Automations() {
   const [rules, setRules] = useState([]);
   const [msg, setMsg] = useState('');
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/api/settings/automations/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (mounted) setRules(Array.isArray(data) ? data : []);
+        const { data } = await api.get('/accounts/preferences/');
+        const automationRules = data?.preferences?.automation_rules;
+        if (!mounted) return;
+        setRules(Array.isArray(automationRules) ? automationRules : []);
       } catch {
         setRules([]);
       }
     })();
     return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   const add = () => setRules(r => [...r, { event: 'lead.created', action: 'send_sms', enabled: true }]);
   const update = (i, k, v) => setRules(arr => arr.map((it, idx) => idx === i ? { ...it, [k]: v } : it));
@@ -32,8 +28,10 @@ export default function Automations() {
   const save = async () => {
     setMsg('');
     try {
-      await axios.put(`${API}/api/settings/automations/`, { rules }, {
-        headers: { Authorization: `Bearer ${token}` }
+      await api.patch('/accounts/preferences/', {
+        preferences: {
+          automation_rules: rules,
+        },
       });
       setMsg('Saved ✓');
     } catch {

@@ -1,66 +1,58 @@
-/* ============================================================
-   COMMUNICATION TAB WRAPPER
-============================================================ */
 .gt-comms-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
-  color: #f3f4f6;
+  color: var(--text-main);
   background: transparent;
   overflow: hidden;
 }
 
-/* ============================================================
-   SEND BAR
-============================================================ */
 .gt-comms-input-row {
-  background: #1d1f23;
-  border-bottom: 1px solid #2c2e34;
-  padding: 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  padding: 12px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  border-radius: 10px 10px 0 0;
+  gap: 10px;
+  border-radius: 12px 12px 0 0;
   flex-wrap: wrap;
 }
 
-/* Textarea (auto-grow, 2+ rows allowed) */
 .gt-comms-textarea {
   flex: 1;
   min-height: 42px;
   max-height: 200px;
   resize: none;
-  background: #111214;
-  border: 1px solid #2a2d33;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1.45;
 }
 
 .gt-comms-textarea:focus {
   outline: none;
-  border-color: #4a8bff;
+  border-color: var(--accent);
 }
 
-/* Media URL input */
 .gt-media-url {
   width: 170px;
-  background: #111214;
-  border: 1px solid #2a2d33;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
   padding: 10px;
-  color: white;
-  border-radius: 8px;
+  color: var(--text-main);
+  border-radius: 10px;
   font-size: 14px;
 }
 
 .gt-media-url:focus {
   outline: none;
-  border-color: #4a8bff;
+  border-color: var(--accent);
 }
 
-/* Media preview thumbnail */
 .gt-media-preview {
   position: relative;
   width: 48px;
@@ -72,15 +64,15 @@
   width: 48px;
   height: 48px;
   object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid #34363d;
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 .gt-media-remove {
   position: absolute;
   top: -6px;
   right: -6px;
-  background: #ff3b30;
+  background: #ef4444;
   color: white;
   width: 18px;
   height: 18px;
@@ -92,170 +84,209 @@
   cursor: pointer;
 }
 
-/* Send button */
 .gt-send-btn {
-  background: #0a84ff;
+  background: var(--msg-blue);
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: 0.2s;
+  transition: filter 0.2s ease;
 }
 
 .gt-send-btn:hover {
-  background: #0666cc;
+  filter: brightness(1.06);
 }
 
-/* Channel dropdown */
 .gt-channel-select {
-  background: #111214;
-  color: white;
-  border: 1px solid #2a2d33;
+  background: var(--bg-2);
+  color: var(--text-main);
+  border: 1px solid var(--border);
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
   min-width: 80px;
 }
 
-/* Icon buttons (AI, Refresh) */
 .gt-icon-btn {
-  background: #111214;
-  border: 1px solid #2a2d33;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
   padding: 10px;
-  border-radius: 8px;
-  color: #d1d5db;
+  border-radius: 10px;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: 0.2s;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .gt-icon-btn:hover {
-  background: #2a2d33;
+  background: var(--bg-panel-hover);
+  color: var(--text-main);
 }
 
-/* ============================================================
-   THREAD SCROLL AREA
-============================================================ */
 .gt-thread {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
-  background: #121417;
-  border-radius: 0 0 10px 10px;
-  border: 1px solid #1f2125;
+  padding: 16px 14px;
+  background: var(--bg-panel);
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
   min-height: 0;
 }
 
-/* Smooth scrollbar */
-.gt-thread::-webkit-scrollbar {
-  width: 8px;
-}
-.gt-thread::-webkit-scrollbar-thumb {
-  background: #2d2f33;
-  border-radius: 6px;
-}
-
-/* Loading state */
 .loading-msg {
-  color: #888;
+  color: var(--text-muted);
   text-align: center;
   padding: 20px;
 }
 
-/* ============================================================
-   MESSAGE CARD (Inbox-style threaded)
-============================================================ */
-.gt-msg-card {
-  background: #1c1e22;
-  padding: 16px 18px;
-  border-radius: 12px;
-  border: 1px solid #2b2d33;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+.gt-msg-row {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
   width: 100%;
 }
 
-/* Header (direction badge, timestamp, status) */
-.gt-msg-header {
+.gt-msg-row.inbound {
+  justify-content: flex-start;
+}
+
+.gt-msg-row.outbound {
+  justify-content: flex-end;
+}
+
+.gt-msg-bubble {
+  max-width: 78%;
+  padding: 10px 12px 8px;
+  border-radius: 18px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 12px;
-  opacity: 0.9;
+  flex-direction: column;
+  gap: 6px;
+  color: #fff;
 }
 
-/* Timestamp */
-.gt-msg-timestamp {
-  color: #9ca3af;
-  font-size: 12px;
-  white-space: nowrap;
+.gt-msg-bubble.inbound {
+  background: var(--bg-bubble-in);
+  border-bottom-left-radius: 6px;
 }
 
-/* Message body */
+.gt-msg-bubble.outbound {
+  background: var(--msg-blue);
+  border-bottom-right-radius: 6px;
+}
+
+.gt-msg-bubble.outbound-email {
+  background: var(--bg-bubble-in);
+  border-bottom-right-radius: 6px;
+}
+
 .gt-msg-body {
   font-size: 15px;
-  line-height: 1.5;
-  color: #e5e7eb;
+  line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
 
-.gt-msg-body img {
-  max-width: 100%;
-  border-radius: 6px;
+.gt-msg-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
-/* ============================================================
-   DIRECTION BADGE
-============================================================ */
-.gt-dir-badge {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: #2b2d33;
-  border: 1px solid #3a3c43;
-  padding: 3px 8px;
-  border-radius: 6px;
+.gt-msg-timestamp {
+  color: rgba(255, 255, 255, 0.72);
   font-size: 10px;
-  color: #d1d5db;
   white-space: nowrap;
 }
 
-/* ============================================================
-   MMS IMAGES
-============================================================ */
+.gt-msg-status {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.gt-dir-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.74);
+}
+
 .gt-mms-wrap {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .gt-mms-img {
-  max-width: 240px;
-  max-height: 240px;
+  max-width: 220px;
+  max-height: 220px;
   object-fit: cover;
   border-radius: 10px;
-  border: 1px solid #3a3c43;
+  border: 1px solid var(--border);
 }
 
-/* ============================================================
-   AI SUGGESTION BOX
-============================================================ */
-.gt-ai-suggestion {
-  background: #0a84ff1e;
-  border-left: 3px solid #0a84ff;
+.gt-call-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.gt-call-block-title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.gt-call-card {
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  border-radius: 10px;
   padding: 12px 14px;
-  border-radius: 6px;
+}
+
+.gt-call-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gt-call-direction {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.gt-call-route {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.gt-call-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.gt-ai-suggestion {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-left: 3px solid var(--accent);
+  padding: 10px 12px;
+  border-radius: 8px;
   font-size: 14px;
   color: #dbeafe;
 }

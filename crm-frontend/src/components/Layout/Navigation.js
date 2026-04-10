@@ -36,19 +36,55 @@ const normalizeBrandColor = (value = '') => {
   return '';
 };
 
+const toRgbString = (hex = '') => {
+  const normalized = String(hex || '')
+    .replace('#', '')
+    .trim();
+  if (!normalized) return '';
+
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((segment) => `${segment}${segment}`)
+          .join('')
+      : normalized;
+
+  const value = Number.parseInt(expanded, 16);
+  if (!Number.isFinite(value)) return '';
+
+  const red = (value >> 16) & 255;
+  const green = (value >> 8) & 255;
+  const blue = value & 255;
+  return `${red}, ${green}, ${blue}`;
+};
+
 export default function Navigation({
   collapsed = false,
   onToggle = () => {},
   peekOnHover = true,
   autoCollapseMobile = true,
+  mobileOpen,
+  onMobileOpenChange = () => {},
 }) {
   const { logout, user, tenant } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 720px)').matches);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 768px)').matches);
+  const [drawerOpenInternal, setDrawerOpenInternal] = useState(false);
   const [logoLoadFailed, setLogoLoadFailed] = useState(false);
+
+  const isDrawerControlled = typeof mobileOpen === 'boolean';
+  const drawerOpen = isDrawerControlled ? mobileOpen : drawerOpenInternal;
+  const setDrawerOpen = (nextValue) => {
+    const resolved = typeof nextValue === 'function' ? nextValue(drawerOpen) : nextValue;
+    if (isDrawerControlled) {
+      onMobileOpenChange(resolved);
+      return;
+    }
+    setDrawerOpenInternal(resolved);
+  };
 
   const tenantBranding = tenant?.preferences?.branding || {};
   const tenantLogo = tenantBranding?.logo_url || tenantBranding?.logo || tenant?.logo || '';
@@ -59,11 +95,18 @@ export default function Navigation({
   const productMeta = tenant?.domain || PRODUCT_SUFFIX;
 
   useEffect(() => {
-    const mm = window.matchMedia('(max-width: 720px)');
+    const mm = window.matchMedia('(max-width: 768px)');
     const handle = () => setIsMobile(mm.matches);
     mm.addEventListener('change', handle);
     return () => mm.removeEventListener('change', handle);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      if (isDrawerControlled) onMobileOpenChange(false);
+      else setDrawerOpenInternal(false);
+    }
+  }, [isMobile, isDrawerControlled, onMobileOpenChange]);
 
   useEffect(() => {
     setLogoLoadFailed(false);
@@ -72,10 +115,28 @@ export default function Navigation({
   useEffect(() => {
     const root = document.documentElement;
     if (tenantPrimaryColor) {
+      const accentRgb = toRgbString(tenantPrimaryColor);
       root.style.setProperty('--color-accent', tenantPrimaryColor);
+      root.style.setProperty('--accentPrimary', tenantPrimaryColor);
+      root.style.setProperty('--accent', tenantPrimaryColor);
+      if (accentRgb) {
+        root.style.setProperty('--accent-rgb', accentRgb);
+        root.style.setProperty('--accent-dim', `rgba(${accentRgb}, 0.14)`);
+        root.style.setProperty('--accent-glow', `rgba(${accentRgb}, 0.32)`);
+        root.style.setProperty(
+          '--accent-gradient',
+          `linear-gradient(132deg, ${tenantPrimaryColor} 0%, ${tenantPrimaryColor} 58%, #4CC9F0 100%)`
+        );
+      }
       return;
     }
     root.style.removeProperty('--color-accent');
+    root.style.removeProperty('--accentPrimary');
+    root.style.removeProperty('--accent');
+    root.style.removeProperty('--accent-rgb');
+    root.style.removeProperty('--accent-dim');
+    root.style.removeProperty('--accent-glow');
+    root.style.removeProperty('--accent-gradient');
   }, [tenantPrimaryColor]);
 
   // Get actual industryKey and userRole from context

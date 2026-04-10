@@ -11,6 +11,8 @@ const Planner = () => {
   const [loading, setLoading] = useState(false);
   const [totalValue, setTotalValue] = useState(0);
   const [recentScans, setRecentScans] = useState([]);
+  const [avgConfidence, setAvgConfidence] = useState(null);
+  const [enrichedCount, setEnrichedCount] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -21,7 +23,7 @@ const Planner = () => {
     try {
       const [totalRes, recentRes] = await Promise.all([
         api.getTotalPotentialValue(),
-        api.getRecentScans(),
+        api.getRecentScans({ limit: 12 }),
       ]);
 
       setTotalValue(totalRes.data?.total_potential_value || 0);
@@ -33,6 +35,14 @@ const Planner = () => {
         : [];
 
       setRecentScans(scans);
+
+      const confidences = scans
+        .map((s) => Number(s.confidence ?? s.ocr_confidence ?? s.match_confidence))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      if (confidences.length) {
+        setAvgConfidence(Math.round(confidences.reduce((a, b) => a + b, 0) / confidences.length));
+      }
+      setEnrichedCount(scans.filter((s) => s.enriched || s.customer_matched || s.customer_id).length);
     } catch (err) {
       console.error('🛑 Revival planner fetch error:', err);
       setRecentScans([]);
@@ -59,8 +69,8 @@ const Planner = () => {
         <h3>Current Metrics</h3>
         <div className="metric-grid">
           <MetricCard label="Quotes Extracted" value={recentScans.length} />
-          <MetricCard label="Avg Confidence" value="92%" />
-          <MetricCard label="Enriched Leads" value="12" />
+          <MetricCard label="Avg Confidence" value={avgConfidence != null ? `${avgConfidence}%` : "—"} />
+          <MetricCard label="Enriched Leads" value={enrichedCount} />
           <MetricCard
             label="Estimated Value"
             value={`$${Number(totalValue || 0).toLocaleString()}`}

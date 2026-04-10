@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import api from '../../api/client';
@@ -42,18 +42,35 @@ const searchCustomers = async (query) => {
 
 export default function QuoteCreate() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Optional pre-fill when navigated here from a customer/lead card.
+  // Pass via: navigate('/quotes/create', { state: { customer: {...} } })
+  const prefill = location?.state?.customer || location?.state?.lead || null;
+  const prefillName =
+    text(prefill?.full_name) ||
+    text(prefill?.name) ||
+    [text(prefill?.first_name), text(prefill?.last_name)].filter(Boolean).join(' ') ||
+    text(prefill?.company_name) ||
+    '';
+  const prefillPhone = text(prefill?.primary_phone || prefill?.phone || prefill?.phone_number);
+  const prefillEmail = text(prefill?.primary_email || prefill?.email);
+  const prefillId = prefill?.customer_id || prefill?.id || null;
+  const prefillTitle = prefillName ? `Quote for ${prefillName}` : '';
+  const prefillService = text(prefill?.service_type || prefill?.service);
+  const prefillDescription = text(prefill?.message || prefill?.notes);
+
   const [saving, setSaving] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [serviceType, setServiceType] = useState('');
+  const [title, setTitle] = useState(prefillTitle);
+  const [description, setDescription] = useState(prefillDescription);
+  const [serviceType, setServiceType] = useState(prefillService);
   const [notes, setNotes] = useState('');
   const [taxRate, setTaxRate] = useState(0);
 
   // Customer fields
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerId, setCustomerId] = useState(null);
+  const [customerName, setCustomerName] = useState(prefillName);
+  const [customerPhone, setCustomerPhone] = useState(prefillPhone);
+  const [customerEmail, setCustomerEmail] = useState(prefillEmail);
+  const [customerId, setCustomerId] = useState(prefillId);
   const [customerSearch, setCustomerSearch] = useState('');
   const [customerResults, setCustomerResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);

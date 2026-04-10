@@ -1,6 +1,6 @@
 // src/components/Layout/TopBar.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   FiInbox,
@@ -10,9 +10,13 @@ import {
   FiSearch,
   FiMoon,
   FiSun,
+  FiDroplet,
+  FiZap,
 } from "react-icons/fi";
 import { getIndustry } from "../../helpers/tenantHelpers";
 import { getIndustryCopy } from "../../constants/industryCopy";
+import { globalSearch } from "../../api/searchApi";
+import { normalizeSmartQuery } from "../../utils/smartQuery";
 
 import "./TopBar.css";
 
@@ -23,19 +27,29 @@ export default function TopBar({
   activeTab,
   onTabChange,
   theme = "light",
+  accent = "emerald",
+  presets = [],
+  onSetAccent,
   onToggleTheme,
+  assistantOpen = false,
+  onToggleAssistant,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const scrollerRef = useRef(null);
   const leftBtnRef = useRef(null);
   const rightBtnRef = useRef(null);
-  const __topbarInstanceId = useRef(Math.random().toString(16).slice(2));
+  const themeMenuRef = useRef(null);
 
   const [showNewMenu, setShowNewMenu] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [tabOverflow, setTabOverflow] = useState({ left: false, right: false });
   const industry = getIndustry("general");
   const copy = getIndustryCopy(industry);
+  const hideGlobalSearch = location.pathname.startsWith("/leads");
 
   /* --------------------------------------------------------------------------
      🌟 Overflow Handling for Scrolling Pills
@@ -68,10 +82,50 @@ export default function TopBar({
 
   useEffect(() => {
     const count = document.querySelectorAll(".top-bar-search").length;
-    if (count !== 1) {
+    if (!hideGlobalSearch && count !== 1) {
       console.error("🚨 INVALID STATE: Expected 1 top-bar-search, found", count);
     }
-  }, []);
+  }, [hideGlobalSearch]);
+
+  useEffect(() => {
+    if (!showThemeMenu) return undefined;
+    const onClickAway = (event) => {
+      if (!themeMenuRef.current?.contains(event.target)) {
+        setShowThemeMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickAway);
+    return () => document.removeEventListener('mousedown', onClickAway);
+  }, [showThemeMenu]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      return undefined;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const { data } = await globalSearch(q);
+        if (!cancelled) {
+          const rows = Array.isArray(data?.results) ? data.results : [];
+          setSearchResults(rows.slice(0, 8));
+          setSearchOpen(rows.length > 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setSearchResults([]);
+          setSearchOpen(false);
+        }
+      }
+    }, 180);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [searchQuery]);
 
   const scrollTabs = (dir) => {
     const el = scrollerRef.current;
@@ -88,14 +142,19 @@ export default function TopBar({
      🔍 SIMPLE INLINE SEARCH (no GlobalSearch component)
   -------------------------------------------------------------------------- */
   const triggerSearch = () => {
-    const q = searchQuery.trim();
+    const q = normalizeSmartQuery(searchQuery);
     if (!q) return;
-    // You can later replace this with real global search routing
     onSearchSelect?.({ query: q });
+    setSearchOpen(false);
   };
 
   const handleThemeToggle = () => {
     onToggleTheme?.();
+  };
+
+  const applyAccent = (nextAccent) => {
+    onSetAccent?.(nextAccent);
+    setShowThemeMenu(false);
   };
 
   const handleSearchKeyDown = (e) => {
@@ -185,36 +244,95 @@ export default function TopBar({
         ------------------------------------------------------------------ */}
         <div className="top-bar-right">
           {/* 🔍 Clean inline search (no nested component) */}
-          <div className="top-bar-search">
-            <FiSearch
-              size={16}
-              className="top-bar-search-icon"
-              onClick={triggerSearch}
-            />
-            <input
-              type="text"
-              placeholder={copy.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-            />
-          </div>
+          {!hideGlobalSearch && (
+            <div className="top-bar-search">
+              <FiSearch
+                size={16}
+                className="top-bar-search-icon"
+                onClick={triggerSearch}
+              />
+              <input
+                type="text"
+                placeholder={`${copy.searchPlaceholder || "Search CRM records"} or ask a smart query`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                onFocus={() => setSearchOpen(searchResults.length > 0)}
+              />
+              {searchOpen && searchResults.length > 0 ? (
+                <div className="top-bar-search-results">
+                  {searchResults.map((result) => (
+                    <button
+                      key={`${result.result_type}-${result.id}`}
+                      type="button"
+                      className="top-bar-search-result"
+                      onClick={() => {
+                        onSearchSelect?.({ result, query: normalizeSmartQuery(searchQuery) });
+                        setSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                    >
+                      <strong>{result.label}</strong>
+                      <span>{result.subtitle || result.result_type}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {/* Theme toggle */}
+          <div className="top-bar-theme-wrap" ref={themeMenuRef}>
+            <button
+              className="top-bar-btn theme-toggle icon-pill"
+              onClick={() => setShowThemeMenu((v) => !v)}
+              aria-label="Theme and accent"
+              type="button"
+            >
+              <FiDroplet size={17} />
+            </button>
+            {showThemeMenu ? (
+              <div className="top-bar-theme-menu">
+                <button type="button" onClick={handleThemeToggle} className="theme-mode-btn">
+                  {theme === "dark" ? <FiSun size={15} /> : <FiMoon size={15} />}
+                  <span>{theme === "dark" ? "Switch to Light" : "Switch to Dark"}</span>
+                </button>
+                <div className="theme-swatches">
+                  {presets.map((preset) => (
+                    <button
+                      key={preset.key}
+                      type="button"
+                      aria-label={`Use ${preset.label} accent`}
+                      title={preset.label}
+                      onClick={() => applyAccent(preset.key)}
+                      className={`theme-swatch ${accent === preset.key ? "active" : ""}`}
+                      style={{
+                        '--swatch-primary': preset.primary,
+                        '--swatch-secondary': preset.secondary,
+                      }}
+                    >
+                      <span>{preset.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <button
-            className="top-bar-btn theme-toggle icon-pill"
-            onClick={handleThemeToggle}
-            aria-label="Toggle theme"
+            className={`top-bar-btn icon-pill ${assistantOpen ? "active" : ""}`}
+            onClick={() => onToggleAssistant?.()}
+            aria-label={assistantOpen ? "Close assistant" : "Open assistant"}
             type="button"
           >
-            {theme === "dark" ? <FiSun size={20} /> : <FiMoon size={20} />}
+            <FiZap size={17} />
           </button>
 
           {/* Inbox */}
           <div className="inbox-wrapper">
             <button
               className="top-bar-btn icon-pill"
-              onClick={() => navigate("/inbox")}
+              onClick={() => navigate("/communication/inbox")}
               aria-label="Inbox"
               type="button"
             >

@@ -1,15 +1,23 @@
 // crm-frontend/src/components/Communications/Email/EmailPage.jsx
 import React, { useMemo, useState } from "react";
-import { Send, RefreshCw, Inbox } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Send, RefreshCw, Inbox, AlertCircle } from "lucide-react";
+import { toast } from "react-toastify";
+import api from "../../../api/client";
 import "./EmailPage.css";
 
 const Emails = () => {
+  const [searchParams] = useSearchParams();
+  const urlCustomerId = searchParams.get("customer_id") || "";
+  const urlLeadId = searchParams.get("lead_id") || "";
+  const urlName = searchParams.get("name") || "";
   const [to, setTo] = useState("");
   const [cc, setCc] = useState("");
   const [bcc, setBcc] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [emailLog, setEmailLog] = useState([]);
+  const [sending, setSending] = useState(false);
   const emailTemplates = [
     { id: "intro", name: "Intro outreach", body: "Hi {{name}}, thanks for connecting. When works for a quick call?" },
     { id: "follow", name: "Follow-up", body: "Circling back on my last note. Do you have 10 minutes this week?" },
@@ -32,19 +40,42 @@ const Emails = () => {
     return `${toCount} to • ${ccCount} cc • ${bccCount} bcc`;
   }, [bcc, cc, to]);
 
-  const handleSendEmail = () => {
-    if (!subject.trim() || !body.trim() || !parseList(to).length) return;
-    const newEmail = {
-      subject,
-      body,
-      to: parseList(to),
-      cc: parseList(cc),
-      bcc: parseList(bcc),
-      time: new Date().toLocaleString(),
-    };
-    setEmailLog((prev) => [newEmail, ...prev]);
-    setSubject("");
-    setBody("");
+  const handleSendEmail = async () => {
+    const recipients = parseList(to);
+    if (!subject.trim() || !body.trim() || !recipients.length) return;
+    setSending(true);
+    try {
+      const payload = {
+        to_email: recipients[0],
+        subject,
+        body_html: body,
+      };
+      if (urlCustomerId) payload.customer_id = urlCustomerId;
+      if (urlLeadId) payload.lead_id = urlLeadId;
+      // Backend requires at least one of lead_id or customer_id
+      if (!payload.customer_id && !payload.lead_id) {
+        toast.error("Open email from a customer or lead to send");
+        setSending(false);
+        return;
+      }
+      await api.post("/comms/email/send/", payload);
+      const newEmail = {
+        subject,
+        body,
+        to: recipients,
+        cc: parseList(cc),
+        bcc: parseList(bcc),
+        time: new Date().toLocaleString(),
+      };
+      setEmailLog((prev) => [newEmail, ...prev]);
+      setSubject("");
+      setBody("");
+      toast.success("Email sent");
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || err?.response?.data?.error || err?.message || "Failed to send email");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -98,8 +129,8 @@ const Emails = () => {
             placeholder="Write your email..."
           />
           <div className="composer-actions">
-            <button onClick={handleSendEmail} className="action-button">
-              <Send size={16} /> Send
+            <button onClick={handleSendEmail} className="action-button" disabled={sending}>
+              <Send size={16} /> {sending ? "Sending…" : "Send"}
             </button>
           </div>
         </div>

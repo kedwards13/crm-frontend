@@ -1,163 +1,330 @@
-/* src/components/Dashboards/Widgets/CalendarView.css */
+@import '../../theme/tokens.css';
 
-/* 
-  Outer wrapper for the calendar, 
-  providing a clean, dark background with subtle gradient.
-*/
 .calendar-wrapper {
-  margin: 1rem auto;
-  max-width: 1000px;
+  border: 1px solid var(--panel-border, var(--glass-border));
+  border-radius: 16px;
+  padding: 12px;
+  background: linear-gradient(158deg, rgba(var(--accent-rgb), 0.08), transparent 48%), var(--glass-bg);
+  box-shadow: var(--shadow-0);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.calendar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.calendar-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.calendar-head p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.calendar-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calendar-head-actions button,
+.calendar-assign-btn {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-main);
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  padding: 1rem;
-  background: linear-gradient(135deg, #1c1c1e, #2c2c2e);
-  color: #f5f5f7;
-  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.calendar-head-actions button:hover,
+.calendar-assign-btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+.calendar-assign-btn.secondary {
+  background: color-mix(in srgb, var(--bg-card) 78%, rgba(var(--accent-rgb), 0.12));
+}
+
+.calendar-metrics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.calendar-metric {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-muted, var(--bg-elev)) 82%, transparent);
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.calendar-metric span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.calendar-metric strong {
+  font-size: 14px;
 }
 
 .calendar-status {
-  font-size: 0.9rem;
-  margin-bottom: 0.75rem;
-  color: #c9d3e1;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--text-muted);
 }
 
 .calendar-status.error {
-  color: #ff9f0a;
+  color: var(--danger);
 }
 
-/* 
-  Force RBC to be transparent so we see the .calendar-wrapper background.
-*/
-.rbc-calendar,
-.rbc-month-view,
-.rbc-day-bg,
-.rbc-header,
-.rbc-date-cell,
-.rbc-timeslot-group,
-.rbc-row-content,
-.rbc-time-slot,
-.rbc-day-slot,
-.rbc-month-row,
-.rbc-week-row {
-  background: transparent !important;
-  border-color: #3d3d3d !important;
-  color: #f5f5f7 !important;
+.calendar-event-card {
+  display: grid;
+  gap: 2px;
+  position: relative;
 }
 
-/* Hover effect on day cells */
-.rbc-day-bg:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* “Today” highlight with a subtle neon overlay */
-.rbc-today {
-  background-color: rgba(255, 255, 255, 0.07) !important;
-}
-
-/*************************************************************
-  Toolbar (top navigation for month/week/day)
-*************************************************************/
-.rbc-toolbar {
+.calendar-event-top {
   display: flex;
   justify-content: space-between;
+  gap: 6px;
   align-items: center;
-  margin-bottom: 1rem;
-  background: transparent !important;
 }
 
-.rbc-toolbar .rbc-btn-group {
+.calendar-event-name {
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.calendar-event-sub {
+  font-size: 11px;
+  color: var(--text-main);
+  opacity: 0.92;
+}
+
+.calendar-event-meta {
   display: flex;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.calendar-event-meta .muted {
+  opacity: 0.9;
+}
+
+.calendar-event-pill {
+  transform: scale(0.92);
+  transform-origin: right center;
+}
+
+.calendar-event-hover {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  top: 100%;
+  margin-top: 6px;
+  width: 260px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-event-hover .title {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.calendar-event-hover .muted {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+.calendar-event-hover .notes {
+  font-size: 12px;
+  color: var(--text-main);
+  opacity: 0.92;
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.calendar-event-hover .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calendar-event-hover .btn {
+  border: 1px solid var(--border);
+  background: rgba(var(--accent-rgb), 0.12);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.calendar-event-hover .btn.secondary {
+  background: var(--bg-card);
+}
+
+.calendar-event-hover .btn.danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.calendar-day,
+.calendar-filter {
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.calendar-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+}
+
+.calendar-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.calendar-modal-surface {
+  position: relative;
+  z-index: 61;
+  width: min(920px, calc(100vw - 20px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+}
+
+.calendar-modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.calendar-modal-head .muted {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.calendar-modal-close {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.calendar-modal-body {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.calendar-modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rbc-calendar,
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  background: transparent !important;
+  color: var(--text-main);
 }
 
 .rbc-toolbar button {
-  background: #3d3d3d;
-  border: none;
-  color: #f5f5f7;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s, opacity 0.3s;
-  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-radius: 8px;
 }
 
-.rbc-toolbar button:hover:not(:disabled) {
-  background: #9c49ff;
+.rbc-toolbar button:hover {
+  border-color: rgba(var(--accent-rgb), 0.42);
+  background: rgba(var(--accent-rgb), 0.12);
 }
 
-.rbc-toolbar button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.rbc-toolbar button.rbc-active {
+  background: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(var(--accent-rgb), 0.44);
 }
 
-.rbc-toolbar-label {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #f5f5f7;
+.rbc-today {
+  background: rgba(var(--accent-rgb), 0.12) !important;
 }
 
-/*************************************************************
-  Agenda View
-*************************************************************/
-.rbc-agenda-view table {
-  width: 100%;
-  border-collapse: collapse;
-  background: transparent;
-  color: #f5f5f7;
+.rbc-day-bg:hover {
+  background: rgba(var(--accent-rgb), 0.06);
 }
 
-.rbc-agenda-view thead > tr > th {
-  background-color: rgba(255,255,255,0.1);
-  font-weight: 600;
-  padding: 0.5rem;
-  border-bottom: 1px solid #3d3d3d;
+.rbc-agenda-view table,
+.rbc-agenda-view tbody > tr > td,
+.rbc-agenda-view tbody > tr > th,
+.rbc-agenda-view thead > tr > th,
+.rbc-time-content > * + * > * {
+  border-color: var(--border) !important;
 }
 
-.rbc-agenda-view tbody > tr {
-  border-bottom: 1px solid #3d3d3d;
-}
-
-.rbc-agenda-view tbody > tr:hover {
-  background-color: rgba(255,255,255,0.05);
-}
-
-/*************************************************************
-  Time/Week/Day View 
-*************************************************************/
-.rbc-time-column .rbc-timeslot-group {
-  border-color: #3d3d3d;
-}
-
-.rbc-time-slot {
-  border-top: 1px solid #3d3d3d;
-}
-
-/*************************************************************
-  Event styles 
-*************************************************************/
-/* 
-  RBC events are styled in JS (eventStyleGetter).
-  We only override .rbc-event if needed for text or minor details.
-*/
-.rbc-event {
-  font-size: 0.85rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-/*************************************************************
-  Responsive
-*************************************************************/
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   .calendar-wrapper {
-    margin: 1rem;
-    padding: 0.75rem;
+    padding: 10px;
   }
-  .rbc-toolbar-label {
-    font-size: 1rem;
+
+  .calendar-head-actions {
+    width: 100%;
   }
-  .rbc-toolbar button {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.6rem;
+
+  .calendar-head-actions button {
+    flex: 1 1 calc(50% - 6px);
+    justify-content: center;
   }
 }

@@ -1,19 +1,18 @@
 // src/services/enrichment/enrich.js
-export async function fetchEnrichedLead(first, last, address, phone) {
-  const res = await fetch('https://ai.abon.ai/enrich-customer/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      tenant_id: localStorage.getItem('activeTenantId'),
-      customer_id: localStorage.getItem('activeCustomerId'),
-      first_name: first,
-      last_name: last,
-      phone,
-      address,
-    }),
-  });
+import api from '../apiClient';
+import { getActiveTenant } from '../helpers/tenantHelpers';
 
-  const result = await res.json();
+export async function fetchEnrichedLead(first, last, address, phone) {
+  const tenant = getActiveTenant();
+  const customerId = localStorage.getItem('activeCustomerId');
+  const { data: result } = await api.post('/customers/enrich/', {
+    tenant_id: tenant?.id || localStorage.getItem('activeTenantId'),
+    customer_id: customerId,
+    first_name: first,
+    last_name: last,
+    phone,
+    address,
+  });
 
   if (result?.status === 'ok') {
     return result.data; // Includes enrichment_data and ai_attributes

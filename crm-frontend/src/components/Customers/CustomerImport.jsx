@@ -1,10 +1,8 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
-import axios from "axios";
-import { API_BASE_URL } from "../../config/env";
-import { AuthContext } from "../../App";
+import React, { useState, useEffect, useRef } from "react";
+import api from "../../apiClient";
 import "./CustomerImport.css";
 
-const API_BASE = `${API_BASE_URL}/imports`;
+const API_BASE = "/imports";
 
 const CRM_FIELDS = [
   "",
@@ -28,8 +26,6 @@ const CRM_FIELDS = [
 ];
 
 export default function CustomerImport() {
-  const { token } = useContext(AuthContext);
-
   const [step, setStep]         = useState("upload");
   const [file, setFile]         = useState(null);
   const [loading, setLoading]   = useState(false);
@@ -61,8 +57,8 @@ export default function CustomerImport() {
     const form = new FormData();
     form.append("file", file);
     if (!isPreview) form.append("mapping_override", JSON.stringify(mapping));
-    return axios.post(url, form, {
-      headers: { Authorization: `Bearer ${token}` },
+    return api.post(url, form, {
+      headers: { "Content-Type": "multipart/form-data" },
       onUploadProgress: ev =>
         setProgress(Math.round((ev.loaded * 100) / ev.total)),
     });
@@ -91,7 +87,7 @@ export default function CustomerImport() {
       setMapping(data.mapping_used || {});
       setStep("preview");
     } catch (err) {
-      setError(err.response?.data?.error || "Preview failed");
+      setError(err?.payload?.error || err?.response?.data?.error || "Preview failed");
       animateError();
     } finally {
       setLoading(false);
@@ -109,10 +105,7 @@ export default function CustomerImport() {
 
       pollRef.current = setInterval(async () => {
         try {
-          const res = await axios.get(
-            `${API_BASE}/status/${taskId}/`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          const res = await api.get(`${API_BASE}/status/${taskId}/`);
           const { celery_status, import_job } = res.data;
 
           if (celery_status === "SUCCESS" || import_job?.status === "completed") {
@@ -134,7 +127,7 @@ export default function CustomerImport() {
         }
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.error || "Import failed");
+      setError(err?.payload?.error || err?.response?.data?.error || "Import failed");
       setStep("upload");
       animateError();
     } finally {

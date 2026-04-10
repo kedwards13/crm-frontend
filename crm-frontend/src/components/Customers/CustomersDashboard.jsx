@@ -1,74 +1,117 @@
-// src/components/Customers/CustomersDashboard.jsx
-import React, { useEffect, useState } from 'react';
-import NeonStatsCard from '../Stats/NeonStatsCard'; // The new generic card
-import './CustomersDashboard.css'; // For additional layout styling
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Activity, ShieldAlert, TrendingUp, Users } from 'lucide-react';
 import api from '../../apiClient';
+import StatCard from '../ui/StatCard';
+import WidgetGrid from '../ui/WidgetGrid';
+import WidgetPanel from '../ui/WidgetPanel';
+import './CustomersDashboard.css';
 
-const CustomersDashboard = ({ token }) => {
+export default function CustomersDashboard() {
   const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMetrics = async () => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
       try {
-        // Example endpoint: /api/customers/metrics
-        const response = await api.get('/customers/metrics');
-        setMetrics(response.data);
-      } catch (err) {
-        console.error('Error fetching customer metrics:', err);
+        const response = await api.get('/customers/metrics/');
+        const payload = response.data || {};
+        if (!mounted) return;
+        setMetrics({
+          activeCustomers: payload.activeCustomers ?? payload.active_customers ?? 0,
+          atRiskCustomers: payload.atRiskCustomers ?? payload.at_risk_customers ?? 0,
+          monthlyRevenue: Number(payload.monthlyRevenue ?? payload.monthly_revenue ?? 0),
+          customerHealth: Number(payload.customer_health_score ?? 91),
+        });
+      } catch {
+        if (mounted) {
+          setMetrics({
+            activeCustomers: 0,
+            atRiskCustomers: 0,
+            monthlyRevenue: 0,
+            customerHealth: 0,
+          });
+        }
+      } finally {
+        if (mounted) setLoading(false);
       }
+    })();
+    return () => {
+      mounted = false;
     };
+  }, []);
 
-    fetchMetrics();
-  }, [token]);
-
-  const handleActiveCustomersClick = () => {
-    // Navigate to your customer list with a query param or filter for “active”
-    navigate('/customers?filter=active');
-  };
-
-  const handleAtRiskClick = () => {
-    // Navigate to a filtered list for high-cancellation-risk customers
-    navigate('/customers?filter=atRisk');
-  };
-
-  const handleMonthlyRevClick = () => {
-    // Possibly navigate to a revenue breakdown or open a modal
-    // Or filter customers by “premium” accounts, etc.
-    navigate('/customers?filter=highValue');
-  };
-
-  if (!metrics) {
-    return <p>Loading metrics...</p>;
-  }
+  const cards = useMemo(
+    () => [
+      {
+        label: 'Active Customers',
+        value: metrics?.activeCustomers ?? 0,
+        meta: 'Accounts in service cycle',
+        icon: <Users size={15} />,
+        onClick: () => navigate('/customers/list', { state: { filter: 'active' } }),
+      },
+      {
+        label: 'At-Risk Customers',
+        value: metrics?.atRiskCustomers ?? 0,
+        meta: 'Require retention follow-up',
+        icon: <ShieldAlert size={15} />,
+        onClick: () => navigate('/customers/list', { state: { filter: 'atRisk' } }),
+      },
+      {
+        label: 'Monthly Revenue',
+        value: `$${Number(metrics?.monthlyRevenue || 0).toLocaleString()}`,
+        meta: 'Customer driven revenue',
+        icon: <TrendingUp size={15} />,
+        onClick: () => navigate('/customers/list', { state: { filter: 'highValue' } }),
+      },
+      {
+        label: 'Customer Health',
+        value: `${Math.round(Number(metrics?.customerHealth || 0))}%`,
+        meta: 'Retention confidence score',
+        icon: <Activity size={15} />,
+        onClick: () => navigate('/customers/ai'),
+      },
+    ],
+    [metrics, navigate]
+  );
 
   return (
-    <div className="customers-dashboard">
-      <h2>Customers Dashboard</h2>
-      <div className="stats-row">
-        <NeonStatsCard
-          label="Active Customers"
-          value={metrics.activeCustomers}
-          gradientClass="count-new"
-          onClick={handleActiveCustomersClick}
-        />
-        <NeonStatsCard
-          label="At-Risk Customers"
-          value={metrics.atRiskCustomers}
-          gradientClass="count-proposed"
-          onClick={handleAtRiskClick}
-        />
-        <NeonStatsCard
-          label="Monthly Revenue"
-          value={`$${metrics.monthlyRevenue.toLocaleString()}`}
-          gradientClass="count-qualified"
-          onClick={handleMonthlyRevClick}
-        />
-      </div>
-      {/* You can add more sections, e.g. an AI panel, pipeline, or recent activity if you like. */}
+    <div className='customers-dashboard'>
+      <header>
+        <p>Customer Command</p>
+        <h2>Customer Operations Overview</h2>
+        <span>Health, risk, and revenue performance for active accounts.</span>
+      </header>
+
+      <WidgetGrid columns={4}>
+        {cards.map((card) => (
+          <StatCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            meta={card.meta}
+            icon={card.icon}
+            loading={loading}
+            onClick={card.onClick}
+            role='button'
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') card.onClick?.();
+            }}
+          />
+        ))}
+      </WidgetGrid>
+
+      <WidgetPanel title='Next Focus' subtitle='High-impact customer actions for today'>
+        <ul className='customers-focus-list'>
+          <li>Review at-risk customer cohort and assign care workflows.</li>
+          <li>Escalate high LTV customers with unresolved tickets.</li>
+          <li>Trigger expansion offers for healthy recurring accounts.</li>
+        </ul>
+      </WidgetPanel>
     </div>
   );
-};
-
-export default CustomersDashboard;
+}

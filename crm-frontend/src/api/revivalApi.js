@@ -1,86 +1,69 @@
-// src/api/revivalApi.js
-import axios from 'axios';
-import {
-  clearActiveTenant,
-  getActiveTenant,
-  isTenantRequiredRequest,
-  tenantSelectionRequiredError,
-} from '../helpers/tenantHelpers';
+import api from './client';
 
-const API_BASE = process.env.REACT_APP_API_BASE;
+const toResults = (value) =>
+  Array.isArray(value) ? value : Array.isArray(value?.results) ? value.results : [];
 
-const apiClient = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true,
-});
-
-// Attach JWT and tenant headers
-apiClient.interceptors.request.use((config) => {
-  const tenant = getActiveTenant();
-  const token = localStorage.getItem('token');
-  const needsTenant = isTenantRequiredRequest(config.url);
-
-  config.headers = config.headers || {};
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  if (needsTenant && !tenant?.id) {
-    return Promise.reject(tenantSelectionRequiredError());
-  }
-  if (tenant?.id) config.headers['X-Tenant-ID'] = tenant.id;
-  if (tenant?.domain) config.headers['X-Tenant-Domain'] = tenant.domain;
-  if (tenant?.industry) config.headers['X-Tenant-Industry'] = tenant.industry;
-
-  return config;
-});
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error?.response?.status === 403) {
-      clearActiveTenant();
-    }
-    return Promise.reject(error);
-  }
-);
-
-// 🔁 Revival API
 const revivalApi = {
-  // 📄 Quote CRUD
-  listQuotes: () => apiClient.get('/revival/'),
-  createQuote: (data) => apiClient.post('/revival/', data),
-  getQuote: (uuid) => apiClient.get(`/revival/${uuid}/`),
-  updateQuote: (uuid, data) => apiClient.put(`/revival/${uuid}/`, data),
-  deleteQuote: (uuid) => apiClient.delete(`/revival/${uuid}/`),
+  listQuotes: (params = {}) => api.get('/revival/', { params }),
+  createQuote: (data) => api.post('/revival/', data),
+  getQuote: (uuid) => api.get(`/revival/${uuid}/`),
+  updateQuote: (uuid, data) => api.put(`/revival/${uuid}/`, data),
+  deleteQuote: (uuid) => api.delete(`/revival/${uuid}/`),
 
-  // ✅ Actions (accept / reject / convert)
-  acceptQuote: (uuid) => apiClient.post(`/revival/${uuid}/accept/`),
-  rejectQuote: (uuid) => apiClient.post(`/revival/${uuid}/reject/`),
-  convertQuote: (uuid) => apiClient.post(`/revival/${uuid}/convert/`),
+  acceptQuote: (uuid) => api.post(`/revival/${uuid}/accept/`),
+  rejectQuote: (uuid) => api.post(`/revival/${uuid}/reject/`),
+  convertQuote: (uuid) => api.post(`/revival/${uuid}/convert/`),
+  submitReview: (uuid, data = {}) => api.patch(`/revival/${uuid}/submit-review/`, data),
 
-  // ✍️ Submit Review
-  submitReview: (uuid, data = {}) => apiClient.patch(`/revival/${uuid}/submit-review/`, data),
-
-  // 📤 File Upload
   uploadScanFile: (uuid, formData) =>
-    apiClient.post(`/revival/${uuid}/upload-scan/`, formData, {
+    api.post(`/revival/${uuid}/upload-scan/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  saveScannedQuote: (data) => api.post('/revival/scanner/save/', data),
 
-  // 🔄 Scanner Save
-  saveScannedQuote: (data) => apiClient.post('/revival/scanner/save/', data),
+  getOverview: () => api.get('/revival/scanner/overview/'),
+  parseScan: (data = {}) => api.post('/revival/scanner/parse/', data),
+  getEligible: () => api.get('/revival/eligible/'),
+  getSummary: () => api.get('/revival/scanner/summary/'),
+  getPaymentSummary: () => api.get('/revival/scanner/payment-summary/'),
+  getInsights: () => api.get('/revival/scanner/insights/'),
+  getRecentScans: (params = {}) => api.get('/revival/scanner/recent/', { params }),
+  getPaidQuotes: () => api.get('/revival/scanner/paid/'),
+  getPartiallyPaidQuotes: () => api.get('/revival/scanner/partial/'),
+  getUnpaidQuotes: () => api.get('/revival/scanner/unpaid/'),
+  triggerRevival: (data = {}) => api.post('/revival/trigger/', data),
 
-  // 📊 Metrics + Summary
-  getOverview: () => apiClient.get('/revival/scanner/overview/'),
-  getSummary: () => apiClient.get('/revival/scanner/summary/'),
-  getPaymentSummary: () => apiClient.get('/revival/scanner/payment-summary/'),
-  getInsights: () => apiClient.get('/revival/scanner/insights/'),
-
-  // 📁 Recent Scans
-  getRecentScans: () => apiClient.get('/revival/scanner/recent/'),
-
-  // 💸 Payment Filters
-  getPaidQuotes: () => apiClient.get('/revival/scanner/paid/'),
-  getPartiallyPaidQuotes: () => apiClient.get('/revival/scanner/partial/'),
-  getUnpaidQuotes: () => apiClient.get('/revival/scanner/unpaid/'),
+  // Legacy helper used by planner surfaces.
+  getTotalPotentialValue: async () => {
+    const summaryRes = await api.get('/revival/scanner/summary/');
+    const summary = summaryRes?.data || {};
+    const summaryTotal = Number(summary.total_scanned_value || summary.total_potential_value || 0);
+    if (Number.isFinite(summaryTotal) && summaryTotal > 0) {
+      return {
+        data: {
+          total_potential_value: summaryTotal,
+        },
+      };
+    }
+    const quotesRes = await api.get('/revival/scanner/recent/', { params: { limit: 25 } });
+    const quotes = toResults(quotesRes?.data);
+    const fallbackTotal = quotes.reduce((acc, item) => {
+      const raw =
+        item?.estimated_total ??
+        item?.quote_total ??
+        item?.total ??
+        item?.amount ??
+        0;
+      const value = Number(raw);
+      return acc + (Number.isFinite(value) ? value : 0);
+    }, 0);
+    return {
+      data: {
+        total_potential_value:
+          Number(summary.total_scanned_value || summary.total_potential_value) || fallbackTotal,
+      },
+    };
+  },
 };
 
 export default revivalApi;

@@ -16,9 +16,7 @@ export const industrySubnavConfig = {
       { key: 'disqualified', label: 'Disqualified', path: '/leads/disqualified' }
     ],
     '/schedule': [
-      { key: 'calendar', label: 'Calendar View', path: '/schedule/calendar' },
-      { key: 'routing', label: 'Route Planner', path: '/schedule/routing' },
-      { key: 'unscheduled', label: 'Unscheduled Jobs', path: '/schedule/unscheduled' }
+      { key: 'dispatch', label: 'Dispatch', path: '/schedule/day' },
     ],
     '/revival': [
       { key: 'overview', label: 'Overview', path: '/revival/overview' },
@@ -48,7 +46,7 @@ export const industrySubnavConfig = {
       { key: 'deals', label: 'Closed Deals', path: '/leads/closed' }
     ],
     '/schedule': [
-      { key: 'calendar', label: 'Showings', path: '/schedule/calendar' },
+      { key: 'day', label: 'Showings', path: '/schedule/day' },
       { key: 'offers', label: 'Offer Deadlines', path: '/schedule/offers' }
     ],
     '/settings': [
@@ -98,9 +96,7 @@ export const industrySubnavConfig = {
       { key: 'ai', label: 'AI Assistant', path: '/customers/ai' }
     ],
     '/schedule': [
-      { key: 'map', label: 'Map View', path: '/schedule/map' },
-      { key: 'routes', label: 'Monthly Routes', path: '/schedule/routes' },
-      { key: 'pool', label: 'Job Pool', path: '/schedule/pool' }
+      { key: 'dispatch', label: 'Dispatch', path: '/schedule/day' }
     ],
     '/settings': [
       { key: 'technicians', label: 'Technicians', path: '/settings/team' },

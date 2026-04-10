@@ -1,5 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
+import api from '../../apiClient';
 import './Assistant.css';
+
+const parseCommandInput = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw.toLowerCase().startsWith('/cmd ')) return null;
+
+  const remainder = raw.slice(5).trim();
+  if (!remainder) return null;
+  const firstSpace = remainder.indexOf(' ');
+  if (firstSpace < 0) {
+    return { action: remainder, payload: {} };
+  }
+
+  const action = remainder.slice(0, firstSpace).trim();
+  const payloadText = remainder.slice(firstSpace + 1).trim();
+  if (!action) return null;
+  if (!payloadText) return { action, payload: {} };
+
+  try {
+    const payload = JSON.parse(payloadText);
+    return { action, payload: payload && typeof payload === 'object' ? payload : {} };
+  } catch {
+    return null;
+  }
+};
 
 const Assistant = ({ tianLeads = [] }) => {
   const [messages, setMessages] = useState([
@@ -9,6 +34,37 @@ const Assistant = ({ tianLeads = [] }) => {
   const [listening, setListening] = useState(false);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const firstLead = tianLeads[0] || {};
+
+  const quickActions = [
+    {
+      label: 'Send offer to top lead',
+      action: 'send_sms',
+      payload: {
+        lead_id: firstLead?.id,
+        to_phone: firstLead?.phone || firstLead?.primary_phone,
+        body: 'Hi! We can help with your service request. Reply YES for a quick quote.',
+      },
+    },
+    {
+      label: 'Create callback task',
+      action: 'create_task',
+      payload: {
+        lead_id: firstLead?.id,
+        title: 'Call back interested lead',
+        description: 'Customer showed interest and needs follow-up.',
+      },
+    },
+    {
+      label: 'Start revival campaign',
+      action: 'start_campaign',
+      payload: {
+        customer_id: firstLead?.customer_id,
+        campaign_name: 'Revival Follow-up',
+        channel: 'sms',
+      },
+    },
+  ];
 
   // Scroll to bottom when new messages are added
   useEffect(() => {
@@ -52,29 +108,62 @@ const Assistant = ({ tianLeads = [] }) => {
 
     const userMessage = { text: input.trim(), sender: 'user' };
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://127.0.0.1:808/api/ai/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify({ message: input.trim(), leads: tianLeads }),
-      });
+      const parsedCommand = parseCommandInput(input);
+      let data;
+      if (parsedCommand) {
+        const commandRes = await api.post('/assistant/command/', {
+          action: parsedCommand.action,
+          payload: parsedCommand.payload || {},
+        });
+        data = commandRes?.data || {};
+      } else {
+        const queryRes = await api.post('/assistant/query/', {
+          query: input.trim(),
+          context: 'crm_assistant_panel',
+          leads: tianLeads,
+        });
+        data = queryRes?.data || {};
+      }
 
-      if (!response.ok) throw new Error(await response.text());
+      setInput('');
 
-      const data = await response.json();
-      const botMessage = { text: data.reply || 'AI did not return a response.', sender: 'bot' };
+      const botMessage = {
+        text:
+          data?.response ||
+          data?.message ||
+          data?.reply ||
+          (data?.status ? `Command ${data.status}.` : '') ||
+          'AI did not return a response.',
+        sender: 'bot',
+      };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('AI Assistant Error:', error);
       setMessages((prev) => [
         ...prev,
         { text: 'Something went wrong processing your request.', sender: 'bot' },
+      ]);
+    }
+  };
+
+  const runQuickAction = async (actionConfig) => {
+    try {
+      const { data } = await api.post('/assistant/command/', {
+        action: actionConfig.action,
+        payload: actionConfig.payload || {},
+      });
+      const status = data?.status || 'queued';
+      setMessages((prev) => [
+        ...prev,
+        { text: `Action "${actionConfig.label}" ${status}.`, sender: 'bot' },
+      ]);
+    } catch (error) {
+      console.error('AI Action Error:', error);
+      setMessages((prev) => [
+        ...prev,
+        { text: `Action "${actionConfig.label}" failed.`, sender: 'bot' },
       ]);
     }
   };
@@ -127,15 +216,11 @@ const Assistant = ({ tianLeads = [] }) => {
         <div className="ai-section">
           <h4>Suggested Tasks</h4>
           <ul className="tasks-list">
-            {[
-              'Send offer to top lead',
-              'Mark leads without phone as inactive',
-              'Schedule callback for interested sellers'
-            ].map((task, i) => (
+            {quickActions.map((task, i) => (
               <li key={i} className="task-item">
-                <span className="task-text">{task}</span>
+                <span className="task-text">{task.label}</span>
                 <div className="task-actions">
-                  <button className="approve-btn">✔</button>
+                  <button className="approve-btn" onClick={() => runQuickAction(task)}>✔</button>
                   <button className="deny-btn">✘</button>
                 </div>
               </li>

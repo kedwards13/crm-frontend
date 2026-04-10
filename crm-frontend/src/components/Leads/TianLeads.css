@@ -1,32 +1,28 @@
-/* --- Lead list container (used only when not rendering in `bare` mode) --- */
 .lead-grid {
   display: grid;
-  grid-template-columns: 1fr; /* mobile default */
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
   width: 100%;
 }
 
-/* ≥900px: two columns, auto-fit wider screens */
 @media (min-width: 900px) {
   .lead-grid {
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
   }
 }
 
-/* --- Card --- */
 .lead-card {
   display: grid;
-  gap: 0.5rem;
-  border: 1px solid var(--border-1);
-  background: var(--bg-1);
+  gap: 0.45rem;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
   border-radius: 12px;
-  padding: 1rem 1.1rem;
-  box-shadow: var(--shadow-0);
+  padding: 1rem;
   overflow: visible;
   min-width: 0;
   word-break: break-word;
   outline: none;
-  transition: transform .06s ease, box-shadow .15s ease, border-color .15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .lead-title-row {
@@ -37,105 +33,212 @@
 }
 
 .lead-source {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid var(--border-0);
-  color: var(--text-1);
-  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
 
 .lead-source.web {
-  color: var(--info-0);
-  border-color: rgba(31, 107, 255, 0.36);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.34);
 }
 
 .lead-source.crm {
-  color: var(--success-0);
-  border-color: rgba(18, 183, 106, 0.36);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.36);
 }
 
 .lead-card:hover {
-  box-shadow: var(--shadow-1);
-  border-color: var(--color-accent);
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.lead-card:active {
-  transform: translateY(1px);
-}
-
-/* Title */
 .lead-card h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 650;
-  color: var(--text-0);
+  color: var(--text-main);
 }
 
-/* Content rows */
 .lead-card p {
   margin: 0;
-  font-size: 0.95rem;
-  color: var(--text-2);
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-/* Clamp long messages to 3 lines */
-.lead-card .truncate {
+.lead-message-block {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.lead-message-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.lead-message-line strong {
+  flex: 0 0 auto;
+}
+
+.lead-message-text-wrap {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  max-height: 3.1em;
+  transition: max-height 0.24s ease, opacity 0.24s ease;
+  opacity: 0.95;
+}
+
+.lead-message-text-wrap.collapsed .lead-message-text {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Actions */
+.lead-message-text-wrap.expanded {
+  max-height: 120em;
+  opacity: 1;
+}
+
+.lead-message-text-wrap.expanded .lead-message-text {
+  display: block;
+  white-space: pre-wrap;
+}
+
+.lead-message-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lead-message-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgb(var(--accent-rgb, 10, 132, 255));
+  padding: 0;
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lead-message-link.secondary {
+  color: var(--text-muted);
+}
+
+.lead-message-link:hover {
+  opacity: 0.9;
+}
+
 .lead-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.35rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
   align-items: center;
 }
 
-/* Buttons */
 .btn {
   appearance: none;
-  border: 1px solid var(--border-0);
+  border: 1px solid var(--border);
   background: var(--bg-2);
-  color: var(--text-0);
-  padding: 0.5rem 0.85rem;
-  border-radius: 10px;
+  color: var(--text-main);
+  padding: 0.44rem 0.8rem;
+  border-radius: 9px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: filter .12s ease, transform .06s ease;
+  font-size: 0.85rem;
 }
 
-.btn:hover { filter: none; background: var(--bg-1); border-color: var(--border-1); }
-.btn:active { transform: translateY(1px); }
+.btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
 
 .btn-save {
-  border-color: var(--accent-1);
-  background: var(--accent-0);
-  color: var(--accent-ink);
-  box-shadow: 0 10px 24px rgba(var(--accent-rgb, 10,132,255), 0.22);
+  border-color: transparent;
+  background: var(--accent-gradient);
+  color: #fff;
 }
 
 .btn-secondary {
-  border-color: rgba(245, 158, 11, 0.6);
-  color: var(--text-0);
-  background: var(--bg-2);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--text-muted);
+  background: transparent;
 }
 
 .btn-ai {
   border-style: dashed;
-  color: var(--text-1);
+  color: var(--text-muted);
+  background: transparent;
 }
 
-/* Mobile comfy spacing */
+.lead-message-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.lead-message-modal {
+  width: min(620px, 100%);
+  max-height: min(78vh, 640px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.45);
+}
+
+.lead-message-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.lead-message-modal-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.lead-message-modal-close {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.lead-message-modal-content {
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
 @media (max-width: 600px) {
-  .lead-card { padding: 0.8rem 0.85rem; }
-  .lead-card h3 { font-size: 0.98rem; }
-  .lead-actions { gap: 0.4rem; }
+  .lead-card {
+    padding: 0.85rem;
+  }
 }

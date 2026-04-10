@@ -114,7 +114,7 @@ export default function CommunicationsPage() {
       }
 
       const device = await initVoiceDevice(
-        registration?.webrtcToken || clientToken,
+        registration?.webrtcToken || registration?.client_token || registration?.access_token || clientToken,
         { iceServers: registration?.iceServers }
       );
       attachDeviceEvents(device);
@@ -154,14 +154,6 @@ export default function CommunicationsPage() {
     const match = tabs.find(t => location.pathname.includes(t.path));
     if (match) setActiveTab(match.key);
   }, [location.pathname, tabs]);
-
-  const onTabChange = (key) => {
-    const tab = tabs.find(t => t.key === key);
-    if (tab) {
-      setActiveTab(key);
-      navigate(tab.path);
-    }
-  };
 
   return (
     <div className="communications-page">

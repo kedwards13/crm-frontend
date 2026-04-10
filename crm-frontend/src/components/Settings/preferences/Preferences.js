@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../../apiClient';
 import { getIndustry } from '../../../helpers/tenantHelpers';
 import TimeRangePicker from '../../ui/TimeRangePicker.tsx';
+import { useTheme } from '../../../theme/ThemeProvider';
 import '../SettingsCommon.css';
 
 const DEFAULTS = {
@@ -34,6 +35,7 @@ const DEFAULTS = {
 };
 
 export default function Preferences() {
+  const { mode, accent, setMode, setAccent, presets } = useTheme();
   const industryKey = getIndustry('general');
   const seed = DEFAULTS[industryKey] || DEFAULTS.general;
 
@@ -217,7 +219,48 @@ export default function Preferences() {
       <button className="settings-primary" onClick={save}>Save Preferences</button>
 
       <div className="settings-card">
-        <h3>AI Context</h3>
+        <h3>Theme Preferences</h3>
+        <p className="muted">Choose light or dark mode and set your workspace accent color.</p>
+        <div className="settings-inline-actions">
+          <button
+            type="button"
+            className="settings-secondary"
+            onClick={() => setMode('light')}
+            aria-pressed={mode === 'light'}
+          >
+            Light Mode
+          </button>
+          <button
+            type="button"
+            className="settings-secondary"
+            onClick={() => setMode('dark')}
+            aria-pressed={mode === 'dark'}
+          >
+            Dark Mode
+          </button>
+        </div>
+        <div className="settings-inline-actions">
+          {presets.map((preset) => (
+            <button
+              key={preset.key}
+              type="button"
+              className="mini"
+              onClick={() => setAccent(preset.key)}
+              aria-pressed={accent === preset.key}
+              style={{
+                borderColor: accent === preset.key ? 'var(--color-accent)' : undefined,
+                background: `linear-gradient(120deg, ${preset.primary}, ${preset.secondary})`,
+                color: '#fff',
+              }}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-card">
+        <h3>Customer Insight Context</h3>
         {aiMsg && <p className="settings-msg">{aiMsg}</p>}
         <label>Tone
           <input

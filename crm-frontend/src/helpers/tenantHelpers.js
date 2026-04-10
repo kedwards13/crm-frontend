@@ -7,7 +7,7 @@ export function normalizeIndustry(raw) {
   const s = String(s0 || 'general').trim().toLowerCase().replace(/\s+/g, ' ');
 
   // Already-normalized keys (idempotent)
-  if (['pest_control', 'real_estate', 'wholesaler', 'fitness', 'food_wellness', 'auto', 'general'].includes(s)) {
+  if (['pest_control', 'real_estate', 'wholesaler', 'fitness', 'food_wellness', 'auto', 'landscaping', 'general'].includes(s)) {
     return s;
   }
 
@@ -16,8 +16,13 @@ export function normalizeIndustry(raw) {
     'pest', 'pestcontrol', 'pest-control', 'pest control', 'pc',
     'sunpest', 'sun pest', 'sun pest control',
     'home service', 'home services', 'home-service', 'home-services', 'homeservices',
-    'hvac', 'plumbing', 'electrical', 'roofing', 'landscaping'
+    'hvac', 'plumbing', 'electrical', 'roofing'
   ].includes(s)) return 'pest_control';
+
+  if ([
+    'landscaping', 'landscape', 'lawn', 'lawn care', 'grounds', 'groundskeeping',
+    'crew landscaping', 'landscape maintenance'
+  ].includes(s)) return 'landscaping';
 
   if (['re', 'realestate', 'real-estate', 'real estate', 'rei', 'investor'].includes(s)) {
     return 'real_estate';
@@ -49,6 +54,7 @@ function inferIndustry({ name = '', domain = '' } = {}) {
 
   // Name heuristics
   if (/\bpest\b/.test(n)) return 'pest_control';
+  if (/\blandscap|lawn|grounds\b/.test(n)) return 'landscaping';
   if (/\b(real|rei|invest)\b/.test(n)) return 'real_estate';
   if (/\bwholesal/.test(n)) return 'wholesaler';
   if (/\bfit|gym|club\b/.test(n)) return 'fitness';
@@ -59,6 +65,7 @@ function inferIndustry({ name = '', domain = '' } = {}) {
 
   // Domain hints (optional)
   if (/\bpest\b/.test(d)) return 'pest_control';
+  if (/\blandscap|lawn|grounds\b/.test(d)) return 'landscaping';
   if (/\breal|rei\b/.test(d)) return 'real_estate';
   if (/\bfarm2farmacy\b/.test(d) || /\bf2f\b/.test(d)) return 'food_wellness';
 
@@ -69,6 +76,7 @@ const TENANT_OPTIONAL_PATHS = [
   '/accounts/auth/login/',
   '/accounts/auth/refresh/',
   '/accounts/auth/switch-tenant/',
+  '/accounts/auth/tenant-signup/',
   '/accounts/tenant-signup/',
 ];
 

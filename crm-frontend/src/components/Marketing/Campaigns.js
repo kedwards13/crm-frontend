@@ -6,6 +6,7 @@ import {
   runCampaign,
 } from '../../api/campaignsApi';
 import { listTemplates } from '../../api/templatesApi';
+import useAiCapabilities from '../../hooks/useAiCapabilities';
 import './Campaigns.css';
 
 const emptyForm = {
@@ -13,12 +14,16 @@ const emptyForm = {
   description: '',
   channel: 'sms',
   template_id: '',
+  target_list: '',
+  message: '',
   city: '',
   state: '',
   has_pets: false,
+  use_ai_generation: false,
 };
 
 export default function Campaigns() {
+  const aiCapabilities = useAiCapabilities();
   const [campaigns, setCampaigns] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -59,7 +64,12 @@ export default function Campaigns() {
       setMsg('Campaign name is required.');
       return;
     }
+    if (!form.template_id && !form.message.trim()) {
+      setMsg('Add a template or draft a message before creating the campaign.');
+      return;
+    }
     const audience_filter = {};
+    if (form.target_list) audience_filter.target_list = form.target_list;
     if (form.city) audience_filter.city = form.city;
     if (form.state) audience_filter.state = form.state;
     if (form.has_pets) audience_filter.has_pets = true;
@@ -71,6 +81,11 @@ export default function Campaigns() {
         channel: form.channel,
         template_id: form.template_id || undefined,
         audience_filter,
+        ...(form.message.trim()
+          ? form.use_ai_generation && aiCapabilities.campaignEnabled
+            ? { smart_message: form.message.trim() }
+            : { message: form.message.trim() }
+          : {}),
       };
       const { data } = await createCampaign(payload);
       setCampaigns((prev) => [data, ...prev]);
@@ -119,7 +134,7 @@ export default function Campaigns() {
       <div className="campaigns-header">
         <div>
           <h2>Campaigns</h2>
-          <p>Launch bulk outreach and monitor results.</p>
+          <p>Launch bulk outreach with deterministic send controls and optional AI-assisted drafting.</p>
         </div>
         <button className="campaigns-refresh" onClick={loadAll}>
           Refresh
@@ -131,6 +146,16 @@ export default function Campaigns() {
       <div className="campaigns-grid">
         <div className="campaigns-card">
           <h3>Create Campaign</h3>
+          <div className="campaigns-note">
+            <strong>System Data</strong>
+            <span>Campaign creation and execution stay on the CRM backend. AI remains draft-only and approval-gated.</span>
+          </div>
+          {!aiCapabilities.loading && !aiCapabilities.campaignEnabled ? (
+            <div className="campaigns-note is-muted">
+              <strong>AI Insight</strong>
+              <span>{aiCapabilities.error || aiCapabilities.disabledReason}</span>
+            </div>
+          ) : null}
           <div className="campaigns-form">
             <label>
               Name
@@ -161,7 +186,17 @@ export default function Campaigns() {
               Template
               <select
                 value={form.template_id}
-                onChange={(e) => setForm((prev) => ({ ...prev, template_id: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => {
+                    const nextTemplateId = e.target.value;
+                    const selectedTemplate = templates.find((tpl) => String(tpl.id) === String(nextTemplateId));
+                    return {
+                      ...prev,
+                      template_id: nextTemplateId,
+                      message: prev.message || String(selectedTemplate?.body || ''),
+                    };
+                  })
+                }
               >
                 <option value="">No template</option>
                 {templates.map((tpl) => (
@@ -170,6 +205,44 @@ export default function Campaigns() {
                   </option>
                 ))}
               </select>
+            </label>
+            <label>
+              Audience segment
+              <select
+                value={form.target_list}
+                onChange={(e) => setForm((prev) => ({ ...prev, target_list: e.target.value }))}
+              >
+                <option value="">Manual / filter-based audience</option>
+                <option value="customers_with_recurring_issues">Recurring issues</option>
+                <option value="customers_with_open_quotes">Open quotes over 7 days</option>
+                <option value="customers_with_failed_treatments">Failed treatments</option>
+                <option value="customers_with_unpaid_invoices">Unpaid invoices</option>
+              </select>
+            </label>
+            <label>
+              Message editor
+              <textarea
+                rows="4"
+                value={form.message}
+                placeholder="Draft the approved base message here. AI remains optional and review-only."
+                onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
+              />
+            </label>
+            <label className="campaigns-toggle">
+              <input
+                type="checkbox"
+                checked={form.use_ai_generation}
+                disabled={aiCapabilities.loading || !aiCapabilities.campaignEnabled}
+                onChange={(e) => setForm((prev) => ({ ...prev, use_ai_generation: e.target.checked }))}
+              />
+              <span>
+                AI-assisted draft mode
+                <small>
+                  {aiCapabilities.campaignEnabled
+                    ? 'Uses the CRM-safe AI drafting path only. Sending still stays approval-gated.'
+                    : 'Disabled for this tenant. Campaigns still work with system templates and manual drafts.'}
+                </small>
+              </span>
             </label>
             <div className="campaigns-filters">
               <label>

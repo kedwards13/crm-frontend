@@ -13,10 +13,10 @@
   z-index: 50;
   padding: 12px;
 
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(var(--glass-blur));
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 58px rgba(2, 7, 18, 0.34);
 
   transition:
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -228,26 +228,18 @@
 
 .sidebar-link.active {
   background: var(--accent-dim);
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
-  border-color: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.26);
 }
 
 .sidebar-link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: var(--accent);
-  border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 10px var(--accent-glow);
+  display: none;
 }
 
 .sidebar-link.active svg {
   stroke: var(--accent);
-  filter: drop-shadow(0 0 5px var(--accent-dim));
+  filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.24));
 }
 
 .sidebar-icon {
@@ -354,15 +346,13 @@
 }
 
 .layout-shell.collapsed .sidebar-link.active::before {
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 3px;
-  border-radius: 0 4px 4px 0;
+  display: none;
 }
 
 .sidebar.peek-on-hover.is-collapsed:hover {
   width: var(--sidebar-width);
+  z-index: 90;
+  box-shadow: 0 24px 58px rgba(2, 7, 18, 0.34);
 }
 
 .sidebar.peek-on-hover.is-collapsed:hover .sidebar-brand-text,
@@ -377,6 +367,19 @@
   justify-content: flex-start;
 }
 
+.layout-shell.collapsed .sidebar.peek-on-hover.is-collapsed:hover .sidebar-link,
+.layout-shell.collapsed .sidebar.peek-on-hover.is-collapsed:hover .sidebar-profile,
+.layout-shell.collapsed .sidebar.peek-on-hover.is-collapsed:hover .sidebar-brand {
+  width: calc(100% - 16px);
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.layout-shell.collapsed .sidebar.peek-on-hover.is-collapsed:hover .sidebar-link {
+  justify-content: flex-start;
+  padding: 10px 14px;
+}
+
 .sidebar-active-indicator {
   display: none;
 }
@@ -389,7 +392,7 @@
 .sidebar.is-mobile {
   transform: translateX(-100%);
   width: min(86vw, 320px) !important;
-  background: var(--bg-elev);
+  background: var(--glass-bg);
   z-index: 1200;
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
   transition: transform 0.25s ease;
@@ -402,7 +405,7 @@
 .sidebar-scrim {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(2, 6, 23, 0.5);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
