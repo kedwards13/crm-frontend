@@ -9,6 +9,7 @@ import Layout from './components/Layout/Layout';
 import Login from './components/Auth/Login';
 import TenantSelector from './components/Auth/TenantSelector';
 import TenantSignUp from './components/Auth/TenantSignUp';
+import ForgotPassword from './components/Auth/ForgotPassword';
 import DashboardHome from './pages/Dashboard/DashboardHome.tsx';
 import AGIDashboard from './pages/Dashboard/AGIDashboard.tsx';
 import DashboardTasks from './components/Dashboards/DashboardTasks';
@@ -190,6 +191,7 @@ const UnauthenticatedRoutes = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<TenantSignUp />} />
+    <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>
 );
