@@ -8,6 +8,7 @@ import Login from './components/Auth/Login';
 import TenantSelector from './components/Auth/TenantSelector';
 import TenantSignUp from './components/Auth/TenantSignUp';
 import Dashboard from './components/Dashboards/Dashboard';
+import ForgotPassword from './components/Auth/ForgotPassword';
 import LeadsPage from './components/Leads/LeadsPage';
 import SchedulingDashboard from './components/Schedule/SchedulingDashboard';
 import CommunicationsPage from './components/Communications/CommunicationsPage';
@@ -182,6 +183,7 @@ const UnauthenticatedRoutes = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<TenantSignUp />} />
+    <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>
 );
