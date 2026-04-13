@@ -24,23 +24,38 @@ const ensureUID = (raw) => {
 };
 
 // --------------------------------------
-// TYPE DETECTORS — FINAL FIXED VERSION
+// TYPE DETECTORS — STRICT, EXPLICIT ORDERING
 // --------------------------------------
-const isCustomer = (raw) =>
-  raw?.object === "customer" ||
-  raw?.customer_id !== undefined ||
-  (raw?.all_phones && raw.all_phones.length > 0) ||
-  (!!raw?.primary_phone && cleanDigits(raw.primary_phone));
+// Priority order enforced in mapEntity: explicit revival → lead → customer.
+// This prevents leads that happen to have a primary_phone from being
+// misclassified as customers (which caused PATCH /api/customers/{lead_id}/
+// → 404 and/or cross-tenant lookups).
 
 const isRevival = (raw) =>
   raw?.object === "revival" ||
-  raw?.items !== undefined ||
-  raw?.estimated_total !== undefined;
+  Array.isArray(raw?.items) ||
+  raw?.estimated_total !== undefined ||
+  raw?.public_token !== undefined;
 
 const isLead = (raw) =>
   raw?.object === "lead" ||
   raw?.source_table === "forms_generic" ||
-  raw?.phone_number !== undefined;
+  raw?.lead_id !== undefined ||
+  raw?.pipeline_stage !== undefined ||
+  raw?.safePipelineStage !== undefined ||
+  raw?.lead_number !== undefined ||
+  raw?.crm_lead_id !== undefined ||
+  raw?.intake_attributes !== undefined;
+
+const isCustomer = (raw) =>
+  raw?.object === "customer" ||
+  raw?.source_table === "customers" ||
+  raw?.account_number !== undefined ||
+  // customer_id is a UUID on Customer model; only trust it when it actually
+  // looks like a UUID. Leads sometimes carry this key in metadata as an int.
+  (typeof raw?.customer_id === "string" && /^[0-9a-f-]{32,36}$/i.test(raw.customer_id)) ||
+  (Array.isArray(raw?.all_phones) && raw.all_phones.length > 0) ||
+  (Array.isArray(raw?.all_emails) && raw.all_emails.length > 0);
 
 // =======================================================================
 // FINAL MERGE LOGIC — KEY FEATURE
@@ -102,9 +117,20 @@ function mergeFields(customer, lead) {
 export function mapEntity(raw) {
   if (!raw) return null;
 
-  if (isCustomer(raw)) return mapCustomer(raw);
+  // Explicit object type (set by API caller) takes absolute priority.
+  // This prevents scanner-created customers fetched from /api/customers/
+  // from being misclassified as leads by the heuristic detectors below.
+  if (raw?.object === "customer") return mapCustomer(raw);
+  if (raw?.object === "revival") return mapRevival(raw);
+  if (raw?.object === "lead") return mapLead(raw);
+
+  // Heuristic detection for records without an explicit object type.
+  // Order matters: check for explicit lead/revival markers BEFORE customer,
+  // because a lead can carry a primary_phone that would otherwise trip
+  // the customer detector and route PATCH to /api/customers/{lead_id}/.
   if (isRevival(raw)) return mapRevival(raw);
   if (isLead(raw)) return mapLead(raw);
+  if (isCustomer(raw)) return mapCustomer(raw);
 
   return mapUnknown(raw);
 }
@@ -150,17 +176,32 @@ export function mapRevival(q) {
 // =======================================================================
 // LEAD
 // =======================================================================
+// Lead records can come from TWO sources:
+//   (a) CRMLead list   → l.id is the CRMLead PK (numeric). /leads/crm-leads/{id}/
+//   (b) Web inbox list → l.id is the leadgen forms_generic PK (numeric).
+//                        If the web lead has already been forwarded to the CRM,
+//                        l.crm_lead_id holds the real CRMLead PK — prefer it.
+//                        If NOT forwarded yet, there is no CRMLead to PATCH and
+//                        the popup save path should fall back to "Add to Pipeline"
+//                        (the LeadsPage already exposes that button).
 export function mapLead(l) {
   const merged = mergeFields(null, l);
+  const crmId = l.crm_lead_id || l.id;
+  const webLeadId = l.source_table === "forms_generic" ? l.id : l.web_lead_id || null;
 
   return {
     object: "lead",
-    id: l.id,
+    id: crmId,
+    crm_lead_id: crmId,
+    web_lead_id: webLeadId,
+    is_forwarded_web_lead: Boolean(l.crm_lead_id && l.source_table === "forms_generic"),
+    is_pending_web_lead: Boolean(l.source_table === "forms_generic" && !l.crm_lead_id),
     universal_id: ensureUID(l),
     full_name: merged.full_name,
     phones: merged.phones,
     emails: merged.emails,
     industry: l.industry || "general",
+    pipeline_stage: l.pipeline_stage || l.safePipelineStage || null,
     raw: { ...l },
   };
 }

@@ -155,9 +155,11 @@ function CustomerPopupInternal({ lead, onClose }) {
             );
             if (data) {
               // 🔥 Merge mapped lead/revival info so mapper can combine phones/emails
+              // Tag as customer — this came from /api/customers/, so it IS a customer.
               setRecord(
                 mapEntity({
                   ...data,
+                  object: "customer",
                   lead: mapped.raw,
                 })
               );
@@ -165,7 +167,7 @@ function CustomerPopupInternal({ lead, onClose }) {
             }
           } catch {}
         }
-  
+
         // STEP 3 — Revival fallback using customer_id
         if (mapped.object === "revival" && mapped.customer_id) {
           try {
@@ -174,9 +176,11 @@ function CustomerPopupInternal({ lead, onClose }) {
             );
             if (data) {
               // 🔥 Merge revival + customer fully
+              // Tag as customer — this came from /api/customers/, so it IS a customer.
               setRecord(
                 mapEntity({
                   ...data,
+                  object: "customer",
                   lead: mapped.raw, // revival identity passes through mapper
                 })
               );
@@ -219,10 +223,18 @@ function CustomerPopupInternal({ lead, onClose }) {
 
   /* ---------------------------------------------------------
      API PATHS
+     Lead IDs vs Customer IDs are distinct keyspaces. Leads use the
+     CRMLead PK (numeric) against /leads/crm-leads/{id}/. Customers use
+     either their numeric PK or the customer_id UUID against /customers/{id}/.
+     Web-inbox leads that haven't been forwarded to the CRM yet have
+     no CRMLead PK — save is blocked until they're added to the pipeline.
   --------------------------------------------------------- */
+  const leadUpdateId = record.crm_lead_id || record.raw?.crm_lead_id || record.id;
+  const customerUpdateId = record.raw?.customer_id || record.id;
+
   const updatePaths = {
-    lead: `/leads/crm-leads/${record.id}/`,
-    customer: `/customers/${record.id}/`,
+    lead: `/leads/crm-leads/${leadUpdateId}/`,
+    customer: `/customers/${customerUpdateId}/`,
     revival: `/revival/${record.id}/`,
   };
 
@@ -235,7 +247,7 @@ function CustomerPopupInternal({ lead, onClose }) {
 
   const convertUrl =
     record.object === "lead"
-      ? `/leads/${record.id}/convert-to-customer/`
+      ? `/leads/crm-leads/${leadUpdateId}/convert-to-customer/`
       : record.object === "revival"
       ? `/revival/${record.id}/convert/`
       : null;
@@ -244,6 +256,7 @@ function CustomerPopupInternal({ lead, onClose }) {
   const isCustomer = record.object === "customer";
   const isRevival = record.object === "revival";
   const isCreate = !record.id;
+  const isPendingWebLead = Boolean(record.is_pending_web_lead);
   const canUpdateStatus = (isLead || isRevival) && !isCreate;
   const canSchedule = !!record.id;
   const displayIndustry = record.raw?.industry || record.industry || "general";
@@ -526,6 +539,28 @@ function CustomerPopupInternal({ lead, onClose }) {
           toast.success("Lead created.");
           return;
         }
+        if (isPendingWebLead) {
+          // Web inbox row that has NOT been forwarded to CRM yet — no CRMLead to PATCH.
+          // Create a new CRMLead now, carrying the web lead metadata so the pipeline
+          // picks it up, then mark the web lead as handled.
+          const { data } = await api.post("/leads/crm-leads/", {
+            ...payload,
+            source_host: record.raw?.source_host,
+            source_table: "forms_generic",
+            industry: record.raw?.industry || record.industry || "general",
+          });
+          if (record.web_lead_id) {
+            try {
+              await api.post(`/leads/web/${record.web_lead_id}/archive/`);
+            } catch {
+              // Non-fatal: the CRMLead is created; web row archive can be retried.
+            }
+          }
+          setRecord(mapEntity(data));
+          setFormData(data || {});
+          toast.success("Lead added to pipeline.");
+          return;
+        }
         await api.patch(updateUrl, payload);
       } else if (isCustomer) {
         const payload = buildCustomerPayload(workingData);
@@ -586,7 +621,7 @@ function CustomerPopupInternal({ lead, onClose }) {
       if (!nextId) throw new Error("Missing customer id");
 
       const full = await api.get(`/customers/${nextId}/`);
-      setRecord(mapEntity(full.data));
+      setRecord(mapEntity({ ...full.data, object: "customer" }));
       toast.success("Converted.");
     } catch {
       toast.error("Failed to convert.");
