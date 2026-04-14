@@ -19,7 +19,8 @@ body {
 
 /* THE MONOLITH CARD */
 .login-card {
-  width: 380px;
+  width: 100%;
+  max-width: 380px;
   padding: 48px;
   background: var(--bg-surface);
   border: 1px solid var(--border);

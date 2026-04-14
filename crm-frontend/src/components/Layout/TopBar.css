@@ -49,8 +49,8 @@
 }
 
 .tabs-arrow {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border: none;
   background: var(--bg-hover);
   color: var(--text-2);
@@ -269,8 +269,8 @@
    ========================================================= */
 
 .top-bar-btn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   border: 1px solid var(--glass-border);
   background: var(--bg-hover);

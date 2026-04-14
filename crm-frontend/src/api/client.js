@@ -12,6 +12,10 @@ const TENANT_OPTIONAL_PATHS = [
   "/accounts/auth/switch-tenant/",
   "/accounts/auth/tenant-signup/",
   "/accounts/tenant-signup/",
+  "/accounts/auth/forgot-password/",
+  "/accounts/auth/verify-reset-code/",
+  "/accounts/auth/reset-password/",
+  "/accounts/auth/accept-invite/",
 ];
 
 const requiresTenant = (url = "") =>

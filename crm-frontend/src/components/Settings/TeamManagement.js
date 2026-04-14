@@ -192,6 +192,10 @@ const TeamManagement = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Tech');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState(null);
 
   const [routingDraft, setRoutingDraft] = useState(DEFAULT_ROUTING_DRAFT);
   const [routingLoading, setRoutingLoading] = useState(true);
@@ -364,6 +368,26 @@ const TeamManagement = () => {
     }
   };
 
+  const handleInviteMember = async (event) => {
+    event.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setInviteLoading(true);
+    setError(null);
+    setInviteSuccess(null);
+    try {
+      const { data } = await api.post('/accounts/auth/invite-user/', {
+        email: inviteEmail.trim().toLowerCase(),
+        role: inviteRole,
+      });
+      setInviteSuccess(data?.detail || `Invitation sent to ${inviteEmail}.`);
+      setInviteEmail('');
+    } catch (err) {
+      setError(readApiError(err, 'Failed to send invite.'));
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   const handleRoutingDraftChange = (patch) => {
     setRoutingSuccess(null);
     setRoutingDraft((previous) => ({ ...previous, ...(patch || {}) }));
@@ -520,6 +544,29 @@ const TeamManagement = () => {
         </select>
         <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Member'}</button>
       </form>
+
+      <div className="team-invite-section">
+        <h3>Invite by Email</h3>
+        <p className="team-muted">Send an invite link — no password needed. They'll set up their own account.</p>
+        {inviteSuccess && <p className="success-message">{inviteSuccess}</p>}
+        <form onSubmit={handleInviteMember} className="team-form">
+          <input
+            type="email"
+            placeholder="Email address"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            required
+          />
+          <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <button type="submit" disabled={inviteLoading}>
+            {inviteLoading ? 'Sending...' : 'Send Invite'}
+          </button>
+        </form>
+      </div>
 
       <h3>Current Team</h3>
       {fetching ? (

@@ -71,6 +71,13 @@ const Login = () => {
         .filter((tenant) => tenant.id);
 
       login(access, refresh, expiry, normalizedTenants, user);
+
+      if (data.must_change_password) {
+        localStorage.setItem('must_change_password', 'true');
+        navigate('/change-password', { replace: true });
+        return;
+      }
+
       navigate(normalizedTenants.length === 1 ? '/dashboard' : '/select-account', { replace: true });
     } catch (err) {
       setError(getLoginErrorMessage(err));

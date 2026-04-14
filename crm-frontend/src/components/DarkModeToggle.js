@@ -15,14 +15,7 @@ const DarkModeToggle = () => {
   return (
     <button
       onClick={() => setIsLightMode(!isLightMode)}
-      style={{
-        backgroundColor: '#0a84ff',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '6px',
-        padding: '0.5rem 1rem',
-        cursor: 'pointer'
-      }}
+      className="dark-mode-toggle-btn"
     >
       {isLightMode ? 'Dark Mode' : 'Light Mode'}
     </button>

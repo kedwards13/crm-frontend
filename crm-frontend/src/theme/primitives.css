@@ -170,3 +170,23 @@ a:focus:not(:focus-visible),
   gap: var(--s-4);
   flex-wrap: wrap;
 }
+
+/* =========================================================
+   DARK MODE TOGGLE
+   ========================================================= */
+.dark-mode-toggle-btn {
+  background: var(--accent);
+  color: var(--bg-app);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+
+.dark-mode-toggle-btn:hover {
+  filter: brightness(1.1);
+}
