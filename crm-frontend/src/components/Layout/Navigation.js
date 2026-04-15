@@ -12,7 +12,7 @@ import { getUserRole } from '../../helpers/tenantHelpers';
 import './Navigation.css';
 
 const PRODUCT_NAME = 'Abon';
-const PRODUCT_SUFFIX = 'Command';
+const PRODUCT_SUFFIX = '';
 const HEX_COLOR_REGEX = /^#(?:[0-9A-Fa-f]{3}){1,2}$/;
 const HEX_COLOR_NO_HASH_REGEX = /^(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 

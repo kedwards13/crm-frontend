@@ -104,7 +104,7 @@ function MarketingDashboard() {
     <div className='marketing-page'>
       <header className='marketing-header'>
         <div>
-          <p>Growth Command</p>
+          <p>Marketing</p>
           <h1>Marketing Operations</h1>
           <span>Campaign signal tracking, attribution, and execution recommendations.</span>
         </div>

@@ -36,7 +36,7 @@ const CONTEXTS = [
   {
     key: 'leads',
     match: (path) => path.startsWith('/leads'),
-    eyebrow: 'Lead Command',
+    eyebrow: 'Leads',
     subtitle: 'Intent, priority, and response-time execution.',
     links: {
       opportunities: '/leads/pipeline',
@@ -91,7 +91,7 @@ const CONTEXTS = [
   {
     key: 'analytics',
     match: (path) => path.startsWith('/analytics'),
-    eyebrow: 'Analytics Command',
+    eyebrow: 'Analytics',
     subtitle: 'Trend awareness and performance intervention.',
     links: {
       opportunities: '/analytics',
@@ -104,7 +104,7 @@ const CONTEXTS = [
 function resolveContext(pathname) {
   return CONTEXTS.find((context) => context.match(pathname)) || {
     key: 'operations',
-    eyebrow: 'Operations Insights',
+    eyebrow: 'Operations',
     subtitle: 'Live operational signals across revenue and service delivery.',
     links: {
       opportunities: '/revival/opportunities',
@@ -322,7 +322,7 @@ export default function RightInsightsPanel() {
       <div className='insights-head'>
         <div>
           <p>{context.eyebrow}</p>
-          <h3>Live Control Panel</h3>
+          <h3>Insights</h3>
           <span>{context.subtitle}</span>
         </div>
         <ActionButton

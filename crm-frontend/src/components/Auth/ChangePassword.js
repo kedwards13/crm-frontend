@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import api from '../../apiClient';
-import AbonMark from '../../assets/brand/abon-mark.svg';
 
 import './Login.css';
 import './ForgotPassword.css';
@@ -64,81 +63,84 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-brand">
-            <div className="login-mark">
-              <img src={AbonMark} alt="Abon logo" />
-            </div>
-            <div>
-              <p className="login-eyebrow">Abon Command</p>
-              <h2 className="login-title">{done ? 'Password Updated' : 'Set New Password'}</h2>
-            </div>
-          </div>
+    <div className="login-page">
+      <div className="login-column">
+        <div className="login-brand">
+          <h1 className="login-wordmark">
+            <span className="wm-ab">Ab</span>
+            <span className="wm-on">on</span>
+          </h1>
+          <p className="login-acronym">Autonomous Business Operating Network</p>
         </div>
 
-        {done ? (
-          <div className="fp-success-block">
-            <div className="fp-success-check" aria-hidden="true">{'\u2713'}</div>
-            <p className="fp-success-text">Redirecting to dashboard...</p>
-          </div>
-        ) : (
-          <>
-            <p className="login-subtitle">Your admin created your account. Please set a new password to continue.</p>
-            {error && <div className="error-flash">{error}</div>}
-            <form onSubmit={handleSubmit}>
-              <div className="input-stack">
-                <div className="fp-password-row">
+        <div className="login-card">
+          <h2 className="card-title">{done ? 'Password updated' : 'Set new password'}</h2>
+          <p className="card-subtitle">
+            {done
+              ? 'Your password has been changed.'
+              : 'Your admin created your account. Set a password to continue.'}
+          </p>
+
+          {done ? (
+            <div className="fp-success-block">
+              <div className="fp-success-check">{'\u2713'}</div>
+              <p className="fp-success-text">Redirecting to dashboard...</p>
+            </div>
+          ) : (
+            <>
+              {error && <div className="login-error">{error}</div>}
+              <form onSubmit={handleSubmit}>
+                <div className="field-stack">
+                  <div className="fp-password-row">
+                    <input
+                      ref={passwordRef}
+                      type={showPassword ? 'text' : 'password'}
+                      className="login-field"
+                      value={password}
+                      onChange={(ev) => setPassword(ev.target.value)}
+                      placeholder="New password"
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="fp-eye-btn"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
                   <input
-                    ref={passwordRef}
                     type={showPassword ? 'text' : 'password'}
-                    className="login-input"
-                    value={password}
-                    onChange={(ev) => setPassword(ev.target.value)}
-                    placeholder="New password"
+                    className="login-field"
+                    value={confirmPassword}
+                    onChange={(ev) => setConfirmPassword(ev.target.value)}
+                    placeholder="Confirm new password"
                     autoComplete="new-password"
                     required
                   />
-                  <button
-                    type="button"
-                    className="fp-eye-btn"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="login-input"
-                  value={confirmPassword}
-                  onChange={(ev) => setConfirmPassword(ev.target.value)}
-                  placeholder="Confirm new password"
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-              <ul className="fp-rules">
-                {passwordChecks.map((rule) => (
-                  <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                    <span className="fp-rule-dot" aria-hidden="true">{rule.ok ? '\u2713' : '\u2022'}</span>
-                    {rule.label}
+                <ul className="fp-rules">
+                  {passwordChecks.map((rule) => (
+                    <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : ''}>
+                      <span className="fp-rule-dot">{rule.ok ? '\u2713' : '\u2022'}</span>
+                      {rule.label}
+                    </li>
+                  ))}
+                  <li className={passwordsMatch ? 'fp-rule-ok' : ''}>
+                    <span className="fp-rule-dot">{passwordsMatch ? '\u2713' : '\u2022'}</span>
+                    Passwords match
                   </li>
-                ))}
-                <li className={passwordsMatch ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                  <span className="fp-rule-dot" aria-hidden="true">{passwordsMatch ? '\u2713' : '\u2022'}</span>
-                  Passwords match
-                </li>
-              </ul>
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={loading || !passwordValid}>
-                  {loading ? 'Updating...' : 'Set Password'}
+                </ul>
+                <button type="submit" className="login-btn" disabled={loading || !passwordValid}>
+                  {loading ? 'Updating\u2026' : 'Set password'}
                 </button>
-              </div>
-            </form>
-          </>
-        )}
+              </form>
+            </>
+          )}
+        </div>
+        <p className="login-tagline">The AI-powered platform that runs your business end to end</p>
       </div>
     </div>
   );

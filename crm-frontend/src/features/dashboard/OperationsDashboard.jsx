@@ -167,7 +167,7 @@ export default function OperationsDashboard() {
       <header className='ops-dashboard-head'>
         <div>
           <p className='eyebrow'>Operations Dashboard</p>
-          <h1>Daily Command Overview</h1>
+          <h1>Dashboard</h1>
           <span>Revenue, conversion, field execution, and retention in one workspace.</span>
         </div>
         <button type='button' className='ops-link-btn' onClick={() => navigate('/analytics')}>

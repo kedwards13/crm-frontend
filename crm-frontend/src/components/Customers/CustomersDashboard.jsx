@@ -81,7 +81,7 @@ export default function CustomersDashboard() {
   return (
     <div className='customers-dashboard'>
       <header>
-        <p>Customer Command</p>
+        <p>Customers</p>
         <h2>Customer Operations Overview</h2>
         <span>Health, risk, and revenue performance for active accounts.</span>
       </header>

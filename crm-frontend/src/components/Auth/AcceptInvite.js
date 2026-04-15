@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import api from '../../apiClient';
 import { AuthContext } from '../../App';
-import AbonMark from '../../assets/brand/abon-mark.svg';
-
 import './Login.css';
 import './ForgotPassword.css';
 
@@ -113,39 +111,36 @@ const AcceptInvite = () => {
     navigate('/login');
   };
 
-  const renderHeader = (title, subtitle) => (
-    <>
-      <div className="login-header">
-        <div className="login-brand">
-          <div className="login-mark">
-            <img src={AbonMark} alt="Abon logo" />
-          </div>
-          <div>
-            <p className="login-eyebrow">Abon Command</p>
-            <h2 className="login-title">{title}</h2>
-          </div>
-        </div>
-      </div>
-      <p className="login-subtitle">{subtitle}</p>
-    </>
-  );
-
   return (
-    <div className="login-container">
-      <div className="login-card">
-        {step === 1 && (
-          <>
-            {renderHeader('Accept Invitation', 'Enter your email and the 6-digit code from your invite.')}
-            {error && <div className="error-flash">{error}</div>}
+    <div className="login-page">
+      <div className="login-column">
+        <div className="login-brand">
+          <h1 className="login-wordmark">
+            <span className="wm-ab">Ab</span>
+            <span className="wm-on">on</span>
+          </h1>
+          <p className="login-acronym">Autonomous Business Operating Network</p>
+        </div>
+        <div className="login-card">
+          <h2 className="card-title">
+            {step === 1 ? 'Accept invitation' : step === 2 ? 'Set up your account' : 'Welcome to Abon'}
+          </h2>
+          <p className="card-subtitle">
+            {step === 1 ? 'Enter your email and invite code.' : step === 2 ? 'Complete your profile to get started.' : 'Your account is ready.'}
+          </p>
+
+          {error && <div className="login-error">{error}</div>}
+
+          {step === 1 && (
             <form onSubmit={handleVerifyInvite}>
-              <div className="input-stack">
+              <div className="field-stack">
                 <input
                   ref={emailRef}
                   type="email"
-                  className="login-input"
+                  className="login-field"
                   value={email}
                   onChange={(ev) => setEmail(ev.target.value)}
-                  placeholder="Work email"
+                  placeholder="Email"
                   autoComplete="email"
                   required
                 />
@@ -154,36 +149,30 @@ const AcceptInvite = () => {
                   inputMode="numeric"
                   pattern="\d{6}"
                   maxLength={6}
-                  className="login-input fp-code-input"
+                  className="login-field fp-code-input"
                   value={code}
                   onChange={(ev) => setCode(ev.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Invite code"
+                  placeholder="000000"
                   autoComplete="one-time-code"
                   required
                 />
               </div>
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={!email || code.length !== 6}>
-                  Continue
-                </button>
-              </div>
-              <div className="help-row">
-                <a href="/login" onClick={backToLogin}>Already have an account? Sign in</a>
+              <button type="submit" className="login-btn" disabled={!email || code.length !== 6}>
+                Continue
+              </button>
+              <div className="fp-back-row">
+                <a href="/login" onClick={backToLogin} className="forgot-link">Already have an account? Sign in</a>
               </div>
             </form>
-          </>
-        )}
+          )}
 
-        {step === 2 && (
-          <>
-            {renderHeader('Set Up Your Account', 'Complete your profile to get started.')}
-            {error && <div className="error-flash">{error}</div>}
+          {step === 2 && (
             <form onSubmit={handleAcceptInvite}>
-              <div className="input-stack">
+              <div className="field-stack">
                 <input
                   ref={firstNameRef}
                   type="text"
-                  className="login-input"
+                  className="login-field"
                   value={firstName}
                   onChange={(ev) => setFirstName(ev.target.value)}
                   placeholder="First name"
@@ -192,7 +181,7 @@ const AcceptInvite = () => {
                 />
                 <input
                   type="text"
-                  className="login-input"
+                  className="login-field"
                   value={lastName}
                   onChange={(ev) => setLastName(ev.target.value)}
                   placeholder="Last name"
@@ -202,7 +191,7 @@ const AcceptInvite = () => {
                 <div className="fp-password-row">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    className="login-input"
+                    className="login-field"
                     value={password}
                     onChange={(ev) => setPassword(ev.target.value)}
                     placeholder="Password"
@@ -220,7 +209,7 @@ const AcceptInvite = () => {
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="login-input"
+                  className="login-field"
                   value={confirmPassword}
                   onChange={(ev) => setConfirmPassword(ev.target.value)}
                   placeholder="Confirm password"
@@ -231,44 +220,36 @@ const AcceptInvite = () => {
 
               <ul className="fp-rules">
                 {passwordChecks.map((rule) => (
-                  <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                    <span className="fp-rule-dot" aria-hidden="true">{rule.ok ? '\u2713' : '\u2022'}</span>
+                  <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : ''}>
+                    <span className="fp-rule-dot">{rule.ok ? '\u2713' : '\u2022'}</span>
                     {rule.label}
                   </li>
                 ))}
-                <li className={passwordsMatch ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                  <span className="fp-rule-dot" aria-hidden="true">{passwordsMatch ? '\u2713' : '\u2022'}</span>
+                <li className={passwordsMatch ? 'fp-rule-ok' : ''}>
+                  <span className="fp-rule-dot">{passwordsMatch ? '\u2713' : '\u2022'}</span>
                   Passwords match
                 </li>
               </ul>
 
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={loading || !passwordValid}>
-                  {loading ? 'Creating account...' : 'Create Account'}
-                </button>
-              </div>
-              <div className="help-row">
-                <button type="button" className="fp-link-btn" onClick={() => setStep(1)}>
+              <button type="submit" className="login-btn" disabled={loading || !passwordValid}>
+                {loading ? 'Creating account\u2026' : 'Create account'}
+              </button>
+              <div className="fp-back-row">
+                <button type="button" className="fp-resend-btn" onClick={() => setStep(1)}>
                   Back
                 </button>
               </div>
             </form>
-          </>
-        )}
+          )}
 
-        {step === 3 && (
-          <>
-            {renderHeader('Welcome to Abon', 'Your account is ready.')}
+          {step === 3 && (
             <div className="fp-success-block">
-              <div className="fp-success-check" aria-hidden="true">{'\u2713'}</div>
+              <div className="fp-success-check">{'\u2713'}</div>
               <p className="fp-success-text">Taking you to the dashboard...</p>
             </div>
-          </>
-        )}
-
-        <div className="login-footnote">
-          Need help? Contact your workspace admin.
+          )}
         </div>
+        <p className="login-tagline">The AI-powered platform that runs your business end to end</p>
       </div>
     </div>
   );
