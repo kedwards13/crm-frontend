@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import api from '../../apiClient';
 import { AuthContext } from '../../App';
-import AbonMark from '../../assets/brand/abon-mark.svg';
 
 import './Login.css';
 import './ForgotPassword.css';
@@ -26,7 +25,7 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const { logout } = useContext(AuthContext) || {};
 
-  const [step, setStep] = useState(1); // 1=email, 2=code, 3=password, 4=success
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -80,10 +79,7 @@ const ForgotPassword = () => {
     setError('');
     setInfo('');
     const trimmed = String(email || '').trim().toLowerCase();
-    if (!trimmed) {
-      setError('Enter your email address.');
-      return;
-    }
+    if (!trimmed) { setError('Enter your email address.'); return; }
     setLoading(true);
     try {
       await api.post('/accounts/auth/forgot-password/', { email: trimmed });
@@ -92,9 +88,7 @@ const ForgotPassword = () => {
       setStep(2);
     } catch (err) {
       setError(extractError(err, 'Unable to send reset code. Please try again.'));
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleResend = async () => {
@@ -106,10 +100,7 @@ const ForgotPassword = () => {
     e?.preventDefault?.();
     setError('');
     const digits = String(code || '').replace(/\D/g, '');
-    if (digits.length !== 6) {
-      setError('Enter the 6-digit code from your email.');
-      return;
-    }
+    if (digits.length !== 6) { setError('Enter the 6-digit code from your email.'); return; }
     setLoading(true);
     try {
       await api.post('/accounts/auth/verify-reset-code/', {
@@ -121,18 +112,13 @@ const ForgotPassword = () => {
       setStep(3);
     } catch (err) {
       setError(extractError(err, 'Invalid or expired code.'));
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleResetPassword = async (e) => {
     e?.preventDefault?.();
     setError('');
-    if (!passwordValid) {
-      setError('Password does not meet all requirements.');
-      return;
-    }
+    if (!passwordValid) { setError('Password does not meet all requirements.'); return; }
     setLoading(true);
     try {
       await api.post('/accounts/auth/reset-password/', {
@@ -143,117 +129,110 @@ const ForgotPassword = () => {
       setStep(4);
     } catch (err) {
       setError(extractError(err, 'Unable to reset password. Please try again.'));
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const backToLogin = (e) => {
-    e?.preventDefault?.();
-    navigate('/login');
+  const backToLogin = (e) => { e?.preventDefault?.(); navigate('/login'); };
+
+  /* Shared card title for each step */
+  const stepConfig = {
+    1: { title: 'Reset password', sub: 'Enter your email to receive a verification code.' },
+    2: { title: 'Enter code', sub: `We sent a 6-digit code to ${email}.` },
+    3: { title: 'New password', sub: 'Choose a strong password you haven\u2019t used before.' },
+    4: { title: 'All set', sub: 'Your password has been updated.' },
   };
 
-  const renderHeader = (title, subtitle) => (
-    <>
-      <div className="login-header">
-        <div className="login-brand">
-          <div className="login-mark">
-            <img src={AbonMark} alt="Abon logo" />
-          </div>
-          <div>
-            <p className="login-eyebrow">Abon Command</p>
-            <h2 className="login-title">{title}</h2>
-          </div>
-        </div>
-      </div>
-      <p className="login-subtitle">{subtitle}</p>
-    </>
-  );
+  const { title, sub } = stepConfig[step];
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        {step === 1 && (
-          <>
-            {renderHeader('Recover Account', 'Enter your work email to receive a verification code.')}
-            {error && <div className="error-flash">{error}</div>}
+    <div className="login-page">
+      <div className="login-column">
+
+        {/* Brand */}
+        <div className="login-brand">
+          <h1 className="login-wordmark">
+            <span className="wm-ab">Ab</span>
+            <span className="wm-on">on</span>
+          </h1>
+          <p className="login-acronym">Autonomous Business Operating Network</p>
+        </div>
+
+        {/* Card */}
+        <div className="login-card">
+          <h2 className="card-title">{title}</h2>
+          <p className="card-subtitle">{sub}</p>
+
+          {info && <div className="fp-info">{info}</div>}
+          {error && <div className="login-error">{error}</div>}
+
+          {/* Step 1: Email */}
+          {step === 1 && (
             <form onSubmit={handleRequestCode}>
-              <div className="input-stack">
+              <div className="field-stack">
                 <input
                   ref={emailRef}
                   type="email"
-                  className="login-input"
+                  className="login-field"
                   value={email}
                   onChange={(ev) => setEmail(ev.target.value)}
-                  placeholder="Work email"
+                  placeholder="Email"
                   autoComplete="email"
                   required
                 />
               </div>
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={loading}>
-                  {loading ? 'Sending...' : 'Send Code'}
-                </button>
-              </div>
-              <div className="help-row">
-                <a href="/login" onClick={backToLogin}>Back to Login</a>
+              <button type="submit" className="login-btn" disabled={loading}>
+                {loading ? 'Sending\u2026' : 'Send code'}
+              </button>
+              <div className="fp-back-row">
+                <a href="/login" onClick={backToLogin} className="forgot-link">Back to sign in</a>
               </div>
             </form>
-          </>
-        )}
+          )}
 
-        {step === 2 && (
-          <>
-            {renderHeader('Enter Code', `We sent a 6-digit code to ${email}.`)}
-            {info && <div className="info-flash">{info}</div>}
-            {error && <div className="error-flash">{error}</div>}
+          {/* Step 2: Code */}
+          {step === 2 && (
             <form onSubmit={handleVerifyCode}>
-              <div className="input-stack">
+              <div className="field-stack">
                 <input
                   ref={codeRef}
                   type="text"
                   inputMode="numeric"
                   pattern="\d{6}"
                   maxLength={6}
-                  className="login-input fp-code-input"
+                  className="login-field fp-code-input"
                   value={code}
                   onChange={(ev) => setCode(ev.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="••••••"
+                  placeholder="000000"
                   autoComplete="one-time-code"
                   required
                 />
               </div>
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={loading || code.length !== 6}>
-                  {loading ? 'Verifying...' : 'Verify Code'}
-                </button>
-              </div>
-              <div className="help-row fp-help-row">
+              <button type="submit" className="login-btn" disabled={loading || code.length !== 6}>
+                {loading ? 'Verifying\u2026' : 'Verify code'}
+              </button>
+              <div className="fp-back-row fp-back-row-split">
                 <button
                   type="button"
-                  className="fp-link-btn"
+                  className="fp-resend-btn"
                   onClick={handleResend}
                   disabled={cooldown > 0 || loading}
                 >
-                  {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
+                  {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
                 </button>
-                <a href="/login" onClick={backToLogin}>Back to Login</a>
+                <a href="/login" onClick={backToLogin} className="forgot-link">Back to sign in</a>
               </div>
             </form>
-          </>
-        )}
+          )}
 
-        {step === 3 && (
-          <>
-            {renderHeader('New Password', 'Choose a strong password you haven\u2019t used before.')}
-            {error && <div className="error-flash">{error}</div>}
+          {/* Step 3: New password */}
+          {step === 3 && (
             <form onSubmit={handleResetPassword}>
-              <div className="input-stack">
+              <div className="field-stack">
                 <div className="fp-password-row">
                   <input
                     ref={passwordRef}
                     type={showPassword ? 'text' : 'password'}
-                    className="login-input"
+                    className="login-field"
                     value={password}
                     onChange={(ev) => setPassword(ev.target.value)}
                     placeholder="New password"
@@ -271,7 +250,7 @@ const ForgotPassword = () => {
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="login-input"
+                  className="login-field"
                   value={confirmPassword}
                   onChange={(ev) => setConfirmPassword(ev.target.value)}
                   placeholder="Confirm new password"
@@ -282,45 +261,41 @@ const ForgotPassword = () => {
 
               <ul className="fp-rules">
                 {passwordChecks.map((rule) => (
-                  <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                    <span className="fp-rule-dot" aria-hidden="true">{rule.ok ? '✓' : '•'}</span>
+                  <li key={rule.key} className={rule.ok ? 'fp-rule-ok' : ''}>
+                    <span className="fp-rule-dot">{rule.ok ? '\u2713' : '\u2022'}</span>
                     {rule.label}
                   </li>
                 ))}
-                <li className={passwordsMatch ? 'fp-rule-ok' : 'fp-rule-pending'}>
-                  <span className="fp-rule-dot" aria-hidden="true">{passwordsMatch ? '✓' : '•'}</span>
+                <li className={passwordsMatch ? 'fp-rule-ok' : ''}>
+                  <span className="fp-rule-dot">{passwordsMatch ? '\u2713' : '\u2022'}</span>
                   Passwords match
                 </li>
               </ul>
 
-              <div className="action-row">
-                <button type="submit" className="btn-solid" disabled={loading || !passwordValid}>
-                  {loading ? 'Updating...' : 'Reset Password'}
-                </button>
-              </div>
-              <div className="help-row">
-                <a href="/login" onClick={backToLogin}>Back to Login</a>
+              <button type="submit" className="login-btn" disabled={loading || !passwordValid}>
+                {loading ? 'Updating\u2026' : 'Reset password'}
+              </button>
+              <div className="fp-back-row">
+                <a href="/login" onClick={backToLogin} className="forgot-link">Back to sign in</a>
               </div>
             </form>
-          </>
-        )}
+          )}
 
-        {step === 4 && (
-          <>
-            {renderHeader('Password Reset', 'Your password has been updated.')}
-            <div className="fp-success-block">
-              <div className="fp-success-check" aria-hidden="true">✓</div>
-              <p className="fp-success-text">Redirecting you to sign in…</p>
-            </div>
-            <div className="help-row">
-              <a href="/login" onClick={backToLogin}>Go to Login now</a>
-            </div>
-          </>
-        )}
-
-        <div className="login-footnote">
-          Having trouble? Contact your workspace admin for help recovering access.
+          {/* Step 4: Success */}
+          {step === 4 && (
+            <>
+              <div className="fp-success-block">
+                <div className="fp-success-check">{'\u2713'}</div>
+                <p className="fp-success-text">Redirecting you to sign in\u2026</p>
+              </div>
+              <div className="fp-back-row">
+                <a href="/login" onClick={backToLogin} className="forgot-link">Go to sign in now</a>
+              </div>
+            </>
+          )}
         </div>
+
+        <p className="login-tagline">The AI-powered platform that runs your business end to end</p>
       </div>
     </div>
   );

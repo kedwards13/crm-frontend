@@ -322,7 +322,6 @@
 }
 
 /* ------------------ Buttons ------------------ */
-.login-btn,
 .auth-button {
   padding: 14px;
   font-size: 16px;
@@ -336,13 +335,11 @@
   box-shadow: var(--shadow-0);
 }
 
-.login-btn:hover,
 .auth-button:hover {
   background: var(--primary-soft);
   box-shadow: var(--shadow-0);
 }
 
-.login-btn:disabled,
 .auth-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
