@@ -1,13 +1,9 @@
 @import '../../theme/tokens.css';
 
 .ui-glass-panel {
-  border: 1px solid var(--panel-border, var(--glass-border));
-  border-radius: 16px;
-  background:
-    linear-gradient(158deg, rgba(var(--accent-rgb), var(--glass-accent-opacity, 0.08)), transparent 48%),
-    var(--panel-glass, var(--glass-bg));
-  box-shadow: var(--shadow-0);
-  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
   color: var(--text-primary, var(--text-main));
 }
 
@@ -41,13 +37,9 @@
 }
 
 .ui-stat-card {
-  border: 1px solid var(--panel-border, var(--glass-border));
-  border-radius: 14px;
-  background:
-    linear-gradient(165deg, rgba(var(--accent-rgb), var(--glass-accent-opacity, 0.08)), transparent 45%),
-    var(--panel-glass, var(--glass-bg));
-  box-shadow: var(--shadow-0);
-  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
   color: var(--text-primary, var(--text-main));
   padding: 12px;
   display: flex;

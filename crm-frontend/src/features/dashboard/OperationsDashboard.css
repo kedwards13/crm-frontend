@@ -56,11 +56,9 @@
 }
 
 .ops-score-card {
-  border: 1px solid var(--panel-border, var(--glass-border));
-  border-radius: 14px;
-  background: linear-gradient(165deg, rgba(var(--accent-rgb), 0.08), transparent 45%), var(--glass-bg);
-  box-shadow: var(--shadow-0);
-  backdrop-filter: blur(var(--glass-blur));
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
   padding: 12px;
   display: flex;
   align-items: flex-start;
@@ -104,11 +102,9 @@
 }
 
 .ops-panel {
-  border: 1px solid var(--panel-border, var(--glass-border));
+  border: 0.5px solid var(--border);
   border-radius: 14px;
-  background: var(--glass-bg);
-  box-shadow: var(--shadow-0);
-  backdrop-filter: blur(var(--glass-blur));
+  background: var(--bg-card);
   padding: 12px;
 }
 

@@ -11,23 +11,18 @@ body,
 }
 
 html {
-  background: var(--bg-app-gradient);
-  background-color: var(--bg-app);
+  background: var(--bg-app);
   color: var(--text-main);
-  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background: var(--bg-app-gradient);
-  background-color: var(--bg-app);
-  background-attachment: fixed;
+  background: var(--bg-app);
   color: var(--text-main);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
-  color-scheme: dark;
 }
 
 html[data-theme='light'],
