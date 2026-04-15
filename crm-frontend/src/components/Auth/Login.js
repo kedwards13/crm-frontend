@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../apiClient';
 import { AuthContext } from '../../App';
 import { normalizeIndustry } from '../../helpers/tenantHelpers';
-import AbonMark from '../../assets/brand/abon-mark.svg';
 
 import './Login.css';
 
@@ -26,6 +25,7 @@ const getLoginErrorMessage = (error) => {
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -40,6 +40,15 @@ const Login = () => {
     handleTheme(mediaQuery);
     mediaQuery.addEventListener('change', handleTheme);
     return () => mediaQuery.removeEventListener('change', handleTheme);
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('login_remember');
+    if (saved === 'true') {
+      setRememberMe(true);
+      const savedEmail = localStorage.getItem('login_email');
+      if (savedEmail) setEmail(savedEmail);
+    }
   }, []);
 
   const handleLogin = async (e) => {
@@ -68,6 +77,14 @@ const Login = () => {
         }))
         .filter((tenant) => tenant.id);
 
+      if (rememberMe) {
+        localStorage.setItem('login_remember', 'true');
+        localStorage.setItem('login_email', email);
+      } else {
+        localStorage.removeItem('login_remember');
+        localStorage.removeItem('login_email');
+      }
+
       login(access, refresh, expiry, normalizedTenants, user);
 
       if (data.must_change_password) {
@@ -87,18 +104,12 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <div className="login-header">
-          <div className="login-brand">
-            <div className="login-mark">
-              <img src={AbonMark} alt="Abon logo" />
-            </div>
-            <div>
-              <p className="login-eyebrow">Abon Command</p>
-              <h2 className="login-title">Secure Access</h2>
-            </div>
-          </div>
-        </div>
-        <p className="login-subtitle">Enter your credentials to access the command center.</p>
+        <h1 className="login-brand">
+          <span className="brand-ab">Ab</span>
+          <span className="brand-on">on</span>
+        </h1>
+        <h2 className="login-title">Welcome Back</h2>
+        <p className="login-subtitle">Sign in to your workspace</p>
 
         {error && <div className="error-flash">{error}</div>}
 
@@ -109,7 +120,7 @@ const Login = () => {
               className="login-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Work email"
+              placeholder="Email"
               required
               autoFocus
             />
@@ -123,18 +134,26 @@ const Login = () => {
             />
           </div>
 
-          <div className="action-row">
-            <button type="submit" className="btn-solid" disabled={loading}>
-              {loading ? 'Verifying...' : 'Continue'}
-            </button>
+          <div className="remember-row">
+            <span className="remember-label">Remember me</span>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span className="toggle-track" />
+            </label>
           </div>
+
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
 
           <div className="help-row">
-            <a href="/forgot-password">Recover Account</a>
+            <a href="/forgot-password">Forgot Password?</a>
           </div>
         </form>
-
-        <div className="login-footnote">Single sign-on available for managed tenants.</div>
       </div>
     </div>
   );

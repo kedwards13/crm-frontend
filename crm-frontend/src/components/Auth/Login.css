@@ -1,5 +1,10 @@
 @import '../../theme/tokens.css';
 
+/* =========================================================
+   LOGIN — Matches mobile login style (login.tsx)
+   Warm, centered card with accent branding.
+   ========================================================= */
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -7,6 +12,7 @@ body {
   color: var(--text-main);
 }
 
+/* --- Page wrapper --- */
 .login-container {
   display: flex;
   height: 100vh;
@@ -14,201 +20,229 @@ body {
   background: var(--bg-app);
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--s-5);
 }
 
-/* THE MONOLITH CARD */
+/* --- Card --- */
 .login-card {
   width: 100%;
-  max-width: 380px;
-  padding: 48px;
-  background: var(--bg-surface);
+  max-width: 400px;
+  padding: var(--s-6);
+  background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 26px;
   box-shadow: var(--sh-2);
   display: flex;
   flex-direction: column;
-  gap: 18px;
 }
 
-.login-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
+/* --- Brand wordmark: "Ab" white + "on" accent --- */
 .login-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  margin: 0 0 var(--s-3);
+  text-align: center;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
-.login-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background: var(--bg-app);
-  border: 1px solid var(--border);
-  display: grid;
-  place-items: center;
+.brand-ab {
   color: var(--text-main);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  box-shadow: var(--sh-1);
 }
 
-.login-mark img {
-  width: 20px;
-  height: 20px;
+.brand-on {
+  color: var(--accent);
 }
 
-.login-eyebrow {
-  font-size: var(--fs-1);
-  letter-spacing: 0.18em;
-  color: var(--text-muted);
-  margin: 0 0 6px;
-  text-transform: uppercase;
-}
-
+/* --- Heading --- */
 .login-title {
   margin: 0;
-  font-size: var(--fs-6);
+  text-align: center;
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-main);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .login-subtitle {
-  margin: 0;
-  font-size: var(--fs-3);
+  margin: var(--s-1) 0 var(--s-5);
+  text-align: center;
+  font-size: var(--fs-2);
   color: var(--text-muted);
 }
 
+/* --- Error --- */
+.error-flash {
+  color: var(--danger);
+  font-size: var(--fs-2);
+  text-align: center;
+  margin-bottom: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--r-1);
+}
+
+/* --- Input stack --- */
 .input-stack {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--s-3);
 }
 
-/* INPUTS (Underline Style - Linear/Stripe vibe) */
+/* --- Bordered / filled inputs (matches mobile) --- */
 .login-input {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
+  min-height: 50px;
+  padding: 0 var(--s-4);
+  font-size: 15px;
+  font-family: inherit;
   color: var(--text-main);
-  padding: 12px 0;
-  font-size: 16px;
-  transition: border 0.2s ease;
-  border-radius: 0;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-sizing: border-box;
 }
 
 .login-input::placeholder {
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
+  color: var(--text-sub);
 }
 
-/* NO UGLY BOX FOCUS */
 .login-input:focus {
   outline: none;
-  border-bottom-color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.16);
 }
 
+/* Autofill fix */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px var(--bg-surface) inset !important;
+  -webkit-box-shadow: 0 0 0 30px var(--bg-1) inset !important;
   -webkit-text-fill-color: var(--text-main) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--r-2) !important;
 }
 
-.action-row {
+/* --- Remember me row --- */
+.remember-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--s-4) 0 var(--s-3);
 }
 
-/* BUTTON */
-.btn-solid {
-  width: 100%;
-  height: 44px;
-  margin-top: 32px;
-  background: var(--text-main);
-  color: var(--bg-app);
-  font-weight: 700;
-  border-radius: var(--radius-sm);
-  border: none;
+.remember-label {
+  font-size: var(--fs-2);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* --- Toggle switch (matches mobile Switch) --- */
+.toggle {
+  position: relative;
+  display: inline-block;
   cursor: pointer;
-  transition: transform 0.1s;
 }
 
-.btn-solid:hover {
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  display: block;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.toggle input:checked + .toggle-track {
+  background: var(--accent);
+}
+
+.toggle input:checked + .toggle-track::after {
+  transform: translateX(18px);
+}
+
+.toggle input:focus-visible + .toggle-track {
+  box-shadow: var(--focus-ring);
+}
+
+/* --- Primary button (accent bg, white text, like mobile) --- */
+.login-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: var(--s-1);
+  border: none;
+  border-radius: var(--r-2);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--fs-4);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.login-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.3);
 }
 
-.btn-solid:disabled {
-  opacity: 0.7;
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  opacity: 0.65;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
-.btn-ghost {
-  width: 100%;
-  height: 46px;
-  background: var(--bg-hover);
-  color: var(--text-main);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-
-.btn-ghost:hover {
-  border-color: var(--text-muted);
-  color: var(--text-main);
-  background: var(--bg-surface);
-  transform: translateY(-1px);
-}
-
-.error-flash {
-  color: var(--danger);
-  font-size: var(--fs-1);
-  margin: -6px 0 4px;
-  text-align: center;
-}
-
+/* --- Forgot password link (accent color, like mobile) --- */
 .help-row {
-  margin-top: 6px;
+  margin-top: var(--s-3);
   text-align: center;
 }
 
 .help-row a {
-  color: var(--text-muted);
-  font-size: var(--fs-1);
+  color: var(--accent);
+  font-size: var(--fs-2);
+  font-weight: 500;
   text-decoration: none;
-  letter-spacing: 0.08em;
 }
 
 .help-row a:hover {
-  color: var(--text-main);
+  text-decoration: underline;
 }
 
-.login-footnote {
-  font-size: var(--fs-1);
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
+/* --- Responsive --- */
 @media (max-width: 540px) {
   .login-card {
-    width: 100%;
-    padding: 32px;
-    border-radius: var(--radius-md);
+    max-width: 100%;
+    padding: var(--s-5);
+    border-radius: var(--r-3);
   }
 }
