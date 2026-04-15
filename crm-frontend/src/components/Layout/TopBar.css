@@ -20,7 +20,7 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--r-3);
   backdrop-filter: blur(var(--glass-blur));
-  box-shadow: 0 16px 40px rgba(2, 7, 18, 0.28);
+  box-shadow: var(--sh-2);
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
