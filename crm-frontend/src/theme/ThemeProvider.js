@@ -8,6 +8,7 @@ const LEGACY_ACCENT_KEY = 'themeAccent';
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 export const ACCENT_PRESETS = {
+  abon: { key: 'abon', label: 'Abon Blue', primary: '#5BB8F5', secondary: '#4A9FE0' },
   emerald: { key: 'emerald', label: 'Emerald', primary: '#22c55e', secondary: '#10b981' },
   violet: { key: 'violet', label: 'Violet', primary: '#7c3aed', secondary: '#a855f7' },
   blue: { key: 'blue', label: 'Blue', primary: '#2563eb', secondary: '#0ea5e9' },
@@ -35,9 +36,9 @@ function getScopedStorageKey(scope) {
   return `${STORAGE_KEY}.${scope}`;
 }
 
-function toRgbParts(value = '#22c55e') {
+function toRgbParts(value = '#5BB8F5') {
   const input = String(value).trim();
-  if (!HEX.test(input)) return [34, 197, 94];
+  if (!HEX.test(input)) return [91, 184, 245];
   const raw = input.slice(1);
   const full =
     raw.length === 3
@@ -51,7 +52,7 @@ function toRgbParts(value = '#22c55e') {
   return [(parsed >> 16) & 255, (parsed >> 8) & 255, parsed & 255];
 }
 
-function toRgbTuple(value = '#22c55e') {
+function toRgbTuple(value = '#5BB8F5') {
   const [red, green, blue] = toRgbParts(value);
   return `${red}, ${green}, ${blue}`;
 }
@@ -89,7 +90,7 @@ function getContrastingInk(color) {
 
 function normalizePreference(raw) {
   const mode = raw?.mode === 'light' ? 'light' : 'dark';
-  const accent = ACCENT_PRESETS[raw?.accent] ? raw.accent : 'emerald';
+  const accent = ACCENT_PRESETS[raw?.accent] ? raw.accent : 'abon';
   return { mode, accent };
 }
 
@@ -141,7 +142,7 @@ function writeStoredPreference(scope, preference) {
 }
 
 function applyTheme({ mode, accent }) {
-  const palette = ACCENT_PRESETS[accent] || ACCENT_PRESETS.emerald;
+  const palette = ACCENT_PRESETS[accent] || ACCENT_PRESETS.abon;
   const root = document.documentElement;
   const body = document.body;
   const accentRgb = toRgbTuple(palette.primary);
@@ -188,7 +189,7 @@ export function ThemeProvider({ children }) {
   const scope = useMemo(() => getPreferenceScope(), []);
   const initial = useMemo(() => readStoredPreference(scope), [scope]);
   const [mode, setMode] = useState(initial.mode === 'light' ? 'light' : 'dark');
-  const [accent, setAccent] = useState(ACCENT_PRESETS[initial.accent] ? initial.accent : 'emerald');
+  const [accent, setAccent] = useState(ACCENT_PRESETS[initial.accent] ? initial.accent : 'abon');
 
   useEffect(() => {
     applyTheme({ mode, accent });

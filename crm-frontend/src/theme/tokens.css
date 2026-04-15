@@ -34,8 +34,8 @@
   --borderSubtle: rgba(148, 163, 184, 0.2);
   --textPrimary: #f2f6ff;
   --textSecondary: #a8b6d1;
-  --accentPrimary: #34c759;
-  --accentSecondary: #22b95d;
+  --accentPrimary: #5BB8F5;
+  --accentSecondary: #4A9FE0;
   --success: #32ce96;
   --warning: #e9be6d;
   --destructive: #f07b91;
@@ -59,16 +59,16 @@
   --bg-2: var(--surfaceElevated);
 
   --accent: var(--accentPrimary);
-  --accent-rgb: 52, 199, 89;
-  --accent-secondary-rgb: 34, 185, 93;
-  --accent-dim: rgba(52, 199, 89, 0.16);
-  --accent-glow: rgba(52, 199, 89, 0.34);
-  --accent-gradient: linear-gradient(132deg, #34c759 0%, #22b95d 52%, #4cc9f0 100%);
+  --accent-rgb: 91, 184, 245;
+  --accent-secondary-rgb: 74, 159, 224;
+  --accent-dim: rgba(91, 184, 245, 0.16);
+  --accent-glow: rgba(91, 184, 245, 0.34);
+  --accent-gradient: linear-gradient(132deg, #5BB8F5 0%, #4A9FE0 52%, #3A8BD4 100%);
   --accent-soft: var(--accent-dim);
-  --accent-text: #9de9b8;
+  --accent-text: #8DCDF8;
   --accent-ink: #ffffff;
   --accent-0: var(--accent);
-  --accent-1: #57d87a;
+  --accent-1: #6EC4F7;
 
   --text-main: var(--textPrimary);
   --text-muted: var(--textSecondary);
@@ -136,8 +136,8 @@ body[data-theme='light'] {
   --borderSubtle: rgba(100, 116, 139, 0.2);
   --textPrimary: #0f1a2f;
   --textSecondary: #5a6c89;
-  --accentPrimary: #26b765;
-  --accentSecondary: #3ac8a8;
+  --accentPrimary: #5BB8F5;
+  --accentSecondary: #4A9FE0;
   --success: #118862;
   --warning: #a8732e;
   --destructive: #c83e57;
@@ -159,16 +159,16 @@ body[data-theme='light'] {
   --bg-2: var(--surfaceElevated);
 
   --accent: var(--accentPrimary);
-  --accent-rgb: 38, 183, 101;
-  --accent-secondary-rgb: 58, 200, 168;
-  --accent-dim: rgba(38, 183, 101, 0.12);
-  --accent-glow: rgba(38, 183, 101, 0.28);
-  --accent-gradient: linear-gradient(132deg, #2fc072 0%, #26b765 52%, #3ac8a8 100%);
+  --accent-rgb: 91, 184, 245;
+  --accent-secondary-rgb: 74, 159, 224;
+  --accent-dim: rgba(91, 184, 245, 0.12);
+  --accent-glow: rgba(91, 184, 245, 0.28);
+  --accent-gradient: linear-gradient(132deg, #5BB8F5 0%, #4A9FE0 52%, #3A8BD4 100%);
   --accent-soft: var(--accent-dim);
-  --accent-text: #1f9b55;
+  --accent-text: #2E8AD4;
   --accent-ink: #ffffff;
   --accent-0: var(--accent);
-  --accent-1: #38c477;
+  --accent-1: #6EC4F7;
 
   --text-main: var(--textPrimary);
   --text-muted: var(--textSecondary);

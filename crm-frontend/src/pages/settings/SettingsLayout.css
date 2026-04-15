@@ -356,9 +356,9 @@ body.light .tenant-tag-input {
 }
 
 .tenant-btn-primary {
-  background: linear-gradient(120deg, #0ea5e9, #0284c7);
-  color: #f7fcff;
-  border-color: rgba(14, 165, 233, 0.5);
+  background: #5BB8F5;
+  color: #000;
+  border-color: rgba(91, 184, 245, 0.5);
 }
 
 .tenant-tag-input-shell {

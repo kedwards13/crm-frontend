@@ -85,9 +85,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
-  color: #0b1220;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
+  background: #5BB8F5;
+  color: #000;
+  box-shadow: 0 8px 24px rgba(91, 184, 245, 0.2);
 }
 
 .template-row {
@@ -113,8 +113,8 @@
   padding: 8px 12px;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #0b1220;
+  background: #5BB8F5;
+  color: #000;
 }
 
 .pill-btn.ghost {

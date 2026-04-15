@@ -218,9 +218,9 @@
 }
 
 .dispatch-actions .dispatch-button.primary {
-  background: #16a34a;
-  border-color: #16a34a;
-  color: #f0fdf4;
+  background: #5BB8F5;
+  border-color: #5BB8F5;
+  color: #000;
 }
 
 .dispatch-button.primary.is-quiet {
