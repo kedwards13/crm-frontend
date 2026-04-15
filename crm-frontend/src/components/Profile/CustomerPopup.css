@@ -61,7 +61,7 @@ body[data-theme="light"] .popup-overlay {
   color: var(--popup-text-main);
   border: 1px solid var(--popup-border);
   border-radius: 20px;
-  box-shadow: 0 42px 110px -26px rgba(0, 0, 0, 0.54);
+  box-shadow: var(--sh-2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -81,7 +81,7 @@ body[data-theme="light"] .popup-overlay {
 body[data-theme="light"] .popup-container {
   background: var(--popup-bg);
   border-color: var(--popup-border);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--sh-2);
   color: var(--popup-text-main);
 }
 
@@ -103,8 +103,8 @@ body[data-theme="light"] .popup-container {
 
 body[data-theme="light"] .popup-header,
 body[data-theme="light"] .popup-footer {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+  background-color: var(--popup-surface);
+  border-color: var(--popup-border);
 }
 
 .header-info {

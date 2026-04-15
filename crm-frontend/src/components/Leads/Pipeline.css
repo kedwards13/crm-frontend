@@ -58,7 +58,7 @@
   margin-bottom: 0.9rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-1);
-  border-radius: 16px;
+  border-radius: var(--r-2);
   background: linear-gradient(135deg, color-mix(in srgb, var(--bg-1) 90%, var(--color-accent) 10%), var(--bg-1));
 }
 
@@ -164,7 +164,7 @@
   min-height: 560px;
   max-height: min(74vh, 820px);
   border: 1px solid var(--border-1);
-  border-radius: 18px;
+  border-radius: var(--r-3);
   padding: 0.9rem;
   background: var(--bg-1);
   box-shadow: var(--shadow-0);
@@ -223,7 +223,7 @@
 .pl-empty {
   margin: 0;
   padding: 1.4rem 1rem;
-  border-radius: 14px;
+  border-radius: var(--r-2);
   background: var(--bg-panel);
   border: 1px dashed var(--border);
   color: var(--text-sub);
@@ -247,7 +247,7 @@
   display: grid;
   gap: 0.4rem;
   border: 1px solid var(--border-0);
-  border-radius: 14px;
+  border-radius: var(--r-2);
   background: var(--bg-2);
   padding: 0.72rem;
   cursor: pointer;
@@ -403,10 +403,10 @@
   display: none;
   z-index: 8;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: var(--r-2);
   border: 1px solid var(--border-1);
   background: color-mix(in srgb, var(--bg-1) 96%, var(--bg-2));
-  box-shadow: 0 22px 42px -28px rgba(2, 7, 18, 0.72);
+  box-shadow: var(--sh-2);
 }
 
 .pl-message-popover strong {

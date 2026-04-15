@@ -31,7 +31,7 @@
   .card {
     background: var(--cp-bg-card);
     border: 1px solid var(--cp-border-color);
-    border-radius: 10px;
+    border-radius: var(--r-2);
     box-shadow: var(--cp-shadow);
     margin: 1rem 0;
     padding: 1.5rem;
@@ -105,7 +105,7 @@
     background: var(--cp-accent);
     color: var(--accent-ink, #fff);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--r-1);
     padding: 0.75rem 1.5rem;
     font-weight: 600;
     cursor: pointer;
@@ -123,7 +123,7 @@
   .customers-page .search-bar input {
     background: var(--cp-bg-card);
     border: 1px solid var(--cp-border-color);
-    border-radius: 6px;
+    border-radius: var(--r-1);
     color: var(--cp-text-light);
     padding: 0.75rem;
     font-size: 0.95rem;
@@ -142,7 +142,7 @@
      ============================================================================= */
   .upload-progress {
     background: var(--cp-bg-card);
-    border-radius: 6px;
+    border-radius: var(--r-1);
     overflow: hidden;
     height: 12px;
     margin: 1rem 0;
@@ -171,7 +171,7 @@
     background: var(--cp-error);
     color: #ffecec;
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: var(--r-1);
     margin-bottom: 1rem;
     font-weight: 600;
   }

@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc';
-
 import api from '../../apiClient';
 import { AuthContext } from '../../App';
 import { normalizeIndustry } from '../../helpers/tenantHelpers';
@@ -86,10 +84,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert('Google sign-in is not enabled for this account.');
-  };
-
   return (
     <div className="login-container">
       <div className="login-card">
@@ -132,10 +126,6 @@ const Login = () => {
           <div className="action-row">
             <button type="submit" className="btn-solid" disabled={loading}>
               {loading ? 'Verifying...' : 'Continue'}
-            </button>
-            <button type="button" className="btn-ghost" onClick={handleGoogleLogin} aria-label="Sign in with Google">
-              <FcGoogle size={18} />
-              Continue with Google
             </button>
           </div>
 

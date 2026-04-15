@@ -72,8 +72,8 @@
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(var(--glass-blur));
-  padding: 24px;
-  border-radius: 24px;
+  padding: var(--s-5);
+  border-radius: var(--r-3);
   transition: transform 0.2s;
 }
 
@@ -97,11 +97,11 @@
 }
 
 .card-label {
-  font-size: 11px;
+  font-size: var(--fs-1);
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-sub);
-  margin-top: 16px;
+  margin-top: var(--s-4);
   margin-bottom: 0;
   font-weight: 700;
 }
@@ -114,9 +114,9 @@
 }
 
 .card-sub {
-  font-size: 13px;
+  font-size: var(--fs-2);
   color: var(--accent-text);
-  margin-top: 4px;
+  margin-top: var(--s-1);
   font-weight: 500;
 }
 
@@ -200,22 +200,22 @@
 .panel.card {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: var(--r-3);
+  padding: var(--s-5);
   box-shadow: var(--sh-1);
   backdrop-filter: blur(var(--glass-blur));
 }
 
 .panel-header h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: var(--fs-6);
   color: var(--text-main);
 }
 
 .panel-header p {
-  margin: 4px 0 0;
+  margin: var(--s-1) 0 0;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--fs-2);
 }
 
 .exceptions-list {
@@ -226,20 +226,20 @@
 
 .exception-item {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-1);
   background: var(--bg-panel);
-  padding: 12px;
+  padding: var(--s-3);
 }
 
 .exception-title {
-  font-size: 14px;
+  font-size: var(--fs-3);
   font-weight: 700;
   color: var(--text-main);
 }
 
 .exception-detail {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: var(--s-1);
+  font-size: var(--fs-1);
   color: var(--text-muted);
 }
 

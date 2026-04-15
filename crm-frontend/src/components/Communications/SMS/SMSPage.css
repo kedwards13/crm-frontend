@@ -78,8 +78,8 @@
 .ai-suggestion-box {
   border: 1px solid var(--border);
   background: var(--bg-panel);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: var(--r-2);
+  padding: var(--s-3);
   color: var(--text-main);
 }
 
@@ -130,8 +130,8 @@
 .conversation-container {
   border: 1px solid var(--border);
   background: var(--bg-card);
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: var(--r-2);
+  padding: var(--s-4);
   color: var(--text-main);
 }
 
@@ -159,9 +159,9 @@
 .card {
   border: 1px solid var(--border-subtle, #e2e8f0);
   background: var(--surface-strong, #ffffff);
-  border-radius: 16px;
+  border-radius: var(--r-2);
   padding: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+  box-shadow: var(--sh-1);
 }
 
 .dark-mode .card {
@@ -203,25 +203,25 @@
 .action-button,
 .group-button {
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--r-2);
   padding: 12px 16px;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+  box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.2);
 }
 
 .action-button {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #0b1220;
+  background: var(--accent-gradient);
+  color: var(--accent-ink);
 }
 
 .group-button {
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
-  color: #0b1220;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
+  background: var(--accent-gradient);
+  color: var(--accent-ink);
+  box-shadow: 0 8px 24px rgba(var(--accent-secondary-rgb), 0.2);
 }
 
 .mass-card label {
@@ -310,8 +310,8 @@
   padding: 8px 12px;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #0b1220;
+  background: var(--accent-gradient);
+  color: var(--accent-ink);
 }
 
 .pill-btn.ghost {
