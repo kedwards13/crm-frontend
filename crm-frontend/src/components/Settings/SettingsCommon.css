@@ -1,47 +1,47 @@
 .settings-page {
-  padding: 30px;
+  padding: var(--s-6);
   max-width: 800px;
   margin: 0 auto;
-  color: var(--color-text, #222);
+  color: var(--text-main);
 }
 
 .settings-title {
-  margin: 0 0 20px;
+  margin: 0 0 var(--s-5);
 }
 
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  gap: var(--s-4);
 }
 
 .settings-tile {
   display: block;
-  background: var(--color-bg-card, #f9f9f9);
-  border: 1px solid var(--color-border, #e5e5e5);
-  border-radius: 10px;
-  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  padding: var(--s-4);
   text-decoration: none;
-  color: var(--color-text, #222);
+  color: var(--text-main);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .settings-tile:hover {
-  border-color: var(--color-accent, #2563eb);
+  border-color: var(--accent);
   transform: translateY(-2px);
 }
 
 .settings-card {
-  background: var(--color-bg-card, #f9f9f9);
-  border: 1px solid var(--color-border, #e5e5e5);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  padding: var(--s-5);
+  margin-bottom: var(--s-5);
 }
 
 .settings-card label {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: var(--s-3);
   font-weight: 500;
 }
 
@@ -51,23 +51,23 @@
   width: 100%;
   padding: 10px;
   font-size: 0.95rem;
-  margin-top: 4px;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
-  background: var(--color-bg, #fff);
-  color: var(--color-text, #222);
+  margin-top: var(--s-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  background: var(--bg-panel);
+  color: var(--text-main);
 }
 
 .settings-card.two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--s-5);
 }
 
 .settings-card.two-col > div {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--s-3);
 }
 
 .settings-card .row {
@@ -83,7 +83,7 @@
 
 .settings-form label {
   display: block;
-  margin-bottom: 14px;
+  margin-bottom: var(--s-4);
   font-weight: 500;
 }
 
@@ -92,53 +92,55 @@
   width: 100%;
   padding: 10px;
   font-size: 1rem;
-  margin-top: 4px;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
-  background: var(--color-bg, #fff);
-  color: var(--color-text, #222);
+  margin-top: var(--s-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  background: var(--bg-panel);
+  color: var(--text-main);
 }
 
 .settings-form.two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: var(--s-5);
 }
 
 .settings-primary {
-  background: var(--color-accent, #2563eb);
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
   padding: 10px 20px;
   font-weight: bold;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--r-1);
   margin-right: 10px;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .settings-secondary {
-  background: var(--color-bg, #e0e0e0);
-  color: var(--color-text, #333);
+  background: var(--bg-panel);
+  color: var(--text-main);
   padding: 10px 20px;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
   cursor: pointer;
+  min-height: 44px;
 }
 
 button.mini,
 .mini {
-  background: var(--color-bg, #e0e0e0);
-  color: var(--color-text, #333);
+  background: var(--bg-panel);
+  color: var(--text-main);
   padding: 6px 12px;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
-  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  font-size: var(--fs-1);
   cursor: pointer;
 }
 
 .mini.danger {
-  color: #dc2626;
-  border-color: rgba(220, 38, 38, 0.4);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 .settings-msg {
@@ -147,7 +149,7 @@ button.mini,
 }
 
 .settings-msg-error {
-  color: #dc2626;
+  color: var(--danger);
 }
 
 .settings-actions {
@@ -157,12 +159,12 @@ button.mini,
 }
 
 .muted {
-  color: var(--text-2, #6b6f75);
+  color: var(--text-muted);
 }
 
 .logo-preview img {
   max-height: 60px;
-  border-radius: 6px;
+  border-radius: var(--r-1);
 }
 
 .table-like {
@@ -172,16 +174,16 @@ button.mini,
 
 .table-like .row {
   display: grid;
-  gap: 12px;
+  gap: var(--s-3);
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
 }
 
 .table-like .row.header {
-  font-size: 11px;
+  font-size: var(--fs-1);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-2, #6b6f75);
+  color: var(--text-muted);
 }
 
 .table-like .row input {
@@ -193,7 +195,7 @@ button.mini,
   grid-template-columns: auto 1fr;
   gap: 10px;
   align-items: center;
-  margin-top: 4px;
+  margin-top: var(--s-1);
 }
 
 .settings-inline-inputs input[type="color"] {
@@ -201,14 +203,14 @@ button.mini,
   min-width: 46px;
   height: 40px;
   padding: 2px;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
-  background: var(--color-bg, #fff);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  background: var(--bg-panel);
 }
 
 .time-range-picker {
   display: grid;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .time-range-picker-label {
@@ -219,7 +221,7 @@ button.mini,
 .time-range-picker-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--s-3);
 }
 
 .time-range-picker-grid label {
@@ -234,31 +236,31 @@ button.mini,
 
 .settings-page .tenant-settings-field {
   display: grid;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .settings-page .tenant-settings-label {
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 600;
 }
 
 .settings-page .tenant-settings-helper {
   margin: 0;
-  font-size: 12px;
-  color: var(--text-2, #6b6f75);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
 }
 
 .settings-page .tenant-settings-error {
   margin: 0;
-  font-size: 12px;
-  color: #dc2626;
+  font-size: var(--fs-1);
+  color: var(--danger);
 }
 
 .settings-page .tenant-tag-input-shell {
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
   padding: 10px;
-  background: var(--color-bg, #fff);
+  background: var(--bg-panel);
   display: grid;
   gap: 10px;
 }
@@ -266,25 +268,25 @@ button.mini,
 .settings-page .tenant-tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-2);
   min-height: 34px;
 }
 
 .settings-page .tenant-tag-empty {
-  color: var(--text-2, #6b6f75);
-  font-size: 12px;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
 }
 
 .settings-page .tenant-tag-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-2);
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-accent, #2563eb) 40%, #d1d5db);
-  background: color-mix(in srgb, var(--color-accent, #2563eb) 12%, #ffffff);
-  color: var(--color-text, #1f2937);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  background: var(--accent-dim);
+  color: var(--text-main);
   padding: 5px 10px;
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 
 .settings-page .tenant-tag-chip-remove {
@@ -300,45 +302,45 @@ button.mini,
 .settings-page .tenant-tag-controls {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .settings-page .tenant-tag-input {
   width: 100%;
   padding: 10px;
   font-size: 0.95rem;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 6px;
-  background: var(--color-bg, #fff);
-  color: var(--color-text, #222);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  background: var(--bg-panel);
+  color: var(--text-main);
 }
 
 .settings-page .tenant-btn {
-  border-radius: 6px;
-  border: 1px solid var(--color-border, #ccc);
-  font-size: 12px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--border);
+  font-size: var(--fs-1);
   font-weight: 600;
   padding: 8px 12px;
   cursor: pointer;
 }
 
 .settings-page .tenant-btn-secondary {
-  background: var(--color-bg, #e0e0e0);
-  color: var(--color-text, #333);
+  background: var(--bg-panel);
+  color: var(--text-main);
 }
 
 .settings-sub {
   margin-top: -6px;
-  margin-bottom: 18px;
-  color: var(--text-2, #6b6f75);
-  font-size: 13px;
+  margin-bottom: var(--s-5);
+  color: var(--text-muted);
+  font-size: var(--fs-2);
 }
 
 .row-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--s-3);
 }
 
 .settings-pill {
@@ -346,9 +348,9 @@ button.mini,
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-accent, #2563eb) 42%, #d1d5db);
-  background: color-mix(in srgb, var(--color-accent, #2563eb) 14%, #ffffff);
-  font-size: 11px;
+  border: 1px solid rgba(var(--accent-rgb), 0.42);
+  background: var(--accent-dim);
+  font-size: var(--fs-1);
   font-weight: 700;
   padding: 4px 10px;
 }
@@ -359,14 +361,14 @@ button.mini,
 }
 
 .settings-integration-row {
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
   padding: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  background: var(--color-bg, #fff);
+  gap: var(--s-3);
+  background: var(--bg-panel);
 }
 
 .settings-integration-row strong {
@@ -376,21 +378,21 @@ button.mini,
 
 .settings-integration-row p {
   margin: 0;
-  font-size: 12px;
-  color: var(--text-2, #6b6f75);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
 }
 
 .settings-inline-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: var(--s-2);
+  margin-bottom: var(--s-5);
 }
 
 .settings-document-item {
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: 10px;
-  background: var(--color-bg, #fff);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--bg-panel);
   padding: 10px;
   display: flex;
   align-items: flex-start;
@@ -404,8 +406,8 @@ button.mini,
 
 .settings-document-item p {
   margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--text-2, #6b6f75);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
 }
 
 .settings-doc-meta {
@@ -413,6 +415,6 @@ button.mini,
   display: grid;
   gap: 4px;
   justify-items: end;
-  font-size: 11px;
-  color: var(--text-2, #6b6f75);
+  font-size: var(--fs-1);
+  color: var(--text-muted);
 }
