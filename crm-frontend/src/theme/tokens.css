@@ -24,14 +24,14 @@
   --r-2: var(--radius-md);
   --r-3: var(--radius-lg);
 
-  /* Semantic dark theme defaults */
-  --backgroundPrimary: #060912;
-  --backgroundSecondary: #0d1424;
-  --surface: rgba(16, 24, 41, 0.88);
-  --surfaceElevated: rgba(19, 30, 52, 0.94);
+  /* Semantic dark theme defaults — Apple matte */
+  --backgroundPrimary: #161618;
+  --backgroundSecondary: #1C1C1E;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surfaceElevated: rgba(255, 255, 255, 0.06);
   --surface-primary: var(--surface);
   --surface-secondary: var(--surfaceElevated);
-  --borderSubtle: rgba(148, 163, 184, 0.2);
+  --borderSubtle: rgba(255, 255, 255, 0.08);
   --textPrimary: #f2f6ff;
   --textSecondary: #a8b6d1;
   --accentPrimary: #5BB8F5;
@@ -42,11 +42,8 @@
 
   /* Compatibility aliases */
   --bg-app: var(--backgroundPrimary);
-  --bg-app-gradient:
-    radial-gradient(1100px 540px at 88% -18%, rgba(255, 179, 0, 0.18), transparent 58%),
-    radial-gradient(900px 520px at -12% 38%, rgba(76, 201, 240, 0.15), transparent 60%),
-    linear-gradient(160deg, #05070a 0%, #0b1020 56%, #121b2e 100%);
-  --bg-sidebar: #050910;
+  --bg-app-gradient: var(--backgroundPrimary);
+  --bg-sidebar: #111113;
   --bg-surface: var(--surface);
   --bg-hover: rgba(148, 163, 184, 0.14);
   --bg-card: var(--surface);
@@ -111,11 +108,11 @@
   --shadow-1: var(--sh-2);
   --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.34);
 
-  --glass-bg: rgba(11, 18, 32, 0.74);
-  --glass-border: rgba(148, 163, 184, 0.22);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: 18px;
   --panel-glass: var(--glass-bg);
-  --surface-muted: rgba(13, 21, 38, 0.82);
+  --surface-muted: rgba(255, 255, 255, 0.03);
   --panel-border: var(--glass-border);
   --accent-primary: var(--accentPrimary);
   --accent-secondary: var(--accentSecondary);
@@ -127,13 +124,13 @@
 }
 
 body[data-theme='light'] {
-  --backgroundPrimary: #f4f7fb;
-  --backgroundSecondary: #ecf1f8;
-  --surface: rgba(255, 255, 255, 0.9);
+  --backgroundPrimary: #F5F6F8;
+  --backgroundSecondary: #ECEDF0;
+  --surface: #ffffff;
   --surfaceElevated: #ffffff;
   --surface-primary: var(--surface);
   --surface-secondary: var(--surfaceElevated);
-  --borderSubtle: rgba(100, 116, 139, 0.2);
+  --borderSubtle: #E5E7EB;
   --textPrimary: #0f1a2f;
   --textSecondary: #5a6c89;
   --accentPrimary: #5BB8F5;
@@ -143,11 +140,8 @@ body[data-theme='light'] {
   --destructive: #c83e57;
 
   --bg-app: var(--backgroundPrimary);
-  --bg-app-gradient:
-    radial-gradient(950px 420px at 92% -18%, rgba(255, 179, 0, 0.12), transparent 58%),
-    radial-gradient(780px 420px at -10% 42%, rgba(76, 201, 240, 0.12), transparent 62%),
-    linear-gradient(156deg, #f7f9fc 0%, #eef4fb 58%, #e8f0fb 100%);
-  --bg-sidebar: #eef3fa;
+  --bg-app-gradient: var(--backgroundPrimary);
+  --bg-sidebar: #ECEDF0;
   --bg-surface: var(--surface);
   --bg-hover: rgba(75, 100, 255, 0.08);
   --bg-card: var(--surface);
@@ -194,11 +188,11 @@ body[data-theme='light'] {
   --shadow-1: var(--sh-2);
   --focus-ring: 0 0 0 2px rgba(var(--accent-rgb), 0.24);
 
-  --glass-bg: rgba(255, 255, 255, 0.76);
-  --glass-border: rgba(100, 116, 139, 0.16);
-  --glass-blur: 16px;
+  --glass-bg: #ffffff;
+  --glass-border: #E5E7EB;
+  --glass-blur: 0px;
   --panel-glass: var(--glass-bg);
-  --surface-muted: rgba(246, 250, 255, 0.86);
+  --surface-muted: #F9FAFB;
   --panel-border: var(--glass-border);
   --accent-primary: var(--accentPrimary);
   --accent-secondary: var(--accentSecondary);

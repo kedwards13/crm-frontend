@@ -6,7 +6,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--bg-app-gradient);
+  background: var(--bg-app);
   padding: 40px;
   position: relative;
   overflow: hidden;
@@ -69,11 +69,10 @@
 }
 
 .jarvis-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
   padding: var(--s-5);
-  border-radius: var(--r-3);
+  border-radius: var(--r-2);
   transition: transform 0.2s;
 }
 
@@ -132,26 +131,19 @@
 }
 
 .jarvis-input-box {
-  background: var(--glass-bg);
-  backdrop-filter: blur(calc(var(--glass-blur) + 8px));
-  border: 1px solid var(--glass-border);
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
   border-radius: 99px;
   padding: 8px 8px 8px 24px;
   display: flex;
   align-items: center;
-  box-shadow:
-    0 20px 80px -10px rgba(2, 7, 18, 0.52),
-    0 0 0 1px rgba(var(--accent-rgb), 0.1),
-    0 0 40px -10px rgba(var(--accent-rgb), 0.24);
+  box-shadow: var(--sh-2);
   transition: all 0.3s ease;
 }
 
 .jarvis-input-box:focus-within {
-  box-shadow:
-    0 30px 100px -10px rgba(2, 7, 18, 0.66),
-    0 0 0 1px rgba(var(--accent-rgb), 0.32),
-    0 0 60px -10px rgba(var(--accent-rgb), 0.28);
-  transform: scale(1.02);
+  border-color: rgba(var(--accent-rgb), 0.32);
+  box-shadow: var(--sh-2), 0 0 0 1px rgba(var(--accent-rgb), 0.2);
 }
 
 .jarvis-input {
@@ -198,12 +190,10 @@
 }
 
 .panel.card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-3);
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-2);
   padding: var(--s-5);
-  box-shadow: var(--sh-1);
-  backdrop-filter: blur(var(--glass-blur));
 }
 
 .panel-header h2 {

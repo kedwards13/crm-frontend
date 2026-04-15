@@ -57,9 +57,9 @@
   gap: 0.75rem;
   margin-bottom: 0.9rem;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-2);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--bg-1) 90%, var(--color-accent) 10%), var(--bg-1));
+  border: 0.5px solid var(--border-1);
+  border-radius: 10px;
+  background: var(--bg-card);
 }
 
 .pl-workflow-label {
@@ -85,9 +85,7 @@
   overflow-x: auto;
   padding: 0.2rem 0 0.95rem;
   margin-bottom: 0.2rem;
-  background:
-    linear-gradient(to bottom, color-mix(in srgb, var(--bg-0) 92%, transparent), color-mix(in srgb, var(--bg-0) 92%, transparent)),
-    transparent;
+  background: var(--bg-app);
 }
 
 .pl-ribbon::-webkit-scrollbar,
@@ -108,23 +106,23 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  border: 1px solid var(--border-1);
+  border: 0.5px solid var(--border-1);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-1) 94%, transparent);
-  color: var(--color-text);
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 0.72rem 0.95rem;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.55rem 0.85rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.12s ease, transform 0.12s ease, background 0.12s ease;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
 }
 
 .pl-ribbon-pill:hover,
 .pl-ribbon-pill.is-active {
-  border-color: rgba(var(--accent-rgb), 0.42);
-  background: color-mix(in srgb, var(--accent-dim) 82%, var(--bg-1));
-  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), 0.32);
+  color: var(--color-text);
+  background: var(--accent-dim);
 }
 
 .pl-ribbon-count {
@@ -163,12 +161,11 @@
   gap: 0.85rem;
   min-height: 560px;
   max-height: min(74vh, 820px);
-  border: 1px solid var(--border-1);
-  border-radius: var(--r-3);
+  border: 0.5px solid var(--border-1);
+  border-radius: var(--r-2);
   padding: 0.9rem;
-  background: var(--bg-1);
-  box-shadow: var(--shadow-0);
-  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  background: var(--bg-card);
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .pl-column.drop-target {
@@ -246,18 +243,16 @@
   position: relative;
   display: grid;
   gap: 0.4rem;
-  border: 1px solid var(--border-0);
-  border-radius: var(--r-2);
-  background: var(--bg-2);
+  border: 0.5px solid var(--border-0);
+  border-radius: 10px;
+  background: var(--bg-1);
   padding: 0.72rem;
   cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .pl-card:hover {
-  border-color: rgba(var(--accent-rgb), 0.42);
-  background: var(--bg-1);
-  box-shadow: var(--shadow-0);
+  border-color: rgba(var(--accent-rgb), 0.32);
 }
 
 .pl-card-header {
@@ -308,10 +303,10 @@
   display: grid;
   gap: 0.25rem;
   padding: 0.35rem;
-  border: 1px solid var(--border-1);
-  border-radius: 12px;
-  background: var(--bg-1);
-  box-shadow: var(--shadow-0);
+  border: 0.5px solid var(--border-1);
+  border-radius: 10px;
+  background: var(--bg-card);
+  box-shadow: var(--sh-2);
   z-index: 5;
 }
 
