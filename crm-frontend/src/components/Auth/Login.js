@@ -102,58 +102,67 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1 className="login-brand">
-          <span className="brand-ab">Ab</span>
-          <span className="brand-on">on</span>
-        </h1>
-        <h2 className="login-title">Welcome Back</h2>
-        <p className="login-subtitle">Sign in to your workspace</p>
+    <div className="login-page">
+      <div className="login-column">
 
-        {error && <div className="error-flash">{error}</div>}
+        {/* Brand */}
+        <div className="login-brand">
+          <h1 className="login-wordmark">
+            <span className="wm-ab">Ab</span>
+            <span className="wm-on">on</span>
+          </h1>
+          <p className="login-acronym">Autonomous Business Operating Network</p>
+        </div>
 
-        <form onSubmit={handleLogin}>
-          <div className="input-stack">
-            <input
-              type="email"
-              className="login-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              autoFocus
-            />
-            <input
-              type="password"
-              className="login-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-            />
-          </div>
+        {/* Card */}
+        <div className="login-card">
+          <h2 className="card-title">Sign in</h2>
+          <p className="card-subtitle">Enter your credentials to continue</p>
 
-          <div className="remember-row">
-            <span className="remember-label">Remember me</span>
-            <label className="toggle">
+          {error && <div className="login-error">{error}</div>}
+
+          <form onSubmit={handleLogin}>
+            <div className="field-stack">
               <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                type="email"
+                className="login-field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                autoFocus
               />
-              <span className="toggle-track" />
-            </label>
-          </div>
+              <input
+                type="password"
+                className="login-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+              />
+            </div>
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+            <div className="options-row">
+              <label className="remember-toggle">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span className="toggle-track" />
+                <span className="remember-text">Remember me</span>
+              </label>
+              <a href="/forgot-password" className="forgot-link">Forgot password?</a>
+            </div>
 
-          <div className="help-row">
-            <a href="/forgot-password">Forgot Password?</a>
-          </div>
-        </form>
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? 'Signing in\u2026' : 'Sign in'}
+            </button>
+          </form>
+        </div>
+
+        {/* Tagline */}
+        <p className="login-tagline">The AI-powered platform that runs your business end to end</p>
       </div>
     </div>
   );
