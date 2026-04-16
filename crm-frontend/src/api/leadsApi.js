@@ -55,14 +55,12 @@ export const spamCrmLead = (id, attributes = {}) =>
     attributes: { ...attributes, spam: true },
   });
 
-export const updateLeadStage = (id, pipelineStage) =>
-  // Keep board stage writes on the canonical PATCH endpoint with bounded retries. UI optimistic
-  // state depends on this staying idempotent enough for transient network failures only.
+export const updateLeadStage = (id, pipelineStage, extraFields = {}) =>
   withRetry(
     () =>
       api.patch(
         `/leads/${id}/stage/`,
-        { pipeline_stage: pipelineStage },
+        { pipeline_stage: pipelineStage, ...extraFields },
         { timeout: 10000 }
       ),
     2

@@ -7,7 +7,7 @@ import { normalizeIndustry } from '../../helpers/tenantHelpers';
 import { getPipelineConfig } from '../../constants/pipelineRegistry';
 import { getIndustryCopy } from '../../constants/industryCopy';
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from '../../constants/pipelineStages';
-import { archiveCrmLead, getLeadPipeline, spamCrmLead, updateLeadStage } from '../../api/leadsApi';
+import { archiveCrmLead, getLeadPipeline, spamCrmLead, updateLeadStage, updateCrmLead } from '../../api/leadsApi';
 import { normalizeLead } from '../../utils/normalizeLead';
 import './Pipeline.css';
 
@@ -36,6 +36,17 @@ const STAGE_SHORT_LABELS = {
   BOOKED: 'Booked',
   LOST: 'Lost',
 };
+
+const LOST_REASON_OPTIONS = [
+  { value: 'no_response', label: 'No Response' },
+  { value: 'budget', label: 'Budget / Price' },
+  { value: 'competitor', label: 'Went with Competitor' },
+  { value: 'timing', label: 'Bad Timing' },
+  { value: 'not_qualified', label: 'Not Qualified' },
+  { value: 'duplicate', label: 'Duplicate Lead' },
+  { value: 'spam', label: 'Spam / Fake' },
+  { value: 'other', label: 'Other' },
+];
 
 const COLUMN_ORDER = PIPELINE_STAGES.map((stage) => ({
   key: stage,
@@ -215,6 +226,9 @@ export default function PipelineView() {
   const [q, setQ] = useState('');
   const [sortBy, setSortBy] = useState('updated_desc');
   const [visibleByStage, setVisibleByStage] = useState({});
+  const [pendingLostLeadId, setPendingLostLeadId] = useState(null);
+  const [lostReason, setLostReason] = useState('');
+  const [lostNotes, setLostNotes] = useState('');
   const searchRef = useRef(null);
   const debouncedQuery = useDebounced(q, 250);
 
@@ -329,13 +343,23 @@ export default function PipelineView() {
   }, []);
 
   const moveLeadToStage = useCallback(
-    async (leadId, nextStage) => {
+    async (leadId, nextStage, extraFields = {}) => {
       const id = clean(leadId);
       if (!id || !nextStage) return;
 
       const currentLead = allLeads.find((lead) => String(lead.id) === id);
       const currentStage = currentLead?.safePipelineStage || currentLead?.pipeline_stage || 'NEW';
       if (currentStage === nextStage) return;
+
+      // Intercept LOST — show modal to capture reason
+      if (nextStage === 'LOST' && !extraFields._confirmedLost) {
+        setPendingLostLeadId(id);
+        setLostReason('');
+        setLostNotes('');
+        setDraggedLeadId(null);
+        setDropStage('');
+        return;
+      }
 
       const snapshot = allLeads;
       setMovingLeadId(id);
@@ -353,7 +377,8 @@ export default function PipelineView() {
       setFocusedStage(nextStage);
 
       try {
-        const response = await updateLeadStage(id, nextStage);
+        const { _confirmedLost, ...apiFields } = extraFields;
+        const response = await updateLeadStage(id, nextStage, apiFields);
         const nextLead = response?.data ? normalizeLead(response.data) : null;
         if (nextLead?.id) {
           setAllLeads((rows) => updateLeadLocally(rows, id, nextLead));
@@ -714,6 +739,59 @@ export default function PipelineView() {
           onClose={() => setActiveLead(null)}
         />
       ) : null}
+
+      {/* Lost Reason Modal */}
+      {pendingLostLeadId && (
+        <div className="pl-lost-overlay" onClick={() => setPendingLostLeadId(null)}>
+          <div className="pl-lost-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="pl-lost-title">Why was this lead lost?</h3>
+            <div className="pl-lost-field">
+              <select
+                value={lostReason}
+                onChange={(e) => setLostReason(e.target.value)}
+                className="pl-lost-select"
+              >
+                <option value="">Select a reason...</option>
+                {LOST_REASON_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="pl-lost-field">
+              <textarea
+                value={lostNotes}
+                onChange={(e) => setLostNotes(e.target.value)}
+                className="pl-lost-textarea"
+                placeholder="Additional notes (optional)"
+                rows={3}
+              />
+            </div>
+            <div className="pl-lost-actions">
+              <button
+                className="pl-lost-cancel"
+                onClick={() => setPendingLostLeadId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="pl-lost-confirm"
+                disabled={!lostReason}
+                onClick={() => {
+                  const id = pendingLostLeadId;
+                  setPendingLostLeadId(null);
+                  void moveLeadToStage(id, 'LOST', {
+                    _confirmedLost: true,
+                    lost_reason: lostReason,
+                    lost_notes: lostNotes,
+                  });
+                }}
+              >
+                Mark as Lost
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

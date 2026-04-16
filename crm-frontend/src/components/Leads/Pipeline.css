@@ -503,3 +503,104 @@
     padding: 0.8rem 0.9rem;
   }
 }
+
+/* =========================================================
+   LOST REASON MODAL
+   ========================================================= */
+.pl-lost-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 24px;
+}
+
+.pl-lost-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+
+.pl-lost-title {
+  margin: 0 0 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.pl-lost-field {
+  margin-bottom: 14px;
+}
+
+.pl-lost-select,
+.pl-lost-textarea {
+  width: 100%;
+  background: var(--bg-1);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.pl-lost-select:focus,
+.pl-lost-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pl-lost-textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.pl-lost-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pl-lost-cancel,
+.pl-lost-confirm {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.pl-lost-cancel {
+  background: transparent;
+  color: var(--text-muted);
+  border: 0.5px solid var(--border);
+}
+
+.pl-lost-cancel:hover {
+  background: var(--bg-hover);
+}
+
+.pl-lost-confirm {
+  background: var(--danger);
+  color: #fff;
+}
+
+.pl-lost-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pl-lost-confirm:not(:disabled):hover {
+  filter: brightness(1.1);
+}

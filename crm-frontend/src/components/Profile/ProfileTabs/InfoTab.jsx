@@ -518,6 +518,39 @@ export default function InfoTab({ lead, formData = {}, onChange, preferences }) 
             <div className="info-group info-group--dense">
               <div className="info-section-header">
                 <div>
+                  <div className="info-section-eyebrow">Contact tracking</div>
+                  <div className="info-section-title">Disposition</div>
+                </div>
+              </div>
+
+              <div className="info-grid-2 info-grid-tight">
+                <InfoField
+                  label="Last Outcome"
+                  name="last_disposition"
+                  value={readFieldValue(safeLead, "last_disposition")}
+                  onValueChange={updateField}
+                  options={[
+                    { value: "reached", label: "Reached - Spoke with contact" },
+                    { value: "voicemail", label: "Left Voicemail" },
+                    { value: "no_answer", label: "No Answer" },
+                    { value: "wrong_number", label: "Wrong Number" },
+                    { value: "callback", label: "Callback Requested" },
+                    { value: "not_interested", label: "Not Interested" },
+                    { value: "qualified", label: "Qualified - Moving Forward" },
+                  ]}
+                />
+                <div className="info-stat-card">
+                  <span className="info-stat-label">Contact Attempts</span>
+                  <strong className="info-stat-value">
+                    {readFieldValue(safeLead, "contact_attempts", 0) || 0}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="info-group info-group--dense">
+              <div className="info-section-header">
+                <div>
                   <div className="info-section-eyebrow">Revenue loop</div>
                   <div className="info-section-title">Revenue Attribution</div>
                 </div>
