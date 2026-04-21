@@ -128,6 +128,9 @@ export const adjustMonthPlan = (planId, moves) =>
 export const advanceMonthPlan = (planId, toState) =>
   api.post(`/scheduling/month-fill/${planId}/advance/`, { to_state: toState });
 
+export const rePushMonthPlan = (planId) =>
+  api.post(`/scheduling/month-fill/${planId}/re-push/`);
+
 export const getMonthPlanIssues = (planId) =>
   api.get(`/scheduling/month-fill/${planId}/issues/`);
 

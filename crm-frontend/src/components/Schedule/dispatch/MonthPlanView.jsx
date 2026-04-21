@@ -33,6 +33,7 @@ import {
   getMonthPlanDay,
   getDispatchBoard,
   advanceMonthPlan,
+  rePushMonthPlan,
   getMonthPlanIssues,
   getMonthPlanProjections,
   getExistingCounts,
@@ -97,6 +98,9 @@ export default function MonthPlanView() {
   const [err, setErr] = useState(null);
   const [existing, setExisting] = useState(null); // {date_str: count} from dispatch board
   const [dayRefresh, setDayRefresh] = useState(0);
+  const [pushStatus, setPushStatus] = useState(null); // null | "queued" | "in_progress" | "completed" | "failed"
+  const [pushProgress, setPushProgress] = useState(null);
+  const [pushError, setPushError] = useState(null);
 
   const md = useMemo(() => pm(monthStr), [monthStr]);
   const yr = md.getFullYear();
@@ -124,6 +128,9 @@ export default function MonthPlanView() {
         getMonthPlan(pid), getMonthPlanIssues(pid), getMonthPlanProjections(pid),
       ]);
       setPlan(p); setIssues(i?.issues || []); setProjections(pr?.projections || null); setErr(null);
+      setPushStatus(p?.push_status || null);
+      setPushProgress(p?.push_progress || null);
+      setPushError(p?.push_error || null);
     } catch (e) { setErr(e?.response?.data?.detail || "Load failed"); }
   }, []);
 
@@ -160,9 +167,43 @@ export default function MonthPlanView() {
 
   const advance = useCallback(async (to) => {
     if (!plan?.plan_id) return;
-    try { await advanceMonthPlan(plan.plan_id, to); await loadMeta(plan.plan_id); }
-    catch (e) { setErr(e?.response?.data?.detail || `Advance failed`); }
+    try {
+      const { data, status: httpStatus } = await advanceMonthPlan(plan.plan_id, to);
+      if (to === "finalized" && (httpStatus === 202 || data?.push_status)) {
+        setPushStatus(data.push_status || "queued");
+        setPlan((prev) => prev ? { ...prev, state: "finalized" } : prev);
+      } else {
+        await loadMeta(plan.plan_id);
+      }
+    } catch (e) { setErr(e?.response?.data?.detail || `Advance failed`); }
   }, [plan, loadMeta]);
+
+  const rePush = useCallback(async () => {
+    if (!plan?.plan_id) return;
+    try {
+      const { data } = await rePushMonthPlan(plan.plan_id);
+      setPushStatus(data.push_status || "queued");
+      setPushError(null);
+    } catch (e) { setErr(e?.response?.data?.detail || "Re-push failed"); }
+  }, [plan]);
+
+  // Poll for push completion every 5 seconds while push is active
+  useEffect(() => {
+    if (!plan?.plan_id) return;
+    if (pushStatus !== "queued" && pushStatus !== "in_progress") return;
+    const interval = setInterval(async () => {
+      try {
+        const { data: p } = await getMonthPlan(plan.plan_id);
+        setPushStatus(p.push_status || null);
+        setPushProgress(p.push_progress || null);
+        setPushError(p.push_error || null);
+        if (p.push_status === "completed" || p.push_status === "failed") {
+          setPlan(p);
+        }
+      } catch { /* ignore polling errors */ }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [plan?.plan_id, pushStatus]);
 
   useEffect(() => {
     if (!selDay) { setDayDetail(null); return; }
@@ -320,12 +361,45 @@ export default function MonthPlanView() {
               </button>
             </>
           )}
+          {state === "finalized" && pushStatus !== "in_progress" && pushStatus !== "queued" && (
+            <button onClick={rePush} className="mp-btn mp-btn-accent">
+              <Send className="mp-icon-sm" />Re-push to FieldRoutes
+            </button>
+          )}
         </div>
       </header>
 
       {err && (
         <div className="mp-error">
           <XCircle className="mp-icon-sm" />{err}
+        </div>
+      )}
+
+      {/* Push status banner */}
+      {(pushStatus === "queued" || pushStatus === "in_progress") && (
+        <div className="mp-push-banner mp-push-active">
+          <Loader2 className="mp-icon-sm mp-spin" />
+          <span>Pushing to FieldRoutes{pushStatus === "queued" ? " (queued)" : ""}…</span>
+          {pushProgress?.fieldroutes_sync && (
+            <span className="mp-push-progress">
+              {pushProgress.fieldroutes_sync.synced || 0}/{pushProgress.fieldroutes_sync.total || "?"} synced
+            </span>
+          )}
+        </div>
+      )}
+      {pushStatus === "completed" && (
+        <div className="mp-push-banner mp-push-done">
+          <CheckCircle2 className="mp-icon-sm" />
+          <span>Push complete — {pushProgress?.committed || 0} committed
+            {pushProgress?.fieldroutes_sync && `, ${pushProgress.fieldroutes_sync.synced || 0} synced to FieldRoutes`}
+          </span>
+        </div>
+      )}
+      {pushStatus === "failed" && (
+        <div className="mp-push-banner mp-push-failed">
+          <XCircle className="mp-icon-sm" />
+          <span>Push failed: {pushError || "unknown error"}</span>
+          <button onClick={rePush} className="mp-btn mp-btn-sm mp-btn-accent">Retry</button>
         </div>
       )}
 

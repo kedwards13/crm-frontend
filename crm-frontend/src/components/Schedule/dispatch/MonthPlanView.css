@@ -79,6 +79,26 @@
   display: flex; align-items: center; gap: 6px;
 }
 
+/* ── Push status banners ── */
+.mp-push-banner {
+  margin: 6px 12px; padding: 8px 12px; border-radius: 6px;
+  font-size: var(--fs-1); display: flex; align-items: center; gap: 8px;
+}
+.mp-push-active {
+  background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);
+  color: #3b82f6;
+}
+.mp-push-done {
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+  color: #22c55e;
+}
+.mp-push-failed {
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  color: var(--mp-danger);
+}
+.mp-push-progress { margin-left: auto; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.mp-btn-sm { padding: 2px 8px; font-size: 11px; }
+
 /* ── Stats bar ── */
 .mp-stats-bar {
   display: flex; align-items: center; gap: 20px;
