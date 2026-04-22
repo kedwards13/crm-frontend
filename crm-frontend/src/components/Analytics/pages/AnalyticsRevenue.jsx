@@ -349,32 +349,39 @@ export default function AnalyticsRevenue() {
     [invalidPlanningFields, missingPlanningFormFields, missingPlanningInputs]
   );
 
+  // Map date preset → period_views key for period-specific metrics
+  const periodKey = datePreset === "this_year" ? "trailing_365"
+    : datePreset === "last_month" ? "trailing_90"
+    : "trailing_30"; // this_month, this_week, today all use trailing_30
+  const pv = summary?.period_views?.[periodKey];
+  const periodLabel = DATE_PRESETS.find((p) => p.key === datePreset)?.label || "This Month";
+
   const financialRows = useMemo(
     () =>
       asRows([
         ["Revenue Model", model.replaceAll("_", " ") || "—"],
-        ["Booked Revenue", toMoney(summary?.booked_revenue)],
-        ["Collected Revenue", toMoney(summary?.collected_revenue)],
+        [`Booked Revenue (${periodLabel})`, toMoney(pv?.booked_revenue ?? summary?.booked_revenue)],
+        [`Collected Revenue (${periodLabel})`, toMoney(pv?.collected_revenue ?? summary?.collected_revenue)],
         ["Remaining Revenue", toMoney(summary?.remaining_revenue)],
         ["Active Revenue", toMoney(summary?.active_revenue)],
         ["Inactive Revenue", toMoney(summary?.inactive_revenue)],
         [isRecurring || isHybrid ? "Active MRR" : "Conversion Rate", isRecurring || isHybrid ? toMoney(summary?.mrr) : toPercent(summary?.conversion_rate)],
         ["Orphan Quotes", toNumber(summary?.orphan_quote_count)],
       ]),
-    [isHybrid, isRecurring, model, summary]
+    [isHybrid, isRecurring, model, summary, pv, periodLabel]
   );
 
   const profitRows = useMemo(
     () =>
       asRows([
-        ["Gross Profit", toMoney(summary?.gross_profit)],
-        ["Gross Margin", toPercent(summary?.gross_margin)],
-        ["Contribution Margin", toMoney(summary?.contribution_margin)],
-        ["Net Profit Proxy", toMoney(summary?.net_profit_proxy)],
+        [`Gross Profit (${periodLabel})`, toMoney(pv?.gross_profit ?? summary?.gross_profit)],
+        ["Gross Margin", toPercent(pv?.gross_margin ?? summary?.gross_margin)],
+        [`Costs (${periodLabel})`, toMoney(pv?.costs)],
+        [`Net Profit (${periodLabel})`, toMoney(pv?.net_profit ?? summary?.net_profit_proxy)],
         ["CAC", toMoney(summary?.cac)],
         ["LTV:CAC", summary?.ltv_cac_ratio != null ? Number(summary.ltv_cac_ratio).toFixed(2) : "—"],
       ]),
-    [summary]
+    [summary, pv, periodLabel]
   );
 
   const planningRows = useMemo(
