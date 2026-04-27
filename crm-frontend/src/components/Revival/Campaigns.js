@@ -14,12 +14,149 @@ import {
   updateCampaign,
 } from '../../api/campaignsApi';
 import { Button } from '../ui/button';
+import { getIndustry } from '../../helpers/tenantHelpers';
 import {
   buildRevivalCampaignRecipients,
   DEFAULT_REVIVAL_MESSAGE,
   normalizeQuoteSeeds,
 } from './campaignDrafts';
 import './Campaigns.css';
+
+// ── Audience Groups ───────────────────────────────────────────
+
+const AUDIENCE_GROUPS = [
+  {
+    key: 'unsold_quotes',
+    label: 'Unsold Quotes',
+    description: 'Customers with draft or sent quotes not yet accepted.',
+    source: 'Quote',
+    supported: true,
+    filter: { quote_status: ['draft', 'sent'] },
+    warning: null,
+  },
+  {
+    key: 'sent_not_accepted',
+    label: 'Sent Quotes Not Accepted',
+    description: 'Quotes sent to customer but not yet accepted or converted.',
+    source: 'Quote',
+    supported: true,
+    filter: { target_list: 'sent_quotes' },
+    warning: null,
+  },
+  {
+    key: 'revival_scanner',
+    label: 'Revival Scanner Quotes',
+    description: 'Quotes imported via scanner that are recovery-eligible.',
+    source: 'Revival',
+    supported: true,
+    filter: { source: 'revival' },
+    warning: null,
+  },
+  {
+    key: 'open_quotes_stale',
+    label: 'Open Quotes Over 7 Days',
+    description: 'Quotes in sent/accepted/converted status older than 7 days.',
+    source: 'Quote',
+    supported: true,
+    filter: { target_list: 'open_quotes_over_7_days' },
+    warning: 'May include accepted quotes — review recipients before sending.',
+  },
+  {
+    key: 'not_contacted_30d',
+    label: 'Not Contacted in 30 Days',
+    description: 'Customers with no outreach in the last 30 days.',
+    source: 'Customer',
+    supported: true,
+    filter: { last_contact_days: 30 },
+    warning: 'May include very old contacts. Review sample before sending.',
+  },
+  {
+    key: 'recurring_issues',
+    label: 'Recurring Issue Customers',
+    description: 'Customers with flagged recurring service issues.',
+    source: 'Customer + OperationalMemory',
+    supported: true,
+    filter: { target_list: 'recurring_issues' },
+    warning: null,
+  },
+  {
+    key: 'unpaid_invoices',
+    label: 'Unpaid Invoice Customers',
+    description: 'Customers with outstanding balances.',
+    source: 'Quote + ServiceAgreement',
+    supported: true,
+    filter: { target_list: 'unpaid_invoices' },
+    warning: 'Sensitive audience — message tone should be gentle.',
+  },
+  {
+    key: 'cold_leads',
+    label: 'Cold Leads',
+    description: 'Leads in early pipeline stages with no recent contact.',
+    source: 'CRMLead',
+    supported: false,
+    filter: null,
+    todo: 'Backend audience.py does not support lead pipeline_stage filtering yet.',
+  },
+  {
+    key: 'lost_leads',
+    label: 'Lost Leads',
+    description: 'Leads marked as lost — potential win-back candidates.',
+    source: 'CRMLead',
+    supported: false,
+    filter: null,
+    todo: 'Backend audience.py does not support lead pipeline_stage=LOST filtering yet.',
+  },
+  {
+    key: 'hot_leads',
+    label: 'Hot Leads',
+    description: 'AI-scored high-priority leads (score ≥ 70).',
+    source: 'CRMLead',
+    supported: false,
+    filter: null,
+    todo: 'Backend audience.py does not support lead priority_score filtering yet.',
+  },
+  {
+    key: 'completed_no_review',
+    label: 'Completed Jobs Needing Review',
+    description: 'Customers with completed work orders but no review request sent.',
+    source: 'WorkOrder',
+    supported: false,
+    filter: null,
+    todo: 'Backend needs WorkOrder.status=completed + no review_request CommunicationLog filter.',
+  },
+  {
+    key: 'inactive_customers',
+    label: 'Inactive Customers',
+    description: 'Customers with no service in 30+ days.',
+    source: 'Customer',
+    supported: false,
+    filter: null,
+    todo: 'Backend needs customer last_service_date or AIInactiveCustomerOpportunity join.',
+  },
+  {
+    key: 'referral_ask',
+    label: 'Past Customers / Referral Ask',
+    description: 'Happy customers eligible for referral outreach.',
+    source: 'Customer + WorkOrder',
+    supported: false,
+    filter: null,
+    todo: 'Backend needs completed job + positive sentiment filter.',
+  },
+];
+
+// ── Safety Checklist ───────────────────────────────────────────
+
+const SAFETY_CHECKS = [
+  { key: 'audience_reviewed', label: 'Audience count reviewed' },
+  { key: 'sample_reviewed', label: 'Sample recipients reviewed' },
+  { key: 'message_reviewed', label: 'Message reviewed for errors' },
+  { key: 'stop_language', label: '"Reply STOP to opt out" present in message' },
+  { key: 'no_booking_link', label: 'No booking link unless verified (disabled by default)' },
+  { key: 'no_review_link', label: 'No review link unless Google review URL configured' },
+  { key: 'send_number', label: 'Sending phone number verified for this tenant' },
+  { key: 'quiet_hours', label: 'Quiet hours configured for this tenant' },
+  { key: 'test_send', label: 'Test send completed (or reviewed preview)' },
+];
 
 const LAST_CAMPAIGN_KEY = 'revival:lastCampaignId';
 
@@ -280,6 +417,10 @@ export default function Campaigns() {
   const [poolTab, setPoolTab] = useState('revival');
   const [poolCollapsed, setPoolCollapsed] = useState(false);
   const [onlyUnassigned, setOnlyUnassigned] = useState(false);
+  const [safetyChecks, setSafetyChecks] = useState({});
+  const [aiVariants, setAiVariants] = useState([]);
+  const [showAiPicker, setShowAiPicker] = useState(false);
+  const industry = getIndustry('general');
   const [loading, setLoading] = useState(true);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [working, setWorking] = useState(false);
@@ -793,23 +934,46 @@ export default function Campaigns() {
       return;
     }
     setWorking(true);
+    setAiVariants([]);
+    setShowAiPicker(false);
     try {
       const response = await optimizeCampaignMessage({
         message,
         channel: form.channel,
         goal: text(form.goal) || undefined,
+        industry,
+        audienceGroup: text(form.description),
+        tone: 'friendly',
       });
-      setForm((prev) => ({
-        ...prev,
-        message: text(response.data?.message) || prev.message,
-      }));
-      toast.success('Base message optimized. Refresh drafts to apply it to queued recipients.');
+      const variants = response.data?.variants || [];
+      if (variants.length > 1) {
+        setAiVariants(variants);
+        setShowAiPicker(true);
+        toast.success(`${variants.length} AI variants generated. Pick one below.`);
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          message: text(response.data?.message) || prev.message,
+        }));
+        toast.success('Base message optimized. Refresh drafts to apply.');
+      }
     } catch (error) {
       toast.error(apiMessage(error, 'AI Optimize failed.'));
     } finally {
       setWorking(false);
     }
   };
+
+  const handlePickVariant = (variant) => {
+    setForm((prev) => ({ ...prev, message: variant }));
+    setShowAiPicker(false);
+    setAiVariants([]);
+    toast.success('Variant applied. Review and edit as needed.');
+  };
+
+  const allSafetyPassed = SAFETY_CHECKS.every((check) => safetyChecks[check.key]);
+  const toggleSafety = (key) => setSafetyChecks((prev) => ({ ...prev, [key]: !prev[key] }));
+  const messageHasStop = text(form.message).toLowerCase().includes('stop');
 
   const handleApproveCampaign = async () => {
     setWorking(true);
@@ -1171,6 +1335,41 @@ export default function Campaigns() {
               </label>
             </div>
 
+            {/* ── AI Variant Picker ── */}
+            {showAiPicker && aiVariants.length > 1 && (
+              <div className="ai-variants-panel">
+                <h3>AI Draft Variants</h3>
+                <p className="campaign-help-text">Pick one, then edit as needed. AI may not perfectly match your brand — always review.</p>
+                {aiVariants.map((variant, idx) => {
+                  const labels = ['Short', 'Friendly', 'Direct'];
+                  const hasStop = variant.toLowerCase().includes('stop');
+                  return (
+                    <div key={idx} className="ai-variant-card">
+                      <div className="ai-variant-header">
+                        <strong>{labels[idx] || `Variant ${idx + 1}`}</strong>
+                        <span className="ai-variant-chars">{variant.length} chars</span>
+                        {!hasStop && <span className="campaign-pill danger">Missing STOP</span>}
+                      </div>
+                      <p className="ai-variant-body">{variant}</p>
+                      <Button variant="outline" size="sm" onClick={() => handlePickVariant(variant)}>
+                        Use This
+                      </Button>
+                    </div>
+                  );
+                })}
+                <Button variant="ghost" size="sm" onClick={() => setShowAiPicker(false)}>
+                  Dismiss
+                </Button>
+              </div>
+            )}
+
+            {/* ── Message Warnings ── */}
+            {text(form.message) && !messageHasStop && (
+              <div className="campaign-warning-banner">
+                ⚠ Message does not contain "STOP" opt-out language. Add "Reply STOP to opt out" before sending.
+              </div>
+            )}
+
             <div className="campaign-builder-footer">
               <div>
                 <strong>{selectedQuoteRows.length}</strong> selected from the revival pool
@@ -1178,6 +1377,101 @@ export default function Campaigns() {
               <Button variant="outline" onClick={() => setSelectedQuoteIds([])} disabled={!selectedQuoteRows.length}>
                 Clear Selected
               </Button>
+            </div>
+          </section>
+
+          {/* ── Audience Groups Reference ── */}
+          <section className="campaign-section-card">
+            <div className="section-head">
+              <div>
+                <h2>Audience Groups</h2>
+                <p>Pre-built segments for common campaign goals. Supported groups use backend filters directly. TODO groups need backend work first.</p>
+              </div>
+            </div>
+            <div className="audience-groups-grid">
+              {AUDIENCE_GROUPS.map((group) => (
+                <div key={group.key} className={`audience-group-card ${group.supported ? '' : 'is-disabled'}`}>
+                  <div className="audience-group-header">
+                    <strong>{group.label}</strong>
+                    <span className={`campaign-pill ${group.supported ? 'info' : 'neutral'}`}>
+                      {group.supported ? 'Ready' : 'TODO'}
+                    </span>
+                  </div>
+                  <p className="audience-group-desc">{group.description}</p>
+                  <div className="audience-group-meta">
+                    <span>Source: {group.source}</span>
+                  </div>
+                  {group.warning && (
+                    <p className="audience-group-warning">⚠ {group.warning}</p>
+                  )}
+                  {group.todo && (
+                    <p className="audience-group-todo">🔧 {group.todo}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── Safety Checklist ── */}
+          <section className="campaign-section-card">
+            <div className="section-head">
+              <div>
+                <h2>Pre-Send Safety Checklist</h2>
+                <p>Confirm each item before approving and sending. All items must be checked for Send to be enabled.</p>
+              </div>
+            </div>
+            <div className="safety-checklist">
+              {SAFETY_CHECKS.map((check) => (
+                <label key={check.key} className="safety-check-row">
+                  <input
+                    type="checkbox"
+                    checked={!!safetyChecks[check.key]}
+                    onChange={() => toggleSafety(check.key)}
+                  />
+                  <span className={safetyChecks[check.key] ? 'is-checked' : ''}>{check.label}</span>
+                </label>
+              ))}
+              <div className={`safety-status ${allSafetyPassed ? 'is-safe' : 'is-blocked'}`}>
+                {allSafetyPassed
+                  ? '✓ All checks passed — campaign is safe to send.'
+                  : `${SAFETY_CHECKS.filter((c) => !safetyChecks[c.key]).length} items remaining before send is allowed.`}
+              </div>
+            </div>
+          </section>
+
+          {/* ── TODO Blocks ── */}
+          <section className="campaign-section-card campaign-todo-section">
+            <div className="section-head">
+              <div>
+                <h2>Not Ready Yet</h2>
+                <p>Features that need backend or infrastructure work before they can be enabled.</p>
+              </div>
+            </div>
+            <div className="todo-grid">
+              <div className="todo-card">
+                <strong>Booking Links</strong>
+                <p>No public booking URL exists. Do not include booking links in messages.</p>
+              </div>
+              <div className="todo-card">
+                <strong>Auto-Scheduling from Replies</strong>
+                <p>Campaign replies create tasks but do not auto-create appointments. Manual call + book required.</p>
+              </div>
+              <div className="todo-card">
+                <strong>Lead Pipeline Targeting</strong>
+                <p>Backend audience.py does not support lead pipeline_stage or lifecycle_state filters. Only customer-based targeting works.</p>
+              </div>
+              <div className="todo-card">
+                <strong>Review Link</strong>
+                <p>No Google review URL configured on tenant. Review request campaigns will have blank links.</p>
+              </div>
+              <div className="todo-card">
+                <strong>Multi-Step Drip Sequences</strong>
+                <p>Campaigns are single-send. No automatic Day 3 or Day 7 follow-ups. Each re-contact is a new campaign.</p>
+              </div>
+              <div className="todo-card">
+                <strong>Image Upload Picker</strong>
+                <p>MMS supports URL-pasted images. File upload picker via StoredFile not yet built for campaigns.</p>
+              </div>
             </div>
           </section>
 
@@ -1193,10 +1487,20 @@ export default function Campaigns() {
                     ? 'Clear Queued'
                     : 'Select Queued'}
                 </Button>
-                <Button variant="outline" onClick={handleSendAllQueued} disabled={!sendableRows.length || working}>
+                <Button
+                  variant="outline"
+                  onClick={handleSendAllQueued}
+                  disabled={!sendableRows.length || working || !allSafetyPassed}
+                  title={!allSafetyPassed ? 'Complete safety checklist first' : ''}
+                >
                   Send All Queued
                 </Button>
-                <Button variant="primary" onClick={handleSendSelected} disabled={!selectedReviewIds.length || working}>
+                <Button
+                  variant="primary"
+                  onClick={handleSendSelected}
+                  disabled={!selectedReviewIds.length || working || !allSafetyPassed}
+                  title={!allSafetyPassed ? 'Complete safety checklist first' : ''}
+                >
                   Send Selected
                 </Button>
               </div>

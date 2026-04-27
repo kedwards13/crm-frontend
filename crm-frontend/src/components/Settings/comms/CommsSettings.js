@@ -1,194 +1,268 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import api from '../../../apiClient';
+import { Button } from '../../ui/button';
 import TimeRangePicker from '../../ui/TimeRangePicker.tsx';
-import '../SettingsCommon.css';
+import '../../../pages/settings/SettingsLayout.css';
 
-const DEFAULT_WINDOW = { start: '08:00', end: '19:00' };
-
-const normalize24Hour = (value = '') => {
-  const raw = String(value || '').trim();
-  const directMatch = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
-  if (directMatch) {
-    const hour = String(directMatch[1]).padStart(2, '0');
-    return `${hour}:${directMatch[2]}`;
-  }
-
-  const meridiemMatch = raw.match(/^([1-9]|1[0-2])(?::([0-5]\d))?\s*(AM|PM)$/i);
-  if (!meridiemMatch) return '';
-
-  const hourRaw = Number(meridiemMatch[1]);
-  const minute = meridiemMatch[2] || '00';
-  const meridiem = meridiemMatch[3].toUpperCase();
-  let hour = hourRaw;
-
-  if (meridiem === 'PM' && hour < 12) hour += 12;
-  if (meridiem === 'AM' && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, '0')}:${minute}`;
-};
-
-const normalizeTimeRange = (value, fallback = DEFAULT_WINDOW) => {
-  if (value && typeof value === 'object') {
-    const start = normalize24Hour(value?.start || '');
-    const end = normalize24Hour(value?.end || '');
-    if (start && end) return { start, end };
-  }
-
-  if (typeof value === 'string') {
-    const parts = value.split(/\s*[–-]\s*/);
-    if (parts.length === 2) {
-      const start = normalize24Hour(parts[0]);
-      const end = normalize24Hour(parts[1]);
-      if (start && end) return { start, end };
-    }
-  }
-
-  return fallback;
-};
+const text = (v) => String(v || '').trim();
+const bool = (v) => v === true || v === 'true' || v === '1';
 
 export default function CommsSettings() {
-  const [prefsSnapshot, setPrefsSnapshot] = useState({});
-  const [autoResponseWindow, setAutoResponseWindow] = useState(DEFAULT_WINDOW);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [prefs, setPrefs] = useState({});
+  const [tenant, setTenant] = useState({});
 
-  useEffect(() => {
-    let mounted = true;
+  // Editable state
+  const [quietStart, setQuietStart] = useState('21:00');
+  const [quietEnd, setQuietEnd] = useState('08:00');
+  const [autoResponderEnabled, setAutoResponderEnabled] = useState(false);
+  const [firstTouchEnabled, setFirstTouchEnabled] = useState(false);
+  const [autoResponseWindow, setAutoResponseWindow] = useState({ start: '08:00', end: '19:00' });
 
-    (async () => {
-      try {
-        const { data } = await api.get('/accounts/preferences/');
-        const serverPrefs = data?.preferences || {};
-        const commsPrefs = serverPrefs?.comms || {};
-        const serverWindow =
-          commsPrefs?.auto_response_window ||
-          commsPrefs?.autoResponseWindow ||
-          serverPrefs?.auto_response_window ||
-          serverPrefs?.autoResponseWindow;
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [prefsRes, meRes] = await Promise.all([
+        api.get('/accounts/preferences/').catch(() => ({ data: {} })),
+        api.get('/accounts/auth/me/').catch(() => ({ data: {} })),
+      ]);
+      const p = prefsRes.data?.preferences || prefsRes.data || {};
+      const t = meRes.data?.tenant || meRes.data?.activeTenant || {};
+      const comms = p.comms || p.communications || {};
+      const ai = p.ai_settings || {};
 
-        if (!mounted) return;
-        setPrefsSnapshot(serverPrefs);
-        setAutoResponseWindow(normalizeTimeRange(serverWindow, DEFAULT_WINDOW));
-      } catch {
-        if (!mounted) return;
-        setPrefsSnapshot({});
-        setAutoResponseWindow(DEFAULT_WINDOW);
-      } finally {
-        if (mounted) setLoading(false);
+      setPrefs(p);
+      setTenant(t);
+
+      // Hydrate editable fields from preferences
+      setQuietStart(text(comms.quiet_start || ai.auto_response_end || '21:00'));
+      setQuietEnd(text(comms.quiet_end || ai.auto_response_start || '08:00'));
+      setAutoResponderEnabled(bool(comms.auto_responder_enabled || ai.texting_enabled));
+      setFirstTouchEnabled(bool(comms.auto_first_touch_enabled));
+
+      const serverWindow =
+        comms.auto_response_window || comms.autoResponseWindow ||
+        p.auto_response_window || p.autoResponseWindow;
+      if (serverWindow && typeof serverWindow === 'object') {
+        setAutoResponseWindow({
+          start: text(serverWindow.start) || '08:00',
+          end: text(serverWindow.end) || '19:00',
+        });
       }
-    })();
-
-    return () => {
-      mounted = false;
-    };
+    } catch {
+      toast.error('Unable to load communications settings.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => { load(); }, [load]);
+
   const handleSave = async () => {
-    setMsg('');
     setSaving(true);
-
-    const nextPreferences = {
-      ...prefsSnapshot,
-      comms: {
-        ...(prefsSnapshot?.comms || {}),
-        auto_response_window: autoResponseWindow,
-      },
-    };
-
     try {
-      await api.patch('/accounts/preferences/', { preferences: nextPreferences });
-      setPrefsSnapshot(nextPreferences);
-      setMsg('Saved ✓');
+      const nextComms = {
+        ...(prefs.comms || {}),
+        quiet_start: quietStart,
+        quiet_end: quietEnd,
+        auto_responder_enabled: autoResponderEnabled,
+        auto_first_touch_enabled: firstTouchEnabled,
+        auto_response_window: autoResponseWindow,
+      };
+
+      await api.patch('/accounts/preferences/', {
+        preferences: {
+          ...prefs,
+          comms: nextComms,
+        },
+      });
+
+      setPrefs((prev) => ({ ...prev, comms: nextComms }));
+      toast.success('Communications settings saved.');
     } catch {
-      setMsg('Save failed.');
+      toast.error('Failed to save settings.');
     } finally {
       setSaving(false);
     }
   };
 
+  const sendingNumber = text(tenant.default_twilio_number);
+  const supportPhone = text(tenant.support_phone);
+
   if (loading) {
     return (
       <div className="settings-page">
-        <p>Loading…</p>
+        <p className="settings-loading">Loading communications settings...</p>
       </div>
     );
   }
 
   return (
     <div className="settings-page">
-      <h2>Phone, SMS & Email</h2>
-      <p className="muted">Configure outbound numbers, brand voice, and delivery settings.</p>
-      {msg && <p className="settings-msg">{msg}</p>}
-
-      <div className="settings-card two-col">
+      <header className="settings-page-header">
         <div>
-          <h3>Voice & SMS</h3>
-          <label>Primary Caller ID
-            <input defaultValue="+1 (813) 555-1122" />
-          </label>
-          <label>Fallback Number
-            <input defaultValue="+1 (813) 555-4401" />
-          </label>
+          <p className="settings-eyebrow">Communications</p>
+          <h1>SMS &amp; Messaging Settings</h1>
+          <p className="settings-subtitle">
+            Configure quiet hours, auto-response behavior, and first-touch SMS for this tenant.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button variant="outline" onClick={load} disabled={saving}>Reload</Button>
+          <Button variant="primary" onClick={handleSave} loading={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
+        </div>
+      </header>
+
+      <div className="settings-cards-grid">
+
+        {/* ── Sending Number (Read-Only) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>Sending Number</h2>
+            <span className={`settings-status-badge ${sendingNumber ? 'is-ok' : 'is-warn'}`}>
+              {sendingNumber ? 'Verified' : 'Not Set'}
+            </span>
+          </div>
+          {sendingNumber ? (
+            <div className="settings-kv-list">
+              <div className="settings-kv"><span>Twilio Number</span><strong>{sendingNumber}</strong></div>
+              {supportPhone && <div className="settings-kv"><span>Support Phone</span><strong>{supportPhone}</strong></div>}
+            </div>
+          ) : (
+            <p className="settings-warning">
+              No sending number configured. SMS will use the shared platform number.
+              Contact support to assign a dedicated number.
+            </p>
+          )}
+          <p className="settings-help">
+            Read-only — sending number is configured at the platform level, not editable from this page.
+          </p>
+        </section>
+
+        {/* ── Quiet Hours (Editable) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>Quiet Hours</h2>
+            <span className={`settings-status-badge ${quietStart && quietEnd ? 'is-ok' : 'is-warn'}`}>
+              {quietStart && quietEnd ? 'Configured' : 'Not Set'}
+            </span>
+          </div>
+          <p className="settings-help">
+            Campaigns will not send during quiet hours. Messages are deferred to the next morning.
+          </p>
+          <div className="settings-form-row">
+            <label className="settings-form-field">
+              <span>Quiet Start (no sends after)</span>
+              <input
+                type="time"
+                value={quietStart}
+                onChange={(e) => setQuietStart(e.target.value)}
+              />
+            </label>
+            <label className="settings-form-field">
+              <span>Quiet End (sends resume after)</span>
+              <input
+                type="time"
+                value={quietEnd}
+                onChange={(e) => setQuietEnd(e.target.value)}
+              />
+            </label>
+          </div>
+          <p className="settings-help">
+            Note: Campaign quiet hours enforcement also depends on TenantCommsSettings in the backend database.
+            If campaigns still send during quiet hours after saving here, verify the backend record.
+          </p>
+        </section>
+
+        {/* ── Auto-Response Window (Editable) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>Auto-Response Window</h2>
+          </div>
+          <p className="settings-help">
+            Time window during which AI-generated responses can be auto-sent (if auto-responder is enabled).
+            Outside this window, AI creates draft suggestions only.
+          </p>
           <TimeRangePicker
-            label="Auto-response Window"
+            label=""
+            startLabel="Window Start"
+            endLabel="Window End"
             value={autoResponseWindow}
             onChange={setAutoResponseWindow}
           />
-        </div>
-        <div>
-          <h3>Email Sending</h3>
-          <label>From Address
-            <input defaultValue="support@gulftech.com" />
-          </label>
-          <label>Reply-To
-            <input defaultValue="hello@gulftech.com" />
-          </label>
-          <label>Tracking
-            <select defaultValue="enabled">
-              <option value="enabled">Open + Click Tracking</option>
-              <option value="disabled">Disabled</option>
-            </select>
-          </label>
-        </div>
-      </div>
+        </section>
 
-      <div className="settings-card">
-        <h3>Message Templates</h3>
-        <div className="table-like">
-          <div className="row header">
-            <div>Template</div>
-            <div>Channel</div>
-            <div>Owner</div>
-            <div>Status</div>
-            <div></div>
-            <div></div>
+        {/* ── Auto-Responder Toggle (Editable) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>Auto-Responder</h2>
+            <span className={`settings-status-badge ${autoResponderEnabled ? 'is-ok' : 'is-warn'}`}>
+              {autoResponderEnabled ? 'Enabled' : 'Disabled'}
+            </span>
           </div>
-          {[
-            { name: 'New Lead Follow-up', channel: 'SMS', owner: 'Sales Ops', status: 'Active' },
-            { name: 'Appointment Reminder', channel: 'SMS', owner: 'Dispatch', status: 'Active' },
-            { name: 'Post-Service Review', channel: 'Email', owner: 'Marketing', status: 'Draft' },
-          ].map((row) => (
-            <div key={row.name} className="row">
-              <input defaultValue={row.name} />
-              <input defaultValue={row.channel} />
-              <input defaultValue={row.owner} />
-              <select defaultValue={row.status}>
-                <option>Active</option>
-                <option>Draft</option>
-              </select>
-              <button className="mini">Edit</button>
-              <button className="mini danger">Archive</button>
+          <label className="settings-toggle-row">
+            <input
+              type="checkbox"
+              checked={autoResponderEnabled}
+              onChange={(e) => setAutoResponderEnabled(e.target.checked)}
+            />
+            <div>
+              <strong>Enable AI auto-responses</strong>
+              <p className="settings-help" style={{ margin: '2px 0 0' }}>
+                {autoResponderEnabled
+                  ? 'AI will auto-send replies to inbound questions when confidence is high. Low-confidence drafts require human review.'
+                  : 'AI generates draft replies only. A human must review and send every response. Safest for new tenants.'}
+              </p>
             </div>
-          ))}
-        </div>
-        <button className="mini">+ New Template</button>
-      </div>
+          </label>
+        </section>
 
-      <div className="settings-actions">
-        <button className="settings-primary" onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Comms Settings'}
-        </button>
-        <button className="settings-secondary">Send Test Message</button>
+        {/* ── First-Touch SMS Toggle (Editable) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>First-Touch SMS</h2>
+            <span className={`settings-status-badge ${firstTouchEnabled ? 'is-ok' : 'is-warn'}`}>
+              {firstTouchEnabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
+          <label className="settings-toggle-row">
+            <input
+              type="checkbox"
+              checked={firstTouchEnabled}
+              onChange={(e) => setFirstTouchEnabled(e.target.checked)}
+            />
+            <div>
+              <strong>Auto-send welcome SMS to new leads</strong>
+              <p className="settings-help" style={{ margin: '2px 0 0' }}>
+                {firstTouchEnabled
+                  ? 'New leads automatically receive a welcome SMS using the first-touch template. Template: "Hey {first_name}, thanks for contacting..."'
+                  : 'New leads do not receive automatic SMS. First contact is manual.'}
+              </p>
+            </div>
+          </label>
+        </section>
+
+        {/* ── DNC / Compliance (Read-Only) ── */}
+        <section className="settings-card">
+          <div className="settings-card-header">
+            <h2>Compliance</h2>
+            <span className="settings-status-badge is-ok">System-Enforced</span>
+          </div>
+          <div className="settings-kv-list">
+            <div className="settings-kv"><span>STOP keyword handling</span><strong>Active</strong></div>
+            <div className="settings-kv"><span>Do-Not-Contact enforcement</span><strong>Active</strong></div>
+            <div className="settings-kv"><span>Campaign STOP footer</span><strong>Auto-appended</strong></div>
+            <div className="settings-kv"><span>24h duplicate prevention</span><strong>Active</strong></div>
+            <div className="settings-kv"><span>Daily per-customer cap</span><strong>3 SMS/day</strong></div>
+            <div className="settings-kv"><span>Marketing cooldown</span><strong>1 per 7 days</strong></div>
+          </div>
+          <p className="settings-help">
+            These compliance controls are enforced by the backend and cannot be disabled. They apply to all tenants.
+          </p>
+        </section>
+
       </div>
     </div>
   );

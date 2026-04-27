@@ -17,6 +17,7 @@ import IntegrationsPage from './integrations/IntegrationsPage';
 import DocumentCenter from './documents/DocumentCenter';
 import SettingsLayout from '../../pages/settings/SettingsLayout.tsx';
 import SmartConfig from '../../pages/settings/SmartConfig.tsx';
+import CampaignSafetySettings from '../../pages/settings/CampaignSafetySettings';
 
 const Settings = () => {
   return (
@@ -38,6 +39,7 @@ const Settings = () => {
       <Route path="/integrations" element={<IntegrationsPage />} />
       <Route path="/documents" element={<DocumentCenter />} />
       <Route path="/smart-config" element={<SmartConfig />} />
+      <Route path="/campaign-safety" element={<CampaignSafetySettings />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

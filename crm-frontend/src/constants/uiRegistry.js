@@ -121,17 +121,18 @@ const base = {
       ],
   
       '/settings': [
-        { key: 'smart_config', label: 'Smart Config',    path: '/settings/smart-config' },
-        { key: 'company',      label: 'Company Profile', path: '/settings/company' },
-        { key: 'team',         label: 'Team & Roles',    path: '/settings/team' },
-        { key: 'preferences',  label: 'Theme & Preferences', path: '/settings/preferences' },
-        { key: 'branding',     label: 'Branding',        path: '/settings/branding' },
-        { key: 'scheduling',   label: 'Scheduling',      path: '/settings/scheduling' },
-        { key: 'documents',    label: 'Document Center', path: '/settings/documents' },
-        { key: 'voice_sms',    label: 'Voice & SMS',     path: '/settings/phones' },
-        { key: 'integrations', label: 'Integrations',    path: '/settings/integrations' },
-        { key: 'automations',  label: 'Automation Rules', path: '/settings/automations' },
-        { key: 'security',     label: 'Security',        path: '/settings/security' },
+        { key: 'smart_config',     label: 'Smart Config',       path: '/settings/smart-config' },
+        { key: 'company',          label: 'Company Profile',    path: '/settings/company' },
+        { key: 'team',             label: 'Team & Roles',       path: '/settings/team' },
+        { key: 'preferences',      label: 'Theme & Preferences', path: '/settings/preferences' },
+        { key: 'campaign_safety',  label: 'Campaign Safety',    path: '/settings/campaign-safety' },
+        { key: 'branding',         label: 'Branding',           path: '/settings/branding' },
+        { key: 'scheduling',       label: 'Scheduling',         path: '/settings/scheduling' },
+        { key: 'documents',        label: 'Document Center',    path: '/settings/documents' },
+        { key: 'voice_sms',        label: 'Voice & SMS',        path: '/settings/phones' },
+        { key: 'integrations',     label: 'Integrations',       path: '/settings/integrations' },
+        { key: 'automations',      label: 'Automation Rules',   path: '/settings/automations' },
+        { key: 'security',         label: 'Security',           path: '/settings/security' },
         ],
 
       '/team': [
@@ -298,12 +299,18 @@ const base = {
         { path: '/finance',       label: 'Finance',        icon: 'FiBarChart2' },
         { path: '/revival',       label: 'Revival',        icon: 'FiBarChart2' },
         { path: '/marketing',     label: 'Marketing',      icon: 'FiTag' },
+        { path: '/sales',         label: 'Sales',          icon: 'FiFileText', roles: ['admin','owner','manager','sales_rep','Admin','Manager','Owner'] },
         { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' }, // consider adding a truck/wrench icon in ICON_MAP
         { path: '/settings',      label: 'Settings',       icon: 'FiSettings' },
       ],
       subnav: {
         ...base.subnav,
-  
+
+        '/sales': [
+          { key: 'd2d',  label: 'D2D Sale',        path: '/sales/d2d' },
+          { key: 'sync', label: 'FieldRoutes Sync', path: '/sales/sync', roles: ['admin','owner','manager','Admin','Manager','Owner'] },
+        ],
+
         // Leads stages streamlined for service businesses
         '/leads': [
           { key: 'new',       label: 'New Requests',   path: '/leads/new' },
@@ -328,18 +335,19 @@ const base = {
         ],
 
         '/settings': [
-            { key: 'smart_config', label: 'Smart Config',            path: '/settings/smart-config' },
-            { key: 'company',      label: 'Company Profile',        path: '/settings/company' },
-            { key: 'team',         label: 'Team & Roles',           path: '/settings/team' },
-            { key: 'preferences',  label: 'Preferences',            path: '/settings/preferences' },
-            { key: 'services',     label: 'Services & Pricing',     path: '/settings/services' },
-            { key: 'routing',      label: 'Scheduling & Routing',   path: '/settings/routing' },
-            { key: 'inventory',    label: 'Products & Inventory',   path: '/settings/inventory' },
-            { key: 'comms',        label: 'Phone/SMS/Email',        path: '/settings/comms' },
-            { key: 'automations',  label: 'Automations',            path: '/settings/automations' },
-            { key: 'branding',     label: 'Branding',               path: '/settings/branding' },
-            { key: 'integrations', label: 'Integrations',           path: '/settings/integrations' },
-            { key: 'security',     label: 'Security',               path: '/settings/security' },
+            { key: 'smart_config',    label: 'Smart Config',            path: '/settings/smart-config' },
+            { key: 'company',         label: 'Company Profile',        path: '/settings/company' },
+            { key: 'team',            label: 'Team & Roles',           path: '/settings/team' },
+            { key: 'preferences',     label: 'Preferences',            path: '/settings/preferences' },
+            { key: 'campaign_safety', label: 'Campaign Safety',        path: '/settings/campaign-safety' },
+            { key: 'services',        label: 'Services & Pricing',     path: '/settings/services' },
+            { key: 'routing',         label: 'Scheduling & Routing',   path: '/settings/routing' },
+            { key: 'inventory',       label: 'Products & Inventory',   path: '/settings/inventory' },
+            { key: 'comms',           label: 'Phone/SMS/Email',        path: '/settings/comms' },
+            { key: 'automations',     label: 'Automations',            path: '/settings/automations' },
+            { key: 'branding',        label: 'Branding',               path: '/settings/branding' },
+            { key: 'integrations',    label: 'Integrations',           path: '/settings/integrations' },
+            { key: 'security',        label: 'Security',               path: '/settings/security' },
         ],
 
 
@@ -376,11 +384,15 @@ const base = {
         { path: '/analytics',     label: 'Analytics',      icon: 'FiTrendingUp' },
         { path: '/finance',       label: 'Finance',        icon: 'FiBarChart2' },
         { path: '/marketing',     label: 'Marketing',      icon: 'FiTag' },
+        { path: '/sales',         label: 'Sales',          icon: 'FiFileText', roles: ['admin','owner','manager','sales_rep','Admin','Manager','Owner'] },
         { path: '/operations',    label: 'Operations',     icon: 'FiBarChart2' },
         { path: '/settings',      label: 'Settings',       icon: 'FiSettings' },
       ],
       subnav: {
         ...base.subnav,
+        '/sales': [
+          { key: 'd2d', label: 'D2D Sale', path: '/sales/d2d' },
+        ],
         '/schedule': [
           { key: 'dispatch', label: 'Dispatch',   path: '/schedule/day' },
         ],

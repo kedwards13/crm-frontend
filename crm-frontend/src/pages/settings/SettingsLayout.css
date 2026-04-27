@@ -765,3 +765,237 @@ body.light .tenant-save-bar {
     flex: 1;
   }
 }
+
+/* ============================================================
+   CAMPAIGN SAFETY + SETTINGS PAGES (shared)
+   ============================================================ */
+
+.settings-page {
+  min-height: 100%;
+  padding: 28px 32px 48px;
+  background: transparent;
+  color: var(--text-main);
+}
+
+.settings-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.settings-eyebrow {
+  margin: 0 0 6px;
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.settings-page-header h1 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.settings-subtitle {
+  margin: 6px 0 0;
+  color: var(--text-sub);
+  font-size: 0.90rem;
+  line-height: 1.4;
+}
+
+.settings-loading {
+  color: var(--text-sub);
+  font-size: 0.92rem;
+}
+
+.settings-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.settings-card {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--sh-1);
+  backdrop-filter: blur(var(--glass-blur, 14px));
+  border-radius: var(--r-3, 22px);
+  padding: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.settings-card-todo {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.settings-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-card-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.settings-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.settings-status-badge.is-ok {
+  background: var(--success-dim, rgba(50, 206, 150, 0.12));
+  color: var(--success);
+  border: 1px solid rgba(50, 206, 150, 0.28);
+}
+
+.settings-status-badge.is-warn {
+  background: rgba(233, 190, 109, 0.10);
+  color: var(--warning);
+  border: 1px solid rgba(233, 190, 109, 0.28);
+}
+
+.settings-kv-list {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--r-1, 10px);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+
+.settings-kv span {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settings-kv strong {
+  font-size: 0.90rem;
+  color: var(--text-main);
+}
+
+.settings-help {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.settings-warning {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--warning);
+  line-height: 1.4;
+  padding: 8px 12px;
+  border-radius: var(--r-1, 10px);
+  background: rgba(233, 190, 109, 0.08);
+  border: 1px solid rgba(233, 190, 109, 0.20);
+}
+
+.settings-todo {
+  margin: 0;
+  font-size: 0.80rem;
+  color: var(--text-sub);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Form controls ── */
+
+.settings-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.settings-form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-form-field span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.settings-form-field input,
+.settings-form-field select,
+.settings-form-field textarea {
+  width: 100%;
+  border-radius: var(--r-1, 10px);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  min-height: 40px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.settings-form-field input:focus-visible,
+.settings-form-field select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.24);
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.settings-toggle-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.settings-toggle-row strong {
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+@media (max-width: 880px) {
+  .settings-page { padding: 20px 16px 36px; }
+  .settings-cards-grid { grid-template-columns: 1fr; }
+  .settings-form-row { grid-template-columns: 1fr; }
+}

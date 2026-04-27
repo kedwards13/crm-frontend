@@ -37,6 +37,7 @@ import MarketingPage from './components/Marketing/MarketingPage';
 import CustomersPage from './components/Customers/CustomersPage';
 import TeamManagement from './components/Settings/TeamManagement';
 import OperationsRouter from './components/Operations/OperationsRouter';
+import SalesRouter from './pages/Sales/SalesRouter';
 import api from './apiClient';
 import { ThemeProvider } from './theme/ThemeProvider';
 
@@ -237,6 +238,7 @@ const AuthenticatedApp = () => {
 
         <Route path="/analytics/*" element={<AnalyticsRouter />} />
         <Route path="/operations/*" element={<OperationsRouter />} />
+        <Route path="/sales/*" element={<SalesRouter />} />
         <Route path="/team" element={<TeamManagement />} />
         <Route path="/team/*" element={<TeamManagement />} />
         <Route path="/settings/team" element={<TeamManagement />} />

@@ -679,3 +679,230 @@ button.campaign-detail-action {
     padding: 10px 12px;
   }
 }
+
+/* ============================================================
+   AUDIENCE GROUPS
+   ============================================================ */
+
+.audience-groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.audience-group-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-1, 10px);
+  padding: 14px;
+  background: var(--bg-panel);
+  display: grid;
+  gap: 6px;
+}
+
+.audience-group-card.is-disabled {
+  opacity: 0.55;
+}
+
+.audience-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.audience-group-header strong {
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+.audience-group-desc {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.audience-group-meta {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.audience-group-warning {
+  font-size: 0.80rem;
+  color: var(--warning);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.audience-group-todo {
+  font-size: 0.80rem;
+  color: var(--text-sub);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ============================================================
+   SAFETY CHECKLIST
+   ============================================================ */
+
+.safety-checklist {
+  display: grid;
+  gap: 8px;
+}
+
+.safety-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 0;
+  font-size: 0.90rem;
+  color: var(--text-main);
+}
+
+.safety-check-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--success);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.safety-check-row span.is-checked {
+  text-decoration: line-through;
+  color: var(--text-sub);
+}
+
+.safety-status {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-1, 10px);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.safety-status.is-safe {
+  background: var(--success-dim, rgba(50, 206, 150, 0.12));
+  color: var(--success);
+  border: 1px solid rgba(50, 206, 150, 0.28);
+}
+
+.safety-status.is-blocked {
+  background: rgba(233, 190, 109, 0.10);
+  color: var(--warning);
+  border: 1px solid rgba(233, 190, 109, 0.28);
+}
+
+/* ============================================================
+   AI VARIANTS
+   ============================================================ */
+
+.ai-variants-panel {
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  background: rgba(var(--accent-rgb), 0.06);
+  border-radius: var(--r-2, 14px);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.ai-variants-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ai-variant-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-1, 10px);
+  padding: 12px;
+  background: var(--bg-panel);
+  display: grid;
+  gap: 6px;
+}
+
+.ai-variant-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-variant-header strong {
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.ai-variant-chars {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+}
+
+.ai-variant-body {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* ============================================================
+   WARNING BANNER
+   ============================================================ */
+
+.campaign-warning-banner {
+  padding: 10px 14px;
+  border-radius: var(--r-1, 10px);
+  background: rgba(233, 190, 109, 0.10);
+  border: 1px solid rgba(233, 190, 109, 0.28);
+  color: var(--warning);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   TODO BLOCKS
+   ============================================================ */
+
+.campaign-todo-section {
+  opacity: 0.7;
+}
+
+.todo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.todo-card {
+  border: 1px dashed var(--border);
+  border-radius: var(--r-1, 10px);
+  padding: 12px;
+  background: transparent;
+}
+
+.todo-card strong {
+  font-size: 0.88rem;
+  color: var(--text-sub);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.todo-card p {
+  margin: 0;
+  font-size: 0.80rem;
+  color: var(--text-sub);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.campaign-help-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  line-height: 1.4;
+}

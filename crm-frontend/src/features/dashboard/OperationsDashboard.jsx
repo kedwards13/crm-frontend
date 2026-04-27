@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CalendarClock, Gauge, TrendingUp, UserRound } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarClock, Flame, Gauge, Inbox, TrendingUp, UserRound, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../apiClient';
 import { getRevenueSummary } from '../../api/analyticsApi';
@@ -124,6 +124,36 @@ export default function OperationsDashboard() {
     [isRecurring, metrics, revenueSummary, trend]
   );
 
+  const leadMetrics = useMemo(
+    () => [
+      {
+        label: 'Needs Action',
+        value: Number(metrics?.leads_needing_action ?? 0),
+        meta: 'No contact in 24h',
+        icon: Zap,
+      },
+      {
+        label: 'Hot Leads',
+        value: Number(metrics?.hot_leads ?? 0),
+        meta: 'Score ≥ 70',
+        icon: Flame,
+      },
+      {
+        label: 'Stale Leads',
+        value: Number(metrics?.stale_leads ?? 0),
+        meta: '7+ days idle',
+        icon: AlertTriangle,
+      },
+      {
+        label: 'Website Pending',
+        value: Number(metrics?.website_leads_pending ?? 0),
+        meta: 'Not yet in CRM',
+        icon: Inbox,
+      },
+    ],
+    [metrics]
+  );
+
   const summaryRows = useMemo(
     () =>
       isRecurring
@@ -175,6 +205,21 @@ export default function OperationsDashboard() {
           <ArrowRight size={14} />
         </button>
       </header>
+
+      <section>
+        <WidgetGrid columns={4} className='ops-score-grid'>
+          {leadMetrics.map(({ label, value, meta, icon: Icon }) => (
+            <StatCard
+              key={label}
+              label={label}
+              value={String(value)}
+              meta={meta}
+              icon={<Icon size={15} />}
+              loading={loading}
+            />
+          ))}
+        </WidgetGrid>
+      </section>
 
       <section>
         <WidgetGrid columns={4} className='ops-score-grid'>
