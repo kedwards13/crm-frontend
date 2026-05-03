@@ -102,10 +102,24 @@ apiClient.interceptors.request.use(
 let isRefreshing = false;
 let refreshQueue = [];
 
+const IDEMPOTENT_METHODS = new Set(["get", "head", "options"]);
+const isIdempotent = (config) =>
+  IDEMPOTENT_METHODS.has(String(config?.method || "get").toLowerCase());
+
 const flushRefreshQueue = (nextAccess, refreshError) => {
   refreshQueue.forEach(({ resolve, reject, config }) => {
     if (refreshError) {
       reject(refreshError);
+      return;
+    }
+    // Only auto-retry idempotent requests after token refresh.
+    // Non-idempotent requests (POST, PATCH, PUT, DELETE) must not be
+    // replayed — they could create duplicate records.
+    if (!isIdempotent(config)) {
+      reject(toApiError(
+        { message: "Session expired. Please retry your action." },
+        "Session expired"
+      ));
       return;
     }
     const tenant = getActiveTenant();
@@ -164,6 +178,15 @@ apiClient.interceptors.response.use(
       localStorage.setItem("access_token", nextAccess);
       flushRefreshQueue(nextAccess, null);
 
+      // Only auto-retry the original request if it's idempotent.
+      if (!isIdempotent(requestConfig)) {
+        return Promise.reject(
+          toApiError(
+            { message: "Session refreshed. Please retry your action." },
+            "Session expired"
+          )
+        );
+      }
       requestConfig.headers = requestConfig.headers || {};
       requestConfig.headers.Authorization = `Bearer ${nextAccess}`;
       return apiClient(requestConfig);
