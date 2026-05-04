@@ -190,15 +190,16 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
     }
   };
 
-  // ── Security: Send password reset ──
+  // ── Security: Send password reset via dedicated admin endpoint ──
   const handleSendPasswordReset = async () => {
     setSecurityLoading(true);
     setSecurityResult(null);
     try {
-      await api.post('/accounts/auth/forgot-password/', {
-        email: updatedEmployee.email,
+      const res = await api.post(`/accounts/team/${updatedEmployee.id}/send-password-reset/`);
+      setSecurityResult({
+        type: 'success',
+        message: res?.data?.detail || 'Password reset code sent to ' + updatedEmployee.email,
       });
-      setSecurityResult({ type: 'success', message: 'Password reset code sent to ' + updatedEmployee.email });
     } catch (err) {
       setSecurityResult({
         type: 'error',
@@ -209,7 +210,7 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
     }
   };
 
-  // ── Security: Set temporary password ──
+  // ── Security: Set temporary password via dedicated admin endpoint ──
   const handleSetTempPassword = async () => {
     if (!tempPassword || tempPassword.length < 8) {
       setSecurityResult({ type: 'error', message: 'Password must be at least 8 characters.' });
@@ -231,25 +232,13 @@ const EmployeePopup = ({ employee, onClose, onSave }) => {
     setSecurityLoading(true);
     setSecurityResult(null);
     try {
-      let done = false;
-      for (const endpoint of USER_UPDATE_ENDPOINTS(updatedEmployee.id)) {
-        try {
-          await api.patch(endpoint, {
-            password: tempPassword,
-            must_change_password: true,
-          });
-          done = true;
-          break;
-        } catch (err) {
-          if (isEndpointFallbackStatus(err?.response?.status)) continue;
-          throw err;
-        }
-      }
-      if (!done) throw new Error('Endpoint not available');
-
+      const res = await api.post(
+        `/accounts/team/${updatedEmployee.id}/set-temporary-password/`,
+        { password: tempPassword }
+      );
       setSecurityResult({
         type: 'success',
-        message: 'Temporary password set. User will be prompted to change it on next login.',
+        message: res?.data?.detail || 'Temporary password set. User must change on next login.',
       });
       setTempPassword('');
       setTempPasswordConfirm('');
